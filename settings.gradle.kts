@@ -14,4 +14,4 @@ pluginManagement {
     }
 }
 rootProject.name = "VidSnapKit"
-
+includeBuild("convention-plugins")

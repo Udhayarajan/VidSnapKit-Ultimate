@@ -18,9 +18,9 @@ import java.util.regex.Pattern
 class Instagram internal constructor(url: String) : Extractor(url) {
     companion object {
         const val TAG: String = Statics.TAG.plus(":Instagram")
-        const val STORIES_URL = "https://www.instagram.com/stories/%s/?__a=1"
+        const val STORIES_URL = "https://www.instagram.com/stories/%s/?__a=1&__d=dis"
         const val STORIES_API = "https://i.instagram.com/api/v1/feed/user/%s/story/"
-        const val PROFILE_API = "https://www.instagram.com/%s/?__a=1"
+        const val PROFILE_API = "https://www.instagram.com/%s/?__a=1&__d=dis"
         const val POST_API = "https://i.instagram.com/api/v1/media/%s/info/"
         const val NO_VIDEO_STATUS_AVAILABLE = "No video Status available"
         const val NO_STATUS_AVAILABLE = "No stories Available to Download"
@@ -296,7 +296,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                         VideoResource(
                             video.getString("url"),
                             MimeType.VIDEO_MP4,
-                            video.getString("width") + "x" + video.getString("height")
+                            try{video.getString("width")}catch (e: JSONException){video.getInt("width").toString()} + "x" + try{video.getString("height")}catch (e: JSONException){video.getInt("height").toString()}
                         )
                     )
                 }
