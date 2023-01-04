@@ -1,4 +1,4 @@
-local.properties
-secring.gpg
 /local.properties
 /secring.gpg
+/.gradle
+/build
