@@ -1,16 +1,17 @@
 plugins {
     kotlin("multiplatform") version "1.7.22"
+    id("convention.publication")
     id("com.android.library")
-    `maven-publish`
 }
 
-group = "com.mugames.cloud"
-version = "1.0-SNAPSHOT"
+group = "io.github.udhayarajan"
+version = "1.0.0"
 
 repositories {
     google()
     mavenCentral()
 }
+
 
 kotlin {
     jvm {
@@ -21,7 +22,10 @@ kotlin {
             useJUnitPlatform()
         }
     }
-    android()
+    android {
+        publishLibraryVariants("release", "debug")
+
+    }
     sourceSets {
         val ktor_version = "2.0.1"
 
