@@ -1,0 +1,20 @@
+on: [push]
+
+jobs:
+ snapshot:
+   runs-on: ${{ matrix.os }}
+   strategy:
+     matrix:
+       os: [ubuntu-latest, macOS-latest, windows-latest]
+   steps:
+     - name: Checkout
+       uses: actions/checkout@v2
+     - name: Configure JDK
+       uses: actions/setup-java@v1
+       with:
+         java-version: 11
+     - name: Publish
+       run: ./gradlew publishAllPublicationsToSonatypeRepository
+       env:
+         SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+         SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
