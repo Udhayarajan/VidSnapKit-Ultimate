@@ -19,21 +19,11 @@ jobs:
           java-version: 11
       - name: Change wrapper permissions
         run: chmod +x ./gradlew
-      # Creates gpg ring file  
-      - name: 'Create env file'
-        env:
-          DATA: ${{ secrets.SIGNING_SECRET_KEY_RING_FILE }}
-        run: |
-          echo $DATA | base64 --decode > secring.gpg
 
         # Builds the release artifacts of the library
       - name: Release build
         run: ./gradlew publishToMavenLocal
         
-        
-      - name: 'Delete env file'
-        run: |
-          rm secring.gpg
 
         # Generates other artifacts (javadocJar is optional)
 #       - name: Source jar and dokka
@@ -47,5 +37,5 @@ jobs:
           OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
           SIGNING_KEY_ID: ${{ secrets.SIGNING_KEY_ID }}
           SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
-          SIGNING_SECRET_KEY_RING_FILE: secring.gpg
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
           SONATYPE_STAGING_PROFILE_ID: ${{ secrets.SONATYPE_STAGING_PROFILE_ID }}
