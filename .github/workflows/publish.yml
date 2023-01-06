@@ -21,8 +21,10 @@ jobs:
         run: chmod +x ./gradlew
       # Creates gpg ring file  
       - name: 'Create env file'
+        env:
+          DATA: ${{ secrets.SIGNING_SECRET_KEY_RING_FILE }}
         run: |
-          echo "${{ secrets.SIGNING_SECRET_KEY_RING_FILE }}" > secring.gpg
+          echo $DATA | base64 --decode > secring.gpg
 
         # Builds the release artifacts of the library
       - name: Release build
