@@ -20,6 +20,12 @@ fun JSONArray.getNullableJSONObject(index: Int): JSONObject? = try {
     null
 }
 
+fun JSONArray.getNullableJSONArray(index: Int): JSONArray? = try {
+    getJSONArray(index)
+} catch (e: JSONException) {
+    null
+}
+
 fun JSONObject.getNullableJSONArray(name: String): JSONArray? = try {
     getJSONArray(name)
 } catch (e: JSONException) {
@@ -35,3 +41,15 @@ fun JSONObject.getNullableString(name: String): String? = try {
 fun String.toJSONObject() = JSONObject(this)
 
 fun String.toJSONArray() = JSONArray(this)
+
+fun String.toJSONObjectOrNull() = try {
+    toJSONObject()
+} catch (e: JSONException) {
+    null
+}
+
+fun String.toJSONArrayOrNull() = try {
+    toJSONArray()
+} catch (e: JSONException) {
+    null
+}
