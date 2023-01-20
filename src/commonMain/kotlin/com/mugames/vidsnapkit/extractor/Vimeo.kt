@@ -95,9 +95,10 @@ class Vimeo internal constructor(url: String) : Extractor(url) {
             )
 
         fun extractVideoData() {
-            videoArray.forEach {
+            for (i in 0 until videoArray.length()) {
+                val it = videoArray.get(i)
                 if (it !is JSONObject)
-                    return@forEach
+                    continue
                 val (videoUrl, mime) = getUrlAndMimeFromObject(it)
                 formats.videoData.add(
                     VideoResource(
@@ -111,9 +112,10 @@ class Vimeo internal constructor(url: String) : Extractor(url) {
         }
 
         fun extractAudioData() {
-            audioArray.forEach {
+            for (i in 0 until audioArray.length()) {
+                val it = audioArray.get(i)
                 if (it !is JSONObject)
-                    return@forEach
+                    continue
                 val (audioUrl, mime) = getUrlAndMimeFromObject(it)
                 formats.audioData.add(
                     AudioResource(
