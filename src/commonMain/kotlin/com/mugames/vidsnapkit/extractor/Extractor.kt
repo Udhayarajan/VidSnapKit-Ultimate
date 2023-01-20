@@ -41,6 +41,7 @@ abstract class Extractor(
                 url.contains("linkedin") -> LinkedIn(url)
                 url.contains("sharechat") -> ShareChat(url)
                 url.contains("dailymotion") -> DailyMotion(url)
+                url.contains("vimeo") -> Vimeo(url)
                 else -> null
             }
         }
