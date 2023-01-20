@@ -22,7 +22,8 @@ plugins {
 }
 
 group = "io.github.udhayarajan"
-version = "1.0.1"
+version = "2.0.1"
+//Version Naming incremented if "<NEW_FEATURE_ADDED>.<WORKED_ON_BUG>.<BETA_VERSION_COUNT>"
 
 repositories {
     google()
