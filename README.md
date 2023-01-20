@@ -10,6 +10,8 @@ Add below lines to your gradle file.
     
 You can see `LATEST_VERSION` from release of this current respository.
 
+NOTE: You no need to add beta `v` and `beta` tag in implementaion line. Just add numerical version alone (eg: `v2.0.1-beta` as  `implementation 'io.github.udhayarajan:VidSnapKit:2.0.1`)
+
 Also make sure to include `mavenCentral()` repository
 
 
@@ -24,3 +26,4 @@ Also make sure to include `mavenCentral()` repository
  - DailyMotion
  - LinkedIn
  - ShareChat
+ - Vimeo
