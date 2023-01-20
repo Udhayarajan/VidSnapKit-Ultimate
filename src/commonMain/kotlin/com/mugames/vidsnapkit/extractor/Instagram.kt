@@ -2,9 +2,7 @@ package com.mugames.vidsnapkit.extractor
 
 import com.mugames.vidsnapkit.*
 import com.mugames.vidsnapkit.dataholders.*
-import com.mugames.vidsnapkit.*
 import com.mugames.vidsnapkit.network.HttpRequest
-import com.mugames.vidsnapkit.dataholders.*
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -61,13 +59,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                 onProgress(Result.Failed(Error.InvalidCookies))
                 return null
             }
-            val page = HttpRequest(String.format(STORIES_URL, it), headers).getResponse()
-            try {
-                val user = JSONObject(page).getJSONObject("user")
-                return user.getString("id")
-            } catch (e: JSONException) {
-                onProgress(Result.Failed(Error.NonFatalError(NO_STATUS_AVAILABLE)))
-            }
+            return response.toJSONObject().getJSONObject("graphql").getJSONObject("user").getString("id")
         } ?: run {
             onProgress(Result.Failed(Error.InvalidUrl))
         }
@@ -94,8 +86,14 @@ class Instagram internal constructor(url: String) : Extractor(url) {
     private suspend fun extractStories(userId: String) {
         val dupHeader = getHeadersWithUserAgent()
         val stories = HttpRequest(STORIES_API.format(userId), dupHeader).getResponse()
-        val reel = JSONObject(stories).getJSONObject("reel")
-        extractFromItems(reel.getJSONArray("items"))
+        val reel = JSONObject(stories).getNullableJSONObject("reel")
+        reel?.let { extractFromItems(it.getJSONArray("items")) } ?: onProgress(
+            Result.Failed(
+                Error.NonFatalError(
+                    NO_STATUS_AVAILABLE
+                )
+            )
+        )
     }
 
     private fun getHeadersWithUserAgent(): Hashtable<String, String> {
@@ -296,7 +294,15 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                         VideoResource(
                             video.getString("url"),
                             MimeType.VIDEO_MP4,
-                            try{video.getString("width")}catch (e: JSONException){video.getInt("width").toString()} + "x" + try{video.getString("height")}catch (e: JSONException){video.getInt("height").toString()}
+                            try {
+                                video.getString("width")
+                            } catch (e: JSONException) {
+                                video.getInt("width").toString()
+                            } + "x" + try {
+                                video.getString("height")
+                            } catch (e: JSONException) {
+                                video.getInt("height").toString()
+                            }
                         )
                     )
                 }
