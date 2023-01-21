@@ -35,7 +35,7 @@ repositories {
 kotlin {
     jvm {
         compilations.all {
-            kotlinOptions.jvmTarget = "1.8"
+            kotlinOptions.jvmTarget = "11"
         }
         testRuns["test"].executionTask.configure {
             useJUnitPlatform()
@@ -87,13 +87,13 @@ android {
         targetSdk = 33
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
     lint {
         isAbortOnError = false
     }
 }
 dependencies {
-    implementation("androidx.core:core-ktx:+")
+    implementation("androidx.core:core-ktx:1.9.0")
 }
