@@ -68,5 +68,15 @@ class MimeType {
          * Constant Value: "application/x-mpegURL"
          */
         const val APPLICATION_X_MPEG_URL = "application/x-mpegURL";
+
+        fun fromCodecs(codec: String) = with(codec) {
+            when {
+                contains("mp4a", ignoreCase = true) -> MimeType.AUDIO_MP4
+                contains("opus", ignoreCase = true) -> MimeType.AUDIO_WEBM
+                contains("avc", ignoreCase = true) -> MimeType.VIDEO_MP4
+                contains("vp8", ignoreCase = true) || contains("vp9", ignoreCase = true) -> MimeType.VIDEO_WEBM
+                else -> throw Exception("Unable to find mimetype from codec $codec")
+            }
+        }
     }
 }

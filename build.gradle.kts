@@ -19,10 +19,11 @@ plugins {
     kotlin("multiplatform") version "1.7.22"
     id("convention.publication")
     id("com.android.library")
+    id("org.jetbrains.kotlin.android") version "1.7.22" apply false
 }
 
 group = "io.github.udhayarajan"
-version = "2.0.2"
+version = "2.0.3"
 //Version Naming incremented if "<NEW_FEATURE_ADDED>.<WORKED_ON_BUG>.<BETA_VERSION_COUNT>"
 
 repositories {
@@ -64,13 +65,9 @@ kotlin {
                 implementation("io.ktor:ktor-client-core:$ktor_version")
                 implementation("io.ktor:ktor-client-android:$ktor_version")
                 implementation("io.ktor:ktor-client-serialization:$ktor_version")
-                implementation("io.ktor:ktor-client-logging:$ktor_version")
 
                 // https://mvnrepository.com/artifact/org.json/json
                 implementation("org.json:json:20220924")
-
-                // https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core
-                implementation("org.apache.logging.log4j:log4j-core:2.19.0")
 
             }
         }
@@ -96,4 +93,7 @@ android {
     lint {
         isAbortOnError = false
     }
+}
+dependencies {
+    implementation("androidx.core:core-ktx:+")
 }
