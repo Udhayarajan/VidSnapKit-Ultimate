@@ -17,6 +17,7 @@
 
 package com.mugames.vidsnapkit.extractor
 
+import com.mugames.vidsnapkit.MimeType
 import com.mugames.vidsnapkit.dataholders.AudioResource
 import com.mugames.vidsnapkit.dataholders.Formats
 import com.mugames.vidsnapkit.dataholders.ImageResource
@@ -91,7 +92,7 @@ class Vimeo internal constructor(url: String) : Extractor(url) {
         fun getUrlAndMimeFromObject(jsonObject: JSONObject) =
             listOf(
                 url + jsonObject.get("base_url") + jsonObject.get("id") + ".mp4",
-                jsonObject.getString("mime_type")
+                MimeType.fromCodecs(jsonObject.getString("codecs"))
             )
 
         fun extractVideoData() {
@@ -120,7 +121,8 @@ class Vimeo internal constructor(url: String) : Extractor(url) {
                 formats.audioData.add(
                     AudioResource(
                         audioUrl,
-                        mime
+                        mime,
+                        bitrate = it.getLong("bitrate")
                     )
                 )
             }

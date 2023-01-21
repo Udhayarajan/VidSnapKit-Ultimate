@@ -59,4 +59,5 @@ data class AudioResource(
     val url: String,
     val mimeType: String,
     var size: Long = 0,
+    var bitrate: Long? = null
 )
