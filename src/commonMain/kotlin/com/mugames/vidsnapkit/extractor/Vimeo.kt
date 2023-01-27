@@ -84,16 +84,23 @@ class Vimeo internal constructor(url: String) : Extractor(url) {
     }
 
     private fun extractFromCdns(response: String, cdnUrl: String) {
-        var url = cdnUrl
-        var baseUrl = response.toJSONObject().getString("base_url")
+        val baseUrl = response.toJSONObject().getString("base_url")
         val videoArray = response.toJSONObject().getJSONArray("video")
         val audioArray = response.toJSONObject().getJSONArray("audio")
 
-        fun getUrlAndMimeFromObject(jsonObject: JSONObject) =
+        val modified = goBackPossibly(baseUrl, cdnUrl).toMutableList()
+        modified[1] += "/${modified[0]}"
+
+        fun getUrlAndMimeFromObject(jsonObject: JSONObject) = run {
+            val tempList = goBackPossibly(jsonObject.getString("base_url"), modified[1]).toMutableList()
+            tempList[1] += "/${tempList[0]}"
+
             listOf(
-                url + jsonObject.get("base_url") + jsonObject.get("id") + ".mp4",
-                MimeType.fromCodecs(jsonObject.getString("codecs"))
+                tempList[1] + jsonObject.get("id") + ".mp4",
+                MimeType.fromCodecs(jsonObject.getString("codecs"), jsonObject.getString("mime_type"))
             )
+        }
+
 
         fun extractVideoData() {
             for (i in 0 until videoArray.length()) {
@@ -127,14 +134,20 @@ class Vimeo internal constructor(url: String) : Extractor(url) {
                 )
             }
         }
-
-        val backCount = baseUrl.split("../").dropLastWhile { it.isEmpty() }.toList().size
-        baseUrl = baseUrl.replace("../", "")
-        repeat(backCount) {
-            url = url.replace("(?:.(?!\\/))+\$".toRegex(), "")
-        }
-        url += "/$baseUrl"
         extractVideoData()
         extractAudioData()
+    }
+
+    private fun goBackPossibly(baseUrl: String, mainUrl: String): List<String> {
+        val backCount = baseUrl.split("/").dropLastWhile { it.isEmpty() }.run {
+            if(all{it==".."}) size -1
+            else size
+        }
+        val tempBaseUrl = baseUrl.replace("../", "")
+        var tempMainUrl = mainUrl.dropLastWhile { it == '/' }
+        repeat(backCount) {
+            tempMainUrl = tempMainUrl.substring(0, tempMainUrl.lastIndexOf("/"))
+        }
+        return listOf(tempBaseUrl, tempMainUrl.dropLastWhile { it == '/' })
     }
 }
