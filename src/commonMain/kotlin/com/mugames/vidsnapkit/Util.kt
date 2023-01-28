@@ -20,6 +20,7 @@ package com.mugames.vidsnapkit
 import java.io.UnsupportedEncodingException
 import java.net.URLDecoder
 import java.util.regex.Pattern
+
 /**
  * @author Udhaya
  * Created on 22-01-2022
@@ -62,6 +63,19 @@ class Util {
          * @param name title of video needed to be filtered
          * @return title without newline and white tabs
          */
-        fun filterName(name:String) = name.replace("[\n.\t]".toRegex(),"")
+        fun filterName(name: String) = name.replace("[\n.\t]".toRegex(), "")
     }
+}
+
+fun String.count(substring: String): Int {
+    var count = 0
+    var index = 0
+    while (index != -1) {
+        index = this.indexOf(substring, index)
+        if (index != -1) {
+            count++
+            index += substring.length
+        }
+    }
+    return count
 }
