@@ -23,7 +23,7 @@ plugins {
 }
 
 group = "io.github.udhayarajan"
-version = "2.0.4"
+version = "2.0.5"
 //Version Naming incremented if "<NEW_FEATURE_ADDED>.<WORKED_ON_BUG>.<BETA_VERSION_COUNT>"
 
 repositories {
