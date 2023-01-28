@@ -57,7 +57,11 @@ class HttpInterfaceImpl(
         return client.request {
             method = HttpMethod.Head
             url(url)
-        }.headers["content-length"]?.toLong() ?: Long.MIN_VALUE
+        }.run {
+            if (status == HttpStatusCode.OK)
+                this.headers["content-length"]?.toLong() ?: Long.MIN_VALUE
+            else Long.MIN_VALUE
+        }
     }
 
 }

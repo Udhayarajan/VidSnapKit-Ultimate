@@ -131,6 +131,7 @@ abstract class Extractor(
                 val videoSize = video.await()
                 val audioSize = audio.await()
                 val imageSize = image.await()
+
                 format.videoData.forEachIndexed { idx, elem ->
                     elem.size = videoSize[idx]
                 }
@@ -141,7 +142,15 @@ abstract class Extractor(
                     elem.size = imageSize[idx]
                 }
             }
-            onProgress(Result.Success(videoFormats))
+            val filteredFormats = mutableListOf<Formats>()
+            for (formats in videoFormats) {
+                val format = Formats(formats.title, formats.url, formats.src)
+                format.videoData.addAll(formats.videoData.filter { it.size > 0 }.toList())
+                format.audioData.addAll(formats.audioData.filter { it.size > 0 }.toList())
+                format.imageData.addAll(formats.imageData.filter { it.size > 0 }.toList())
+                filteredFormats.add(format)
+            }
+            onProgress(Result.Success(filteredFormats))
         }
     }
 

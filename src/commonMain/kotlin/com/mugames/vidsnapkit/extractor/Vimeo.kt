@@ -18,6 +18,7 @@
 package com.mugames.vidsnapkit.extractor
 
 import com.mugames.vidsnapkit.MimeType
+import com.mugames.vidsnapkit.count
 import com.mugames.vidsnapkit.dataholders.AudioResource
 import com.mugames.vidsnapkit.dataholders.Formats
 import com.mugames.vidsnapkit.dataholders.ImageResource
@@ -25,6 +26,7 @@ import com.mugames.vidsnapkit.dataholders.VideoResource
 import com.mugames.vidsnapkit.network.HttpRequest
 import com.mugames.vidsnapkit.toJSONObject
 import org.json.JSONObject
+import java.net.URI
 import java.util.regex.Pattern
 
 
@@ -139,12 +141,11 @@ class Vimeo internal constructor(url: String) : Extractor(url) {
     }
 
     private fun goBackPossibly(baseUrl: String, mainUrl: String): List<String> {
-        val backCount = baseUrl.split("/").dropLastWhile { it.isEmpty() }.run {
-            if(all{it==".."}) size -1
-            else size
-        }
+        var backCount = baseUrl.count("..")
         val tempBaseUrl = baseUrl.replace("../", "")
         var tempMainUrl = mainUrl.dropLastWhile { it == '/' }
+        if (URI.create(tempMainUrl).path.contains(".") && backCount >= 1)
+            backCount += 1
         repeat(backCount) {
             tempMainUrl = tempMainUrl.substring(0, tempMainUrl.lastIndexOf("/"))
         }
