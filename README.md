@@ -46,6 +46,9 @@ This project is licensed under the Apache 2.0 License.
 ## Author
 This project is created by [Udhayarajan M](https://linktr.ee/udhayarajan_m)
 
+## Cloud version
+This project is available as cloud API version vist [Rapid API](https://rapidapi.com/mudhayarajan2013/api/vidsnap) to get it. **IT IS FREE CURRENTLY**
+
 ## Resources
 A sample app using this library can be found at this URL: https://github.com/Udhayarajan/VidSnapKit/tree/master/sample%20app
 
