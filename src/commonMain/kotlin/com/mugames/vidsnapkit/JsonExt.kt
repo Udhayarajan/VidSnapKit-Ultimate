@@ -55,6 +55,12 @@ fun JSONObject.getNullableString(name: String): String? = try {
     null
 }
 
+fun JSONObject.getNullable(name: String): String? = try {
+    get(name).toString()
+} catch (e: JSONException) {
+    null
+}
+
 fun String.toJSONObject() = JSONObject(this)
 
 fun String.toJSONArray() = JSONArray(this)

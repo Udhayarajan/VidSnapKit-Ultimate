@@ -15,21 +15,28 @@
  *
  */
 
-pluginManagement {
-    repositories {
-        google()
-        jcenter()
-        gradlePluginPortal()
-        mavenCentral()
+package com.mugames.json;
+
+/*
+Public Domain.
+*/
+
+/**
+ * The JSONPointerException is thrown by {@link JSONPointer} if an error occurs
+ * during evaluating a pointer.
+ * 
+ * @author JSON.org
+ * @version 2016-05-13
+ */
+public class JSONPointerException extends RuntimeException {
+    private static final long serialVersionUID = 8872944667561856751L;
+
+    public JSONPointerException(String message) {
+        super(message);
     }
-    resolutionStrategy {
-        eachPlugin {
-            if (requested.id.namespace == "com.android") {
-                useModule("com.android.tools.build:gradle:7.0.4")
-            }
-        }
+
+    public JSONPointerException(String message, Throwable cause) {
+        super(message, cause);
     }
+
 }
-rootProject.name = "VidSnapKit"
-includeBuild("convention-plugins")
-include("java-json-lib")

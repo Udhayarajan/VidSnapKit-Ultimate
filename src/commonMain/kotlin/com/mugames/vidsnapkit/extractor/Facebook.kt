@@ -24,7 +24,7 @@ import com.mugames.vidsnapkit.dataholders.*
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
-import org.json.XML
+
 import java.util.*
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -361,8 +361,8 @@ class Facebook internal constructor(url: String) : Extractor(url) {
             extractFromDash(it)
         }
 
-        val res: String = media.getNullableString("width")
-            ?: (media["original_width"].toString() + "x" + (media.getNullableString("height")
+        val res: String = media.getNullable("width")
+            ?: (media["original_width"].toString() + "x" + (media.getNullable("height")
                 ?: media["original_height"].toString()))
 
         for (suffix in arrayOf("", "_quality_hd")) {
@@ -383,7 +383,7 @@ class Facebook internal constructor(url: String) : Extractor(url) {
         var xmlDecoded = xml.replace("x3C".toRegex(), "<")
         xmlDecoded = xmlDecoded.replace("\\\\\u003C".toRegex(), "<")
         val adaptionSet: JSONArray =
-            XML.toJSONObject(xmlDecoded).getJSONObject("MPD").getJSONObject("Period")
+            XMLParserFactory.createParserFactory().xmlToJsonObject(xmlDecoded).getJSONObject("MPD").getJSONObject("Period")
                 .getJSONArray("AdaptationSet")
         val videos = adaptionSet.getJSONObject(0).getJSONArray("Representation")
         val audios = adaptionSet.getJSONObject(1)
@@ -462,7 +462,7 @@ class Facebook internal constructor(url: String) : Extractor(url) {
         return null
     }
 
-    public suspend fun testWebpage(string: String) {
+    suspend fun testWebpage(string: String) {
         scratchWebPage(string)
     }
 

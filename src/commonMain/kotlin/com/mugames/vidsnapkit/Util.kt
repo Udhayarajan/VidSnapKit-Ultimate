@@ -17,6 +17,7 @@
 
 package com.mugames.vidsnapkit
 
+import org.json.JSONObject
 import java.io.UnsupportedEncodingException
 import java.net.URLDecoder
 import java.util.regex.Pattern
