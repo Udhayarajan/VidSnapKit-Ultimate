@@ -24,6 +24,7 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/convention-plugins" />
+            <option value="$PROJECT_DIR$/java-json-lib" />
           </set>
         </option>
       </GradleProjectSettings>

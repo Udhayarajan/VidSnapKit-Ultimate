@@ -15,21 +15,18 @@
  *
  */
 
-pluginManagement {
-    repositories {
-        google()
-        jcenter()
-        gradlePluginPortal()
-        mavenCentral()
-    }
-    resolutionStrategy {
-        eachPlugin {
-            if (requested.id.namespace == "com.android") {
-                useModule("com.android.tools.build:gradle:7.0.4")
+package com.mugames.vidsnapkit
+
+import com.mugames.json.XML
+import org.json.JSONObject
+
+actual object XMLParserFactory {
+    actual fun createParserFactory(): XMLParser {
+        return object : XMLParser {
+            override fun xmlToJsonObject(xmlString: String): JSONObject {
+                return XML.toJSONObject(xmlString)
             }
+
         }
     }
 }
-rootProject.name = "VidSnapKit"
-includeBuild("convention-plugins")
-include("java-json-lib")

@@ -1,3 +1,5 @@
+import android.annotation.SuppressLint
+
 /*
  *    Copyright (c) 2023 Udhayarajan M
  *
@@ -23,7 +25,7 @@ plugins {
 }
 
 group = "io.github.udhayarajan"
-version = "2.0.5"
+version = "2.0.6"
 //Version Naming incremented if "<NEW_FEATURE_ADDED>.<WORKED_ON_BUG>.<BETA_VERSION_COUNT>"
 
 repositories {
@@ -32,7 +34,7 @@ repositories {
 }
 
 
-kotlin {
+ kotlin {
     jvm {
         compilations.all {
             kotlinOptions.jvmTarget = "11"
@@ -48,7 +50,14 @@ kotlin {
     sourceSets {
         val ktor_version = "2.0.1"
 
-        val jvmMain by getting
+        @SuppressLint("DuplicatePlatformClasses")
+        val jvmMain by getting{
+            dependencies {
+                // https://mvnrepository.com/artifact/org.json/json
+                implementation("org.json:json:20220924")
+            }
+        }
+
         val jvmTest by getting
         val androidMain by getting {
             dependencies {
@@ -65,10 +74,6 @@ kotlin {
                 implementation("io.ktor:ktor-client-core:$ktor_version")
                 implementation("io.ktor:ktor-client-android:$ktor_version")
                 implementation("io.ktor:ktor-client-serialization:$ktor_version")
-
-                // https://mvnrepository.com/artifact/org.json/json
-                implementation("org.json:json:20220924")
-
             }
         }
         val commonTest by getting {
