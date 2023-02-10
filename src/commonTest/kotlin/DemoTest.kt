@@ -38,7 +38,7 @@ class DemoTest {
         val extractor = Extractor.findExtractor(url)
         runBlocking {
             extractor?.apply {
-//                cookies="csrftoken=wP8Wm7bbgKhv0LSq6PQSLM9OiVRevkOD;ds_user_id=48252728893;mid=Y1a44wALAAGo0YfkaF9Gz5CObmdY;sessionid=48252728893%3ACSdZDAoXf2QHQJ%3A2%3AAYduHPQ_19ArTnoweFlreXw0wKgiNSZrthoCUkZn9A"
+//                cookies="APPROPRIATE COOKIES"
                 start {
                     when (it) {
                         is Result.Failed -> {

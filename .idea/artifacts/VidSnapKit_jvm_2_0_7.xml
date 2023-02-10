@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="VidSnapKit-jvm-2.0.7">
+    <output-path>$PROJECT_DIR$/build/libs</output-path>
+    <root id="archive" name="VidSnapKit-jvm-2.0.7.jar">
+      <element id="module-output" name="VidSnapKit.jvmMain" />
+    </root>
+  </artifact>
+</component>

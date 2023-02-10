@@ -21,11 +21,10 @@ plugins {
     kotlin("multiplatform") version "1.7.22"
     id("convention.publication")
     id("com.android.library")
-    id("org.jetbrains.kotlin.android") version "1.7.22" apply false
 }
 
 group = "io.github.udhayarajan"
-version = "2.0.6"
+version = "2.0.7"
 //Version Naming incremented if "<NEW_FEATURE_ADDED>.<WORKED_ON_BUG>.<BETA_VERSION_COUNT>"
 
 repositories {
@@ -34,7 +33,7 @@ repositories {
 }
 
 
- kotlin {
+kotlin {
     jvm {
         compilations.all {
             kotlinOptions.jvmTarget = "11"
@@ -51,7 +50,7 @@ repositories {
         val ktor_version = "2.0.1"
 
         @SuppressLint("DuplicatePlatformClasses")
-        val jvmMain by getting{
+        val jvmMain by getting {
             dependencies {
                 // https://mvnrepository.com/artifact/org.json/json
                 implementation("org.json:json:20220924")
@@ -87,6 +86,7 @@ repositories {
 android {
     compileSdk = 33
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
+    sourceSets["main"].java.srcDir("src/androidMain/kotlin/")
     defaultConfig {
         minSdk = 21
         targetSdk = 33
@@ -101,4 +101,9 @@ android {
 }
 dependencies {
     implementation("androidx.core:core-ktx:1.9.0")
+    testImplementation(project(mapOf("path" to ":")))
+    testImplementation(project(mapOf("path" to ":")))
+    testImplementation(project(mapOf("path" to ":")))
+    androidTestImplementation(project(mapOf("path" to ":")))
+    androidTestImplementation(project(mapOf("path" to ":")))
 }
