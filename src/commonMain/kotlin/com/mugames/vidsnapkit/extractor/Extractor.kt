@@ -23,6 +23,7 @@ import com.mugames.vidsnapkit.dataholders.Formats
 import com.mugames.vidsnapkit.dataholders.ProgressState
 import com.mugames.vidsnapkit.dataholders.Result
 import com.mugames.vidsnapkit.network.HttpRequest
+import com.mugames.vidsnapkit.sanitizeAsHeaderValue
 import io.ktor.client.plugins.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.future.future
@@ -77,7 +78,7 @@ abstract class Extractor(
     var cookies: String? = null
         set(value) {
             value?.let {
-                headers["Cookie"] = it
+                headers["Cookie"] = it.sanitizeAsHeaderValue()
             }
             field = value
         }
