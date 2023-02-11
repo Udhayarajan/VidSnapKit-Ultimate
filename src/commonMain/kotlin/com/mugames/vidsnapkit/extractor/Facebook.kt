@@ -344,6 +344,10 @@ class Facebook internal constructor(url: String) : Extractor(url) {
     }
 
     private fun parseGraphqlVideo(media: JSONObject) {
+        if (media.getNullableJSONObject("creation_story") != null) {
+            extractFromCreationStory(media)
+            return
+        }
         val thumbnailUrl = media.getNullableJSONObject("thumbnailImage")?.getString("uri")
             ?: media.getJSONObject("preferred_thumbnail")
                 .getJSONObject("image")
@@ -377,6 +381,13 @@ class Facebook internal constructor(url: String) : Extractor(url) {
             )
 
         }
+    }
+
+    private fun extractFromCreationStory(media: JSONObject) {
+        parseGraphqlVideo(
+            media.getJSONObject("creation_story").getJSONObject("short_form_video_context")
+                .getJSONObject("playback_video")
+        )
     }
 
     private fun extractFromDash(xml: String) {
