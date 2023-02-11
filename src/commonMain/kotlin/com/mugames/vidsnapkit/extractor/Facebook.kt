@@ -17,14 +17,13 @@
 
 package com.mugames.vidsnapkit.extractor
 
-import com.mugames.vidsnapkit.Util.Companion.decodeHTML
 import com.mugames.vidsnapkit.*
-import com.mugames.vidsnapkit.network.HttpRequest
+import com.mugames.vidsnapkit.Util.Companion.decodeHTML
 import com.mugames.vidsnapkit.dataholders.*
+import com.mugames.vidsnapkit.network.HttpRequest
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
-
 import java.util.*
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -361,9 +360,10 @@ class Facebook internal constructor(url: String) : Extractor(url) {
             extractFromDash(it)
         }
 
-        val res: String = media.getNullable("width")
-            ?: (media["original_width"].toString() + "x" + (media.getNullable("height")
-                ?: media["original_height"].toString()))
+        fun getWidth() = media.getNullable("width") ?: media["original_width"].toString()
+        fun getHeight() = media.getNullable("height") ?: media["original_height"].toString()
+
+        val res = "${getWidth()}x${getHeight()}"
 
         for (suffix in arrayOf("", "_quality_hd")) {
             val playableUrl = media.getNullableString("playable_url$suffix")
@@ -383,7 +383,8 @@ class Facebook internal constructor(url: String) : Extractor(url) {
         var xmlDecoded = xml.replace("x3C".toRegex(), "<")
         xmlDecoded = xmlDecoded.replace("\\\\\u003C".toRegex(), "<")
         val adaptionSet: JSONArray =
-            XMLParserFactory.createParserFactory().xmlToJsonObject(xmlDecoded).getJSONObject("MPD").getJSONObject("Period")
+            XMLParserFactory.createParserFactory().xmlToJsonObject(xmlDecoded).getJSONObject("MPD")
+                .getJSONObject("Period")
                 .getJSONArray("AdaptationSet")
         val videos = adaptionSet.getJSONObject(0).getJSONArray("Representation")
         val audios = adaptionSet.getJSONObject(1)
