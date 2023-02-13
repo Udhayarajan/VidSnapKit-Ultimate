@@ -1,0 +1,18 @@
+Every child of Extractor.kt must posses following pattern
+
+1. Must have constructor as Internal Constructor.
+2. Should have local format (which is instance of com.mugames.vidsnapkit.dataholders.Formats).
+3. The overridden `analyse()` method must set the corresponding url & src.
+4. Upon adding all the data to formats never forget to add them to mediaFormats(videoFormats) property of Extractor.kt.
+5. The flow from child must be transferred to parent(Extractor) via calling the method finalize() which is available in Extractor class.
+
+Sample
+class NewExtractor internal constructor(url: String): Extractor(url){
+    private val formats = Formats()
+    override suspended fun analyse(){
+        formats.src = "NewExtractor"
+        formats.url = inputUrl
+
+    }
+
+}
