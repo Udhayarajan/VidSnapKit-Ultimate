@@ -80,4 +80,4 @@ fun String.count(substring: String): Int {
     return count
 }
 
-fun String.sanitizeAsHeaderValue() = replace("'", "")
+fun String.sanitizeAsHeaderValue() = replace("['\n]+".toRegex(), "")
