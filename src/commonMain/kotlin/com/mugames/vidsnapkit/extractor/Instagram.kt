@@ -336,7 +336,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
             } ?: run {
                 item.getNullableJSONArray("carousel_media")?.let {
                     extractFromItems(it)
-                    return@run
+                    return
                 } ?: run {
                     val imageVersion2 = item.getNullableJSONObject("image_versions2")
                     imageVersion2?.let {
