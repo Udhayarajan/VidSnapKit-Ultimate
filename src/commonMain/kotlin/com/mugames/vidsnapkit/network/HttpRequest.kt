@@ -59,4 +59,7 @@ class HttpRequest(
      * @return bytes count of given [url]
      */
     suspend fun getSize() = createClient().getSize(url)
+
+    suspend fun postRequest(postData: Hashtable<String, Any>): String =
+        withContext(Dispatchers.IO) { createClient().postData(url, postData, headers) }
 }

@@ -17,10 +17,13 @@
 
 package com.mugames.vidsnapkit.network
 
+import com.mugames.vidsnapkit.toJsonString
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
+import io.ktor.client.statement.*
 import io.ktor.http.*
+import io.ktor.http.content.*
 import java.util.*
 
 /**
@@ -30,11 +33,33 @@ import java.util.*
 interface HttpInterface {
     suspend fun getData(url: String, headers: Hashtable<String, String>? = null): String
     suspend fun getSize(url: String, headers: Hashtable<String, String>? = null): Long
+
+    suspend fun postData(
+        url: String,
+        postData: Hashtable<String, Any>,
+        headers: Hashtable<String, String>? = null
+    ): String
 }
 
 class HttpInterfaceImpl(
     private val client: HttpClient,
 ) : HttpInterface {
+    override suspend fun postData(
+        url: String,
+        postData: Hashtable<String, Any>,
+        headers: Hashtable<String, String>?
+    ): String {
+        return try {
+            client.post {
+                url(url)
+                println(postData.toJsonString())
+                setBody(TextContent(postData.toJsonString(), ContentType.Application.Json))
+            }.bodyAsText()
+        } catch (e: Error) {
+            throw e
+        }
+    }
+
     override suspend fun getData(url: String, headers: Hashtable<String, String>?): String {
         return try {
             client.get {
