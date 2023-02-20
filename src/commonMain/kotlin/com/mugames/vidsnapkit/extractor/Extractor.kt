@@ -60,6 +60,7 @@ abstract class Extractor(
                 url.contains("sharechat") -> ShareChat(url)
                 url.contains("dailymotion") -> DailyMotion(url)
                 url.contains("vimeo") -> Vimeo(url)
+                url.contains("likee") -> Likee(url)
                 else -> null
             }
         }
