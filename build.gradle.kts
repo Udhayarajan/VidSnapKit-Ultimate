@@ -24,9 +24,9 @@ plugins {
 }
 
 group = "io.github.udhayarajan"
-version = "2.0.9"
+version = "3.0.1"
 //Version Naming incremented if "<NEW_FEATURE_ADDED>.<WORKED_ON_BUG>.<BETA_VERSION_COUNT>"
-
+//Priority on incrementing Feature > BugFix > Beta
 repositories {
     google()
     mavenCentral()
