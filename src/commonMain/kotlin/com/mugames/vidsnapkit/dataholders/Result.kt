@@ -73,7 +73,13 @@ sealed class Error(val message: String? = null, val e: Exception? = null) {
      * Sometimes unexpectedly instagram returns 404 ERROR
      * even for public post
      */
-    class Instagram404Error(val isCookiesUsed: Boolean): Error()
+    class Instagram404Error(val isCookiesUsed: Boolean) : Error()
+
+    /**
+     * The current extractor missing some of its extraction logic
+     * for the given url
+     */
+    object MethodMissingLogic: Error("Missing implementation logic")
 }
 
 /**
