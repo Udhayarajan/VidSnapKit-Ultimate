@@ -55,7 +55,7 @@ abstract class Extractor(
             url: String,
         ): Extractor? {
             return when {
-                url.contains("facebook|fb".toRegex()) -> Facebook(url)
+                url.contains("facebook|fb\\.".toRegex()) -> Facebook(url)
                 url.contains("instagram") -> Instagram(url)
                 url.contains("linkedin") -> LinkedIn(url)
                 url.contains("sharechat") -> ShareChat(url)
