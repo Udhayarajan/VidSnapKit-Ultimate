@@ -58,7 +58,7 @@ abstract class Extractor(
                 url.contains("instagram") -> Instagram(url)
                 url.contains("linkedin") -> LinkedIn(url)
                 url.contains("sharechat") -> ShareChat(url)
-                url.contains("dailymotion") -> DailyMotion(url)
+                url.contains("dailymotion|dai.ly".toRegex()) -> DailyMotion(url)
                 url.contains("vimeo") -> Vimeo(url)
                 url.contains("likee") -> Likee(url)
                 else -> null

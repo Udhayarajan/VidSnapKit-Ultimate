@@ -21,6 +21,7 @@ import org.json.JSONObject
 import java.io.UnsupportedEncodingException
 import java.net.URLDecoder
 import java.util.*
+import java.util.regex.Matcher
 import java.util.regex.Pattern
 
 /**
@@ -93,3 +94,15 @@ fun <K, V> Map<K, V>.toHashtable(): Hashtable<K, V> {
 }
 
 fun <K, V> Hashtable<K, V>.toJsonString() = JSONObject(toMap()).toString()
+
+fun Matcher.tryGroup(group: Int) = try {
+    group(group)
+} catch (e: IndexOutOfBoundsException) {
+    null
+}
+
+fun Matcher.tryGroup(name: String) = try {
+    group(name)
+} catch (e: IndexOutOfBoundsException) {
+    null
+}
