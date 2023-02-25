@@ -18,10 +18,11 @@
 package com.mugames.vidsnapkit.extractor
 
 import com.mugames.vidsnapkit.MimeType
+import com.mugames.vidsnapkit.dataholders.*
 import com.mugames.vidsnapkit.getNullableJSONArray
 import com.mugames.vidsnapkit.network.HttpRequest
 import com.mugames.vidsnapkit.toJSONObject
-import com.mugames.vidsnapkit.dataholders.*
+import com.mugames.vidsnapkit.tryGroup
 import java.util.regex.Pattern
 
 /**
@@ -102,7 +103,8 @@ class DailyMotion(url: String) : Extractor(url) {
     private suspend fun extractFromM3U8(response: String) {
         fun valueForKey(key: String, line: String): String? {
             val matcher = Pattern.compile("$key=(?:\"(.*?)\"|(.*?),)").matcher(line)
-            return if (matcher.find()) matcher.group(1) else null
+            return if (matcher.find())
+                matcher.tryGroup(1) ?: matcher.tryGroup(2) else null
         }
 
         onProgress(Result.Progress(ProgressState.Middle))
