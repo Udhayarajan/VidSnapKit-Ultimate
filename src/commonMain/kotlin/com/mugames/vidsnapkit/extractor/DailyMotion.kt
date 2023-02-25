@@ -17,12 +17,9 @@
 
 package com.mugames.vidsnapkit.extractor
 
-import com.mugames.vidsnapkit.MimeType
+import com.mugames.vidsnapkit.*
 import com.mugames.vidsnapkit.dataholders.*
-import com.mugames.vidsnapkit.getNullableJSONArray
 import com.mugames.vidsnapkit.network.HttpRequest
-import com.mugames.vidsnapkit.toJSONObject
-import com.mugames.vidsnapkit.tryGroup
 import java.util.regex.Pattern
 
 /**
@@ -50,7 +47,14 @@ class DailyMotion(url: String) : Extractor(url) {
         val id = getVideoId()
         id?.let {
             onProgress(Result.Progress(ProgressState.Start))
-            val json = HttpRequest(METADATA_API.format(id)).getResponse().toJSONObject()
+            val json = HttpRequest(METADATA_API.format(id)).getResponse()?.toJSONObject() ?: run {
+                clientRequestError()
+                return
+            }
+            json.getNullableJSONObject("error")?.let {
+                clientRequestError(it.getString("raw_message"))
+                return
+            }
 
             localFormats.title = json.getString("title")
             localFormats.url = inputUrl
@@ -84,7 +88,10 @@ class DailyMotion(url: String) : Extractor(url) {
                     extractFromM3U8(
                         HttpRequest(
                             autoQuality.getJSONObject(i).getString("url")
-                        ).getResponse()
+                        ).getResponse() ?: run {
+                            clientRequestError()
+                            return
+                        }
                     )
                 } else {
                     localFormats.videoData.add(

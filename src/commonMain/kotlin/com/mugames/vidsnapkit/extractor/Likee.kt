@@ -42,7 +42,10 @@ class Likee internal constructor(url: String) : Extractor(url) {
     override suspend fun analyze() {
         formats.src = "Likee"
         formats.url = inputUrl
-        val postId = getPostId()!!
+        val postId = getPostId() ?: run {
+            clientRequestError()
+            return
+        }
         val response = HttpRequest(GET_VIDEO_INFO).postRequest(hashMapOf("postIds" to postId).toHashtable())
         val responseData =
             response.toJSONObject()
@@ -79,9 +82,13 @@ class Likee internal constructor(url: String) : Extractor(url) {
     }
 
     private suspend fun getPostId(): String? {
-        val page = HttpRequest(inputUrl).getResponse()
-        Pattern.compile("<meta property=\"og:url\"\\W+content=\".*?postId=(.*?)\"").matcher(page).apply {
-            return if (find()) group(1) else null
+        try {
+            val page = HttpRequest(inputUrl).getResponse()
+            Pattern.compile("<meta property=\"og:url\"\\W+content=\".*?postId=(.*?)\"").matcher(page).apply {
+                return if (find()) group(1) else null
+            }
+        } catch (e: kotlin.Error) {
+            return null
         }
     }
 }

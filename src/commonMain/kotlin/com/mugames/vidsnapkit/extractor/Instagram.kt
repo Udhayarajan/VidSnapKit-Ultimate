@@ -76,7 +76,10 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                 onProgress(Result.Failed(Error.InvalidCookies))
                 return null
             }
-            return response.toJSONObject().getJSONObject("graphql").getJSONObject("user").getString("id")
+            return response?.toJSONObject()?.getJSONObject("graphql")?.getJSONObject("user")?.getString("id") ?: run {
+                clientRequestError()
+                null
+            }
         } ?: run {
             onProgress(Result.Failed(Error.InvalidUrl))
         }
@@ -90,7 +93,10 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         formats.src = "Instagram"
         formats.url = inputUrl
         if (!isProfileUrl())
-            extractInfoShared(HttpRequest(inputUrl, headers).getResponse())
+            extractInfoShared(HttpRequest(inputUrl, headers).getResponse() ?: run {
+                clientRequestError()
+                return
+            })
         else {
             val userId = getUserID()
             userId?.let {

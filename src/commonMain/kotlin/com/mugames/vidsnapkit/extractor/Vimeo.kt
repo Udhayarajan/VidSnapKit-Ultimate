@@ -55,7 +55,10 @@ class Vimeo internal constructor(url: String) : Extractor(url) {
         val id = getVideoId()
         id?.let {
             val request = HttpRequest(CONFIG_URL.format(it))
-            parseConfigRequest(request.getResponse())
+            parseConfigRequest(request.getResponse()?: run {
+                clientRequestError()
+                return
+            })
             videoFormats.add(formats)
             finalize()
         }
@@ -66,7 +69,10 @@ class Vimeo internal constructor(url: String) : Extractor(url) {
         val hls = json.getJSONObject("request").getJSONObject("files").getJSONObject("dash")
         val defaultCdn = hls.getString("default_cdn")
         val cdnUrl = hls.getJSONObject("cdns").getJSONObject(defaultCdn).getString("url")
-        extractFromCdns(HttpRequest(cdnUrl).getResponse(), cdnUrl)
+        extractFromCdns(HttpRequest(cdnUrl).getResponse()?: run {
+            clientRequestError()
+            return
+        }, cdnUrl)
         val video = json.getJSONObject("video")
         extractMetaData(video)
     }

@@ -84,7 +84,10 @@ class Facebook internal constructor(url: String) : Extractor(url) {
 
     private suspend fun extractInfo() {
         inputUrl = inputUrl.replace("://m.facebook\\.com/".toRegex(), "://www.facebook.com/")
-        scratchWebPage(HttpRequest(inputUrl, headers).getResponse())
+        scratchWebPage(HttpRequest(inputUrl, headers).getResponse() ?: run {
+            clientRequestError()
+            return
+        })
     }
 
     private suspend fun extractForceEng() {
@@ -92,7 +95,10 @@ class Facebook internal constructor(url: String) : Extractor(url) {
         inputUrl = inputUrl.replace("://www.facebook\\.com/".toRegex(), "://en-gb.facebook.com/")
         triedWithForceEng = true
         headers["Accept-Language"] = "en-GB, en-US, en"
-        scratchWebPage(HttpRequest(inputUrl, headers).getResponse())
+        scratchWebPage(HttpRequest(inputUrl, headers).getResponse() ?: run {
+            clientRequestError()
+            return
+        })
     }
 
     private suspend fun scratchWebPage(webPage: String) {
@@ -203,7 +209,7 @@ class Facebook internal constructor(url: String) : Extractor(url) {
             finalize()
         } ?: apply {
             if (!triedWithForceEng) extractForceEng() else onProgress(
-                Result.Failed(Error.InternalError("This video can't be Downloaded"))
+                Result.Failed(Error.NonFatalError("This video can't be Downloaded"))
             )
         }
     }
