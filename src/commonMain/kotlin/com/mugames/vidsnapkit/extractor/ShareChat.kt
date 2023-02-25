@@ -36,7 +36,10 @@ class ShareChat internal constructor(url: String) : Extractor(url) {
         formats.url = inputUrl
         formats.src = "ShareChat"
         onProgress(Result.Progress(ProgressState.Start))
-        scratchWebPage(HttpRequest(inputUrl).getResponse())
+        scratchWebPage(HttpRequest(inputUrl).getResponse()?: run {
+            clientRequestError()
+            return
+        })
     }
 
     private suspend fun scratchWebPage(response: String) {

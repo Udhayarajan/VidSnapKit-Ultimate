@@ -28,6 +28,7 @@ import io.ktor.client.plugins.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.future.future
 import java.util.*
+import javax.net.ssl.SSLHandshakeException
 
 /**
  * @author Udhaya
@@ -111,9 +112,13 @@ abstract class Extractor(
 
     private suspend fun safeAnalyze() {
         try {
-            analyze()
+            if (HttpRequest(inputUrl, headers).isAvailable())
+                analyze()
+            else clientRequestError()
         } catch (e: Exception) {
-            if (e is ClientRequestException && inputUrl.contains("instagram"))
+            if (e is SSLHandshakeException)
+                clientRequestError()
+            else if (e is ClientRequestException && inputUrl.contains("instagram"))
                 onProgress(Result.Failed(Error.Instagram404Error(cookies != null)))
             else
                 onProgress(Result.Failed(Error.InternalError("Error in SafeAnalyze", e)))
@@ -184,5 +189,9 @@ abstract class Extractor(
             }
         }
         return sizes.awaitAll()
+    }
+
+    protected inline fun clientRequestError(msg: String = "The request video page missing. If you find it as false kindly contact us") {
+        onProgress(Result.Failed(Error.NonFatalError(msg)))
     }
 }

@@ -51,7 +51,7 @@ class HttpRequest(
      *
      * @return Text format of entire webpage for given [url]
      */
-    suspend fun getResponse(): String = withContext(Dispatchers.IO) { createClient().getData(url, headers) }
+    suspend fun getResponse(): String? = withContext(Dispatchers.IO) { createClient().getData(url, headers) }
 
     /**
      * Used to estimate size of given url in bytes
@@ -62,4 +62,8 @@ class HttpRequest(
 
     suspend fun postRequest(postData: Hashtable<String, Any>): String =
         withContext(Dispatchers.IO) { createClient().postData(url, postData, headers) }
+
+    suspend fun isAvailable(): Boolean =
+        withContext(Dispatchers.IO) { createClient().checkWebPage(url, headers) }
+
 }

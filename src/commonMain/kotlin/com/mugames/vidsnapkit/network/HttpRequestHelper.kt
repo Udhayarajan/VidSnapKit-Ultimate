@@ -20,6 +20,7 @@ package com.mugames.vidsnapkit.network
 import com.mugames.vidsnapkit.toJsonString
 import io.ktor.client.*
 import io.ktor.client.call.*
+import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
@@ -31,7 +32,7 @@ import java.util.*
  * Created on 21-01-2022
  */
 interface HttpInterface {
-    suspend fun getData(url: String, headers: Hashtable<String, String>? = null): String
+    suspend fun getData(url: String, headers: Hashtable<String, String>? = null): String?
     suspend fun getSize(url: String, headers: Hashtable<String, String>? = null): Long
 
     suspend fun postData(
@@ -39,6 +40,8 @@ interface HttpInterface {
         postData: Hashtable<String, Any>,
         headers: Hashtable<String, String>? = null
     ): String
+
+    suspend fun checkWebPage(url: String, headers: Hashtable<String, String>?): Boolean
 }
 
 class HttpInterfaceImpl(
@@ -60,7 +63,35 @@ class HttpInterfaceImpl(
         }
     }
 
-    override suspend fun getData(url: String, headers: Hashtable<String, String>?): String {
+    override suspend fun checkWebPage(url: String, headers: Hashtable<String, String>?): Boolean {
+        return try {
+            client.get {
+                url(url)
+                headers?.let {
+                    if (it.isNotEmpty())
+                        headers {
+                            for ((key, value) in it)
+                                append(key, value)
+                        }
+                }
+            }.run {
+                status in listOf(
+                        HttpStatusCode.OK,
+                        HttpStatusCode.Accepted,
+                        HttpStatusCode.Created,
+                        HttpStatusCode.NonAuthoritativeInformation,
+                        HttpStatusCode.NoContent,
+                        HttpStatusCode.PartialContent,
+                        HttpStatusCode.ResetContent,
+                        HttpStatusCode.MultiStatus
+                    )
+            }
+        } catch (e: ClientRequestException) {
+            false
+        }
+    }
+
+    override suspend fun getData(url: String, headers: Hashtable<String, String>?): String? {
         return try {
             client.get {
                 url(url)
@@ -72,8 +103,14 @@ class HttpInterfaceImpl(
                         }
                     }
                 }
-            }.body()
-        } catch (e: Error) {
+            }.run {
+                if (status == HttpStatusCode.OK)
+                    body()
+                else null
+            }
+        } catch (e: ClientRequestException) {
+            null
+        } catch (e: Exception) {
             throw e
         }
     }
