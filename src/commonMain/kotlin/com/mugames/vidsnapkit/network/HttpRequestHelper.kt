@@ -63,6 +63,8 @@ class HttpInterfaceImpl(
         }
     }
 
+    // Instagram Server crashes with 500 if we sent wrong cookies
+    // So it is tackled by hardcoding and making it as true to prevent NonFatal Error
     override suspend fun checkWebPage(url: String, headers: Hashtable<String, String>?): Boolean {
         return try {
             client.get {
@@ -75,16 +77,17 @@ class HttpInterfaceImpl(
                         }
                 }
             }.run {
-                status in listOf(
-                        HttpStatusCode.OK,
-                        HttpStatusCode.Accepted,
-                        HttpStatusCode.Created,
-                        HttpStatusCode.NonAuthoritativeInformation,
-                        HttpStatusCode.NoContent,
-                        HttpStatusCode.PartialContent,
-                        HttpStatusCode.ResetContent,
-                        HttpStatusCode.MultiStatus
-                    )
+                status in setOf(
+                    HttpStatusCode.OK,
+                    HttpStatusCode.Accepted,
+                    HttpStatusCode.Created,
+                    HttpStatusCode.NonAuthoritativeInformation,
+                    HttpStatusCode.NoContent,
+                    HttpStatusCode.PartialContent,
+                    HttpStatusCode.ResetContent,
+                    HttpStatusCode.MultiStatus,
+                    if (url.contains("instagram")) HttpStatusCode.InternalServerError else HttpStatusCode.OK
+                )
             }
         } catch (e: ClientRequestException) {
             false
