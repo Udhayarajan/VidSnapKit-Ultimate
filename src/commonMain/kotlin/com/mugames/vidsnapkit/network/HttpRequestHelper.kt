@@ -109,6 +109,7 @@ class HttpInterfaceImpl(
             }.run {
                 if (status == HttpStatusCode.OK)
                     body()
+                else if (url.contains("instagram") && status == HttpStatusCode.InternalServerError) "{error:\"Invalid Cookies\"}"
                 else null
             }
         } catch (e: ClientRequestException) {
