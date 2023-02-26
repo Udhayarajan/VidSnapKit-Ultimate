@@ -71,15 +71,19 @@ class Instagram internal constructor(url: String) : Extractor(url) {
     private suspend fun getUserID(): String? = cookies?.let { _ ->
 
         getUserName()?.let {
-            val response = HttpRequest(String.format(PROFILE_API, it), headers).getResponse()
-            if (!isAccessible(JSONObject(response))) {
+            val response = HttpRequest(String.format(PROFILE_API, it), headers).getResponse()?.toJSONObject() ?: run {
+                clientRequestError()
+                return null
+            }
+            if (response.toString() == "{}") {
+                clientRequestError()
+                return null
+            }
+            if (!isAccessible(response)) {
                 onProgress(Result.Failed(Error.InvalidCookies))
                 return null
             }
-            return response?.toJSONObject()?.getJSONObject("graphql")?.getJSONObject("user")?.getString("id") ?: run {
-                clientRequestError()
-                null
-            }
+            return response.getJSONObject("graphql")?.getJSONObject("user")?.getString("id")
         } ?: run {
             onProgress(Result.Failed(Error.InvalidUrl))
         }
