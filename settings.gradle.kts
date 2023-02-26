@@ -32,5 +32,3 @@ pluginManagement {
 }
 rootProject.name = "VidSnapKit"
 includeBuild("convention-plugins")
-include("java-json-lib")
-include(":sampleapk")
