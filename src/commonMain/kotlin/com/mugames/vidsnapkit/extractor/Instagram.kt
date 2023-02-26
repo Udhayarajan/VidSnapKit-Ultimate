@@ -141,7 +141,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                         HttpRequest(
                             url,
                             getHeadersWithUserAgent()
-                        ).getResponse()
+                        ).getResponse().toString()
                     ).getJSONArray("items")
                 )
             } catch (e: JSONException) {
