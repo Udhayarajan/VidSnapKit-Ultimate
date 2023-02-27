@@ -151,7 +151,7 @@ class Facebook internal constructor(url: String) : Extractor(url) {
                 return
             }
             if (webPage.contains("You must log in to continue")) {
-                onProgress(Result.Failed(Error.LoginInRequired))
+                onProgress(Result.Failed(Error.LoginRequired))
                 return
             }
         }

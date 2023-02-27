@@ -89,7 +89,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         }
         return null
     } ?: run {
-        onProgress(Result.Failed(Error.LoginInRequired))
+        onProgress(Result.Failed(Error.LoginRequired))
         null
     }
 
@@ -145,7 +145,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                     ).getJSONArray("items")
                 )
             } catch (e: JSONException) {
-                onProgress(Result.Failed(Error.LoginInRequired))
+                onProgress(Result.Failed(Error.LoginRequired))
             }
         }
 
@@ -178,7 +178,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                     ?.getNullableJSONArray(objectName) != null
             }
             if (isObjectPresentInEntryData("LoginAndSignupPage")) {
-                onProgress(Result.Failed(Error.LoginInRequired))
+                onProgress(Result.Failed(Error.LoginRequired))
             } else if (isObjectPresentInEntryData("HttpErrorPage")) {
                 onProgress(Result.Failed(Error.Instagram404Error(cookies != null)))
             } else {
@@ -278,7 +278,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         } else null
 
         if (jsonString.isNullOrEmpty()) {
-            onProgress(Result.Failed(Error.LoginInRequired))
+            onProgress(Result.Failed(Error.LoginRequired))
             return
         }
         val jsonObject = JSONObject(jsonString)

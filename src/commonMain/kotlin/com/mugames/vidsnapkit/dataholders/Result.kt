@@ -69,7 +69,7 @@ sealed class Error(val message: String? = null, val e: Exception? = null) {
      * If you use Instagram downloader then you get this error
      * then you need to pass valid Instagram cookies before start() call
      */
-    object LoginInRequired : Error()
+    object LoginRequired : Error()
 
     /**
      * Called when cookies are invalid
