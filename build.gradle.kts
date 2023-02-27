@@ -1,5 +1,5 @@
 import android.annotation.SuppressLint
-import java.util.Properties
+import java.util.*
 
 /*
  *    Copyright (c) 2023 Udhayarajan M
@@ -106,6 +106,7 @@ android {
         isAbortOnError = false
     }
 }
+
 dependencies {
     implementation("androidx.core:core-ktx:1.9.0")
     testImplementation(project(mapOf("path" to ":")))
@@ -114,7 +115,12 @@ dependencies {
     androidTestImplementation(project(mapOf("path" to ":")))
     androidTestImplementation(project(mapOf("path" to ":")))
 }
-nexusPublishing{
+
+tasks.dokkaHtml.configure {
+    outputDirectory.set(file("$projectDir/docs"))
+}
+
+nexusPublishing {
 // Stub secrets to let the project sync and build without the publication values set up
     val ext = rootProject.ext
     ext["signing.keyId"] = null
