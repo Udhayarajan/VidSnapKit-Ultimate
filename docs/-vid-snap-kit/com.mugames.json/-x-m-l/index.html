@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>XML</title>
+    <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer="defer"></script>
+</head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+            <a href="../../../index.html">
+                    <span>VidSnapKit</span>
+            </a>
+    </div>
+    <div>
+3.3.4    </div>
+    <div class="pull-right d-flex">
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":dokkaHtml/androidMain">android</button>
+        </div>
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" id="content" pageIds="VidSnapKit::com.mugames.json/XML///PointingToDeclaration//1837590656">
+  <div class="breadcrumbs"><a href="../../../index.html">VidSnapKit</a><span class="delimiter">/</span><a href="../index.html">com.mugames.json</a><span class="delimiter">/</span><span class="current">XML</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span><span>XML</span></span></h1>
+    <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+      <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain" data-active="" data-toggle=":dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/androidMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">class </span><a href="index.html">XML</a></div><p class="paragraph">This provides static methods to convert an XML text into a JSONObject, and to covert a JSONObject into an XML text.</p><span class="kdoc-tag"><h4 class="">Author</h4><p class="paragraph">JSON.org</p></span></div>    </div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Functions">Functions</button><button class="section-tab" data-togglable="Properties">Properties</button></div>
+    <div class="tabs-section-body">
+      <h2 class="">Functions</h2>
+      <div class="table" data-togglable="Functions"><a data-name="-1769786470%2FFunctions%2F1837590656" anchor-label="escape" id="-1769786470%2FFunctions%2F1837590656" data-filterable-set=":dokkaHtml/androidMain"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="escape.html"><span><span>escape</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1769786470%2FFunctions%2F1837590656"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                  <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain" data-active="" data-toggle=":dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/androidMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="escape.html"><span class="token function">escape</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">string<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a></div><div class="brief ">Replace special characters with XML escapes: <div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">
+&amp;amp; (ampersand) is replaced by &amp;amp;amp;
+&amp;lt; (less than) is replaced by &amp;amp;lt;
+&amp;gt; (greater than) is replaced by &amp;amp;gt;
+&amp;quot; (double quote) is replaced by &amp;amp;quot;
+&amp;apos; (single quote / apostrophe) is replaced by &amp;amp;apos;
+</code></pre><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-436093264%2FFunctions%2F1837590656" anchor-label="noSpace" id="-436093264%2FFunctions%2F1837590656" data-filterable-set=":dokkaHtml/androidMain"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="no-space.html"><span>no</span><wbr></wbr><span><span>Space</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-436093264%2FFunctions%2F1837590656"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                  <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain" data-active="" data-toggle=":dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/androidMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="no-space.html"><span class="token function">noSpace</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">string<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief ">Throw an exception if the string contains whitespace.</div></div>                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-511789607%2FFunctions%2F1837590656" anchor-label="stringToValue" id="-511789607%2FFunctions%2F1837590656" data-filterable-set=":dokkaHtml/androidMain"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="string-to-value.html"><span>string</span><wbr></wbr><span>To</span><wbr></wbr><span><span>Value</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-511789607%2FFunctions%2F1837590656"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                  <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain" data-active="" data-toggle=":dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/androidMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="string-to-value.html"><span class="token function">stringToValue</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">string<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a></div><div class="brief ">This method is the same as stringToValue.</div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="string-to-value.html"><span class="token function">stringToValue</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">string<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">typeConverter<span class="token operator">: </span><a href="../-x-m-l-xsi-type-converter/index.html">XMLXsiTypeConverter</a><span class="token operator">&lt;</span><span class="token keyword">out </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a></div><div class="brief ">This method tries to convert the given string value to the target object</div></div>                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1480740000%2FFunctions%2F1837590656" anchor-label="toJSONObject" id="1480740000%2FFunctions%2F1837590656" data-filterable-set=":dokkaHtml/androidMain"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="to-j-s-o-n-object.html"><span>to</span><wbr></wbr><span><span>JSONObject</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1480740000%2FFunctions%2F1837590656"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                  <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain" data-active="" data-toggle=":dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/androidMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="to-j-s-o-n-object.html"><span class="token function">toJSONObject</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">reader<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/io/Reader.html">Reader</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/org/json/JSONObject.html">JSONObject</a></div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="to-j-s-o-n-object.html"><span class="token function">toJSONObject</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">reader<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/io/Reader.html">Reader</a><span class="token punctuation">, </span></span><span class="parameter ">keepStrings<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/org/json/JSONObject.html">JSONObject</a></div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="to-j-s-o-n-object.html"><span class="token function">toJSONObject</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">reader<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/io/Reader.html">Reader</a><span class="token punctuation">, </span></span><span class="parameter ">config<span class="token operator">: </span><a href="../-x-m-l-parser-configuration/index.html">XMLParserConfiguration</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/org/json/JSONObject.html">JSONObject</a></div><div class="brief ">Convert a well-formed (but not necessarily valid) XML into a JSONObject.</div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="to-j-s-o-n-object.html"><span class="token function">toJSONObject</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">string<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/org/json/JSONObject.html">JSONObject</a></div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="to-j-s-o-n-object.html"><span class="token function">toJSONObject</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">string<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">keepStrings<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/org/json/JSONObject.html">JSONObject</a></div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="to-j-s-o-n-object.html"><span class="token function">toJSONObject</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">string<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">config<span class="token operator">: </span><a href="../-x-m-l-parser-configuration/index.html">XMLParserConfiguration</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/org/json/JSONObject.html">JSONObject</a></div><div class="brief ">Convert a well-formed (but not necessarily valid) XML string into a JSONObject.</div></div>                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-391426366%2FFunctions%2F1837590656" anchor-label="toString" id="-391426366%2FFunctions%2F1837590656" data-filterable-set=":dokkaHtml/androidMain"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="to-string.html"><span>to</span><wbr></wbr><span><span>String</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-391426366%2FFunctions%2F1837590656"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                  <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain" data-active="" data-toggle=":dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/androidMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="to-string.html"><span class="token function">toString</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">object<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a></div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="to-string.html"><span class="token function">toString</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">object<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token punctuation">, </span></span><span class="parameter ">tagName<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a></div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="to-string.html"><span class="token function">toString</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">object<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token punctuation">, </span></span><span class="parameter ">tagName<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">config<span class="token operator">: </span><a href="../-x-m-l-parser-configuration/index.html">XMLParserConfiguration</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a></div><div class="brief ">Convert a JSONObject into a well-formed, element-normal XML string.</div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="to-string.html"><span class="token function">toString</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">object<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token punctuation">, </span></span><span class="parameter ">indentFactor<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a></div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="to-string.html"><span class="token function">toString</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">object<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token punctuation">, </span></span><span class="parameter ">tagName<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">indentFactor<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a></div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="to-string.html"><span class="token function">toString</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">object<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token punctuation">, </span></span><span class="parameter ">tagName<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">config<span class="token operator">: </span><a href="../-x-m-l-parser-configuration/index.html">XMLParserConfiguration</a><span class="token punctuation">, </span></span><span class="parameter ">indentFactor<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a></div><div class="brief ">Convert a JSONObject into a well-formed, pretty printed element-normal XML string.</div></div>                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-843686111%2FFunctions%2F1837590656" anchor-label="unescape" id="-843686111%2FFunctions%2F1837590656" data-filterable-set=":dokkaHtml/androidMain"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="unescape.html"><span><span>unescape</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-843686111%2FFunctions%2F1837590656"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                  <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain" data-active="" data-toggle=":dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/androidMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="unescape.html"><span class="token function">unescape</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">string<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a></div><div class="brief ">Removes XML escapes from the string.</div></div>                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Properties</h2>
+      <div class="table" data-togglable="Properties"><a data-name="-974838730%2FProperties%2F1837590656" anchor-label="AMP" id="-974838730%2FProperties%2F1837590656" data-filterable-set=":dokkaHtml/androidMain"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-a-m-p.html"><span><span>AMP</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-974838730%2FProperties%2F1837590656"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted" data-togglable="Properties">
+                  <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain" data-active="" data-toggle=":dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/androidMain"><a data-name="-974838730%2FProperties%2F1837590656" anchor-label="AMP" id="-974838730%2FProperties%2F1837590656" data-filterable-set=":dokkaHtml/androidMain"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-a-m-p.html">AMP</a><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/Character.html">Character</a></div><div class="brief "><a data-name="-974838730%2FProperties%2F1837590656" anchor-label="AMP" id="-974838730%2FProperties%2F1837590656" data-filterable-set=":dokkaHtml/androidMain"></a>The Character '&'.</div></div>                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1307432243%2FProperties%2F1837590656" anchor-label="APOS" id="-1307432243%2FProperties%2F1837590656" data-filterable-set=":dokkaHtml/androidMain"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-a-p-o-s.html"><span><span>APOS</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1307432243%2FProperties%2F1837590656"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted" data-togglable="Properties">
+                  <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain" data-active="" data-toggle=":dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/androidMain"><a data-name="-1307432243%2FProperties%2F1837590656" anchor-label="APOS" id="-1307432243%2FProperties%2F1837590656" data-filterable-set=":dokkaHtml/androidMain"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-a-p-o-s.html">APOS</a><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/Character.html">Character</a></div><div class="brief "><a data-name="-1307432243%2FProperties%2F1837590656" anchor-label="APOS" id="-1307432243%2FProperties%2F1837590656" data-filterable-set=":dokkaHtml/androidMain"></a>The Character '''.</div></div>                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1872865928%2FProperties%2F1837590656" anchor-label="BANG" id="1872865928%2FProperties%2F1837590656" data-filterable-set=":dokkaHtml/androidMain"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-b-a-n-g.html"><span><span>BANG</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1872865928%2FProperties%2F1837590656"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted" data-togglable="Properties">
+                  <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain" data-active="" data-toggle=":dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/androidMain"><a data-name="1872865928%2FProperties%2F1837590656" anchor-label="BANG" id="1872865928%2FProperties%2F1837590656" data-filterable-set=":dokkaHtml/androidMain"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-b-a-n-g.html">BANG</a><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/Character.html">Character</a></div><div class="brief "><a data-name="1872865928%2FProperties%2F1837590656" anchor-label="BANG" id="1872865928%2FProperties%2F1837590656" data-filterable-set=":dokkaHtml/androidMain"></a>The Character '!'.</div></div>                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-371380396%2FProperties%2F1837590656" anchor-label="EQ" id="-371380396%2FProperties%2F1837590656" data-filterable-set=":dokkaHtml/androidMain"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-e-q.html"><span><span>EQ</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-371380396%2FProperties%2F1837590656"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted" data-togglable="Properties">
+                  <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain" data-active="" data-toggle=":dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/androidMain"><a data-name="-371380396%2FProperties%2F1837590656" anchor-label="EQ" id="-371380396%2FProperties%2F1837590656" data-filterable-set=":dokkaHtml/androidMain"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-e-q.html">EQ</a><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/Character.html">Character</a></div><div class="brief "><a data-name="-371380396%2FProperties%2F1837590656" anchor-label="EQ" id="-371380396%2FProperties%2F1837590656" data-filterable-set=":dokkaHtml/androidMain"></a>The Character '='.</div></div>                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1644907059%2FProperties%2F1837590656" anchor-label="GT" id="1644907059%2FProperties%2F1837590656" data-filterable-set=":dokkaHtml/androidMain"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-g-t.html"><span><span>GT</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1644907059%2FProperties%2F1837590656"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted" data-togglable="Properties">
+                  <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain" data-active="" data-toggle=":dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/androidMain"><a data-name="1644907059%2FProperties%2F1837590656" anchor-label="GT" id="1644907059%2FProperties%2F1837590656" data-filterable-set=":dokkaHtml/androidMain"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-g-t.html">GT</a><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/Character.html">Character</a></div><div class="brief "><a data-name="1644907059%2FProperties%2F1837590656" anchor-label="GT" id="1644907059%2FProperties%2F1837590656" data-filterable-set=":dokkaHtml/androidMain"></a>The Character <div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">'&gt;'. </code></pre><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-2136957448%2FProperties%2F1837590656" anchor-label="LT" id="-2136957448%2FProperties%2F1837590656" data-filterable-set=":dokkaHtml/androidMain"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-l-t.html"><span><span>LT</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2136957448%2FProperties%2F1837590656"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted" data-togglable="Properties">
+                  <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain" data-active="" data-toggle=":dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/androidMain"><a data-name="-2136957448%2FProperties%2F1837590656" anchor-label="LT" id="-2136957448%2FProperties%2F1837590656" data-filterable-set=":dokkaHtml/androidMain"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-l-t.html">LT</a><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/Character.html">Character</a></div><div class="brief "><a data-name="-2136957448%2FProperties%2F1837590656" anchor-label="LT" id="-2136957448%2FProperties%2F1837590656" data-filterable-set=":dokkaHtml/androidMain"></a>The Character '<'.</div></div>                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="745909777%2FProperties%2F1837590656" anchor-label="NULL_ATTR" id="745909777%2FProperties%2F1837590656" data-filterable-set=":dokkaHtml/androidMain"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-n-u-l-l_-a-t-t-r.html"><span><span>NULL_ATTR</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="745909777%2FProperties%2F1837590656"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted" data-togglable="Properties">
+                  <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain" data-active="" data-toggle=":dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/androidMain"><a data-name="745909777%2FProperties%2F1837590656" anchor-label="NULL_ATTR" id="745909777%2FProperties%2F1837590656" data-filterable-set=":dokkaHtml/androidMain"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-n-u-l-l_-a-t-t-r.html">NULL_ATTR</a><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a><span class="token operator"> = </span><span class="token string">&quot;xsi:nil&quot;</span></div><div class="brief "><a data-name="745909777%2FProperties%2F1837590656" anchor-label="NULL_ATTR" id="745909777%2FProperties%2F1837590656" data-filterable-set=":dokkaHtml/androidMain"></a>Null attribute name</div></div>                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="627911576%2FProperties%2F1837590656" anchor-label="QUEST" id="627911576%2FProperties%2F1837590656" data-filterable-set=":dokkaHtml/androidMain"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-q-u-e-s-t.html"><span><span>QUEST</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="627911576%2FProperties%2F1837590656"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted" data-togglable="Properties">
+                  <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain" data-active="" data-toggle=":dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/androidMain"><a data-name="627911576%2FProperties%2F1837590656" anchor-label="QUEST" id="627911576%2FProperties%2F1837590656" data-filterable-set=":dokkaHtml/androidMain"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-q-u-e-s-t.html">QUEST</a><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/Character.html">Character</a></div><div class="brief "><a data-name="627911576%2FProperties%2F1837590656" anchor-label="QUEST" id="627911576%2FProperties%2F1837590656" data-filterable-set=":dokkaHtml/androidMain"></a>The Character '?'.</div></div>                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-50402601%2FProperties%2F1837590656" anchor-label="QUOT" id="-50402601%2FProperties%2F1837590656" data-filterable-set=":dokkaHtml/androidMain"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-q-u-o-t.html"><span><span>QUOT</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-50402601%2FProperties%2F1837590656"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted" data-togglable="Properties">
+                  <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain" data-active="" data-toggle=":dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/androidMain"><a data-name="-50402601%2FProperties%2F1837590656" anchor-label="QUOT" id="-50402601%2FProperties%2F1837590656" data-filterable-set=":dokkaHtml/androidMain"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-q-u-o-t.html">QUOT</a><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/Character.html">Character</a></div><div class="brief "><a data-name="-50402601%2FProperties%2F1837590656" anchor-label="QUOT" id="-50402601%2FProperties%2F1837590656" data-filterable-set=":dokkaHtml/androidMain"></a>The Character '&quot;'.</div></div>                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-645695651%2FProperties%2F1837590656" anchor-label="SLASH" id="-645695651%2FProperties%2F1837590656" data-filterable-set=":dokkaHtml/androidMain"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-s-l-a-s-h.html"><span><span>SLASH</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-645695651%2FProperties%2F1837590656"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted" data-togglable="Properties">
+                  <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain" data-active="" data-toggle=":dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/androidMain"><a data-name="-645695651%2FProperties%2F1837590656" anchor-label="SLASH" id="-645695651%2FProperties%2F1837590656" data-filterable-set=":dokkaHtml/androidMain"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-s-l-a-s-h.html">SLASH</a><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/Character.html">Character</a></div><div class="brief "><a data-name="-645695651%2FProperties%2F1837590656" anchor-label="SLASH" id="-645695651%2FProperties%2F1837590656" data-filterable-set=":dokkaHtml/androidMain"></a>The Character '/'.</div></div>                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="553041028%2FProperties%2F1837590656" anchor-label="TYPE_ATTR" id="553041028%2FProperties%2F1837590656" data-filterable-set=":dokkaHtml/androidMain"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-t-y-p-e_-a-t-t-r.html"><span><span>TYPE_ATTR</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="553041028%2FProperties%2F1837590656"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted" data-togglable="Properties">
+                  <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain" data-active="" data-toggle=":dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/androidMain"><a data-name="553041028%2FProperties%2F1837590656" anchor-label="TYPE_ATTR" id="553041028%2FProperties%2F1837590656" data-filterable-set=":dokkaHtml/androidMain"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-t-y-p-e_-a-t-t-r.html">TYPE_ATTR</a><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a><span class="token operator"> = </span><span class="token string">&quot;xsi:type&quot;</span></div></div>                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2023 Copyright</span><span
+                class="pull-right"><span>Generated by </span><a
+                href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+    </div>
+</div>
+</body>
+</html>
