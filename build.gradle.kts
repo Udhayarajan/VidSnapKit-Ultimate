@@ -22,6 +22,7 @@ plugins {
     kotlin("multiplatform") version "1.7.22"
     id("convention.publication")
     id("com.android.library")
+    id("org.jetbrains.dokka") version "1.7.20"
     id("io.github.gradle-nexus.publish-plugin") version "1.2.0"
 }
 
@@ -35,6 +36,9 @@ repositories {
     mavenCentral()
 }
 
+subprojects {
+    apply(plugin = "org.jetbrains.dokka")
+}
 
 kotlin {
     jvm {
