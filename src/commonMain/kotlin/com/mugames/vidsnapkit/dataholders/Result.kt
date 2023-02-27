@@ -27,8 +27,23 @@ package com.mugames.vidsnapkit.dataholders
  *
  */
 sealed class Result {
+    /**
+     * It's instance will be returned by Extractor.start() If everything went correct
+     * @param formats contains details of given post url
+     */
     data class Success(val formats: List<Formats>) : Result()
+
+    /**
+     * When the extraction progress goes on
+     * @param progressState current state
+     */
+    @Deprecated("This class is found to be useless after a few year")
     data class Progress(val progressState: ProgressState) : Result()
+
+    /**
+     * When error occurs while extraction process
+     * @param error tells what is actually went wrong
+     */
     data class Failed(val error: Error) : Result()
 }
 
@@ -40,17 +55,19 @@ sealed class Result {
  */
 sealed class Error(val message: String? = null, val e: Exception? = null) {
     /**
-     * Called when Internet connection is not available
-     */
-    object NetworkError : Error()
-
-    /**
      * Called When Url is empty
      */
     object InvalidUrl : Error()
 
     /**
      * Called when cookies are null but required by website
+     *
+     * Sometimes features such as private video downloader requires authentication from the site
+     * passing cookies before call to Extractor.start() solves it.
+     *
+     * For eg:
+     * If you use Instagram downloader then you get this error
+     * then you need to pass valid Instagram cookies before start() call
      */
     object LoginInRequired : Error()
 
@@ -65,7 +82,7 @@ sealed class Error(val message: String? = null, val e: Exception? = null) {
     class InternalError(message: String, e: Exception? = null) : Error(message, e)
 
     /**
-     * These are minor error happens video not found etc
+     * These are minor error happens in cases such as post not found
      */
     class NonFatalError(message: String) : Error(message)
 
