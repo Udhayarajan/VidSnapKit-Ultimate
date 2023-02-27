@@ -37,7 +37,7 @@ import java.util.regex.Pattern
 class Facebook internal constructor(url: String) : Extractor(url) {
     private var triedWithForceEng = false
 
-    private val formats = Formats()
+    private val localFormats = Formats()
 
 
     private var userAgent = """
@@ -47,8 +47,8 @@ class Facebook internal constructor(url: String) : Extractor(url) {
     """.trimIndent().replace("\n", "")
 
     override suspend fun analyze() {
-        formats.url = inputUrl
-        formats.src = "FaceBook"
+        localFormats.url = inputUrl
+        localFormats.src = "FaceBook"
         fun findVideoId(): String? {
             var pattern =
                 Pattern.compile("(?:https?://(?:[\\w-]+\\.)?(?:facebook\\.com|facebookcorewwwi\\.onion)/(?:[^#]*?#!/)?(?:(?:video/video\\.php|photo\\.php|video\\.php|video/embed|story\\.php|watch(?:/live)?/?)\\?(?:.*?)(?:v|video_id|story_fbid)=|[^/]+/videos/(?:[^/]+/)?|[^/]+/posts/|groups/[^/]+/permalink/|watchparty/)|facebook:)([0-9]+)")
@@ -143,11 +143,8 @@ class Facebook internal constructor(url: String) : Extractor(url) {
             if (matcher.find()) {
                 onProgress(
                     Result.Failed(
-                        Error.InternalError(
-
-                            "This video unavailable. FB says : " + matcher.group(
-                                1
-                            )
+                        Error.NonFatalError(
+                            "This video unavailable. FB says : ${matcher.group(1)}"
                         )
                     )
                 )
@@ -164,7 +161,7 @@ class Facebook internal constructor(url: String) : Extractor(url) {
                 for (regex in regexes) {
                     m = Pattern.compile(regex.toString()).matcher(webPage)
                     if (m.find()) {
-                        formats.imageData.add(
+                        localFormats.imageData.add(
                             ImageResource(
                                 resolution = Util.getResolutionFromUrl(
                                     m.group(
@@ -184,20 +181,20 @@ class Facebook internal constructor(url: String) : Extractor(url) {
                     m = Pattern.compile(regex.toString())
                         .matcher(webPage)
                     if (m.find()) {
-                        formats.title = decodeHTML(m.group(1)!!).toString()
+                        localFormats.title = decodeHTML(m.group(1)!!).toString()
                         return
                     }
-                    formats.title = default
+                    localFormats.title = default
                 }
             }
 
-            if (formats.imageData.isEmpty()) extractThumbnail(
+            if (localFormats.imageData.isEmpty()) extractThumbnail(
                 Regex("\"thumbnailImage\":\\{\"uri\":\"(.*?)\"\\}"),
                 Regex("\"thumbnailUrl\":\"(.*?)\""),
                 Regex("\"twitter:image\"\\s*?content\\s*?=\\s*?\"(.*?)\"")
             )
 
-            if (formats.title.isEmpty() || formats.title == "null") {
+            if (localFormats.title.isEmpty() || localFormats.title == "null") {
                 extractTitle(
                     Regex("(?:true|false),\"name\":\"(.*?)\",\"savable"),
                     Regex("<[Tt]itle id=\"pageTitle\">(.*?) \\| Facebook<\\/title>"),
@@ -205,7 +202,7 @@ class Facebook internal constructor(url: String) : Extractor(url) {
                     default = "Facebook_Video"
                 )
             }
-            videoFormats.add(formats)
+            videoFormats.add(localFormats)
             finalize()
         } ?: apply {
             if (!triedWithForceEng) extractForceEng() else onProgress(
@@ -311,9 +308,9 @@ class Facebook internal constructor(url: String) : Extractor(url) {
                         parseAttachment(attachments.getJSONObject(j), "media")
                     }
                 }
-                if (formats.videoData.isEmpty()) parseGraphqlVideo(video)
+                if (localFormats.videoData.isEmpty()) parseGraphqlVideo(video)
             }
-            if (formats.videoData.isNotEmpty()) return SUCCESS
+            if (localFormats.videoData.isNotEmpty()) return SUCCESS
         }
         return null
     }
@@ -359,8 +356,8 @@ class Facebook internal constructor(url: String) : Extractor(url) {
                 .getJSONObject("image")
                 .getString("uri")
         val thumbnailRes = Util.getResolutionFromUrl(thumbnailUrl)
-        formats.imageData.add(ImageResource(resolution = thumbnailRes, url = thumbnailUrl))
-        formats.title = media.getNullableString("name")
+        localFormats.imageData.add(ImageResource(resolution = thumbnailRes, url = thumbnailUrl))
+        localFormats.title = media.getNullableString("name")
             ?: media.getNullableJSONObject("savable_description")
                 ?.getNullableString("text")
                     ?: "FaceBook_Video"
@@ -378,7 +375,7 @@ class Facebook internal constructor(url: String) : Extractor(url) {
         for (suffix in arrayOf("", "_quality_hd")) {
             val playableUrl = media.getNullableString("playable_url$suffix")
             if (playableUrl == null || playableUrl == "null") continue
-            formats.videoData.add(
+            localFormats.videoData.add(
                 VideoResource(
                     playableUrl,
                     MimeType.VIDEO_MP4,
@@ -397,49 +394,58 @@ class Facebook internal constructor(url: String) : Extractor(url) {
     }
 
     private fun extractFromDash(xml: String) {
+        fun getRepresentationArray(adaptionSet: JSONArray, index: Int) = with(adaptionSet.getJSONObject(index)) {
+            "Representation".let { key ->
+                getNullableJSONArray(key) ?: run {
+                    JSONArray().apply {
+                        put(getJSONObject(key))
+                    }
+                }
+            }
+        }
+
         var xmlDecoded = xml.replace("x3C".toRegex(), "<")
         xmlDecoded = xmlDecoded.replace("\\\\\u003C".toRegex(), "<")
         val adaptionSet: JSONArray =
             XMLParserFactory.createParserFactory().xmlToJsonObject(xmlDecoded).getJSONObject("MPD")
                 .getJSONObject("Period")
                 .getJSONArray("AdaptationSet")
-        val videos = adaptionSet.getJSONObject(0).getJSONArray("Representation")
-        val audios = adaptionSet.getJSONObject(1)
-        val audioUrl: String
-        var audioMime: String?
-        var res: String
-        var pre = ""
-        val audioRep = try {
-            audios.getJSONObject("Representation")
-        } catch (e: JSONException) {
-            audios.getJSONArray("Representation").getJSONObject(0)
-        }
-        audioUrl = audioRep.getString("BaseURL")
-        audioMime = audioRep.getNullableString("_mimeType")
-        if (audioMime == null) audioMime = audioRep.getString("mimeType") else pre = "_"
-        for (i in 0 until videos.length()) {
-            val video = videos.getJSONObject(i)
-            val videoUrl = video.getString("BaseURL")
-            res = try {
-                video.getString(pre + "FBQualityLabel") + "(" + video.getString(pre + "FBQualityClass")
-                    .uppercase() + ")"
-            } catch (e: JSONException) {
-                video[pre + "width"].toString() + "x" + video[pre + "height"]
-            }
-            val videoMime = video.getString(pre + "mimeType")
-            formats.videoData.add(
-                VideoResource(
-                    videoUrl,
-                    videoMime,
-                    res,
-                    hasAudio = false
+        val videos = getRepresentationArray(adaptionSet, 0)
+        val audios = getRepresentationArray(adaptionSet, 1)
+
+        fun safeGet(jsonObject: JSONObject, key: String) = jsonObject.getNullable("_$key") ?: jsonObject.getNullable(key) ?: "--NA--"
+
+        fun addVideos() {
+            for (i in 0 until videos.length()) {
+                val video = videos.getJSONObject(i)
+                val videoUrl = video.getString("BaseURL")
+                val res: String = try {
+                    "${safeGet(video, "FBQualityLabel")}(${safeGet(video, "FBQualityClass").uppercase()})"
+                } catch (e: JSONException) {
+                    "${safeGet(video, "width")}x${safeGet(video, "height")}"
+                }
+                val videoMime = safeGet(video, "mimeType")
+                localFormats.videoData.add(
+                    VideoResource(
+                        videoUrl,
+                        videoMime,
+                        res,
+                        hasAudio = false
+                    )
                 )
-            )
-            val audio = audioMime?.let {
-                AudioResource(audioUrl, it)
-            } ?: AudioResource(audioUrl, MimeType.AUDIO_MP4)
-            formats.audioData.add(audio)
+            }
         }
+
+        fun addAudios() {
+            for (i in 0 until audios.length()) {
+                val audio = audios.getJSONObject(i)
+                val audioUrl = safeGet(audio, "BaseURL")
+                val audioMime = safeGet(audio, "mimeType")
+                localFormats.audioData.add(AudioResource(audioUrl, audioMime))
+            }
+        }
+        addAudios()
+        addVideos()
     }
 
     private fun grabFromJSModsInstance(jsData: JSONObject): Any? {
@@ -463,7 +469,7 @@ class Facebook internal constructor(url: String) : Extractor(url) {
                 for (s in arrayOf("hd", "sd")) {
                     val url = videoData.getNullableString("${s}_src")
                     if (url == null || url == "null") continue
-                    formats.videoData.add(
+                    localFormats.videoData.add(
                         VideoResource(
                             url,
                             MimeType.VIDEO_MP4,
