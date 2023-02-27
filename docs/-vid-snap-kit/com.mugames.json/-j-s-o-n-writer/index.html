@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>JSONWriter</title>
+    <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer="defer"></script>
+</head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+            <a href="../../../index.html">
+                    <span>VidSnapKit</span>
+            </a>
+    </div>
+    <div>
+3.3.4    </div>
+    <div class="pull-right d-flex">
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":dokkaHtml/androidMain">android</button>
+        </div>
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" id="content" pageIds="VidSnapKit::com.mugames.json/JSONWriter///PointingToDeclaration//1837590656">
+  <div class="breadcrumbs"><a href="../../../index.html">VidSnapKit</a><span class="delimiter">/</span><a href="../index.html">com.mugames.json</a><span class="delimiter">/</span><span class="current">JSONWriter</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span><span>JSONWriter</span></span></h1>
+    <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+      <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain" data-active="" data-toggle=":dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/androidMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">class </span><a href="index.html">JSONWriter</a></div><p class="paragraph">JSONWriter provides a quick and convenient way of producing JSON text. The texts produced strictly conform to JSON syntax rules. No whitespace is added, so the results are ready for transmission or storage. Each instance of JSONWriter can produce one JSON text. </p><p class="paragraph"> A JSONWriter instance provides a <code class="lang-kotlin">value</code> method for appending values to the text, and a <code class="lang-kotlin">key</code> method for adding keys before values in objects. There are <code class="lang-kotlin">array</code> and <code class="lang-kotlin">endArray</code> methods that make and bound array values, and <code class="lang-kotlin">object</code> and <code class="lang-kotlin">endObject</code> methods which make and bound object values. All of these methods return the JSONWriter instance, permitting a cascade style. For example, </p><div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">new JSONWriter(myWriter)
+    .object()
+        .key(&quot;JSON&quot;)
+        .value(&quot;Hello, World!&quot;)
+    .endObject();</code></pre><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div> which writes <div class="sample-container"><pre><code class="block lang-kotlin" theme="idea">{&quot;JSON&quot;:&quot;Hello, World!&quot;}</code></pre><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph"> The first method called must be <code class="lang-kotlin">array</code> or <code class="lang-kotlin">object</code>. There are no methods for adding commas or colons. JSONWriter adds them for you. Objects and arrays can be nested up to 200 levels deep. </p><p class="paragraph"> This can sometimes be easier than using a JSONObject to build a string.</p><span class="kdoc-tag"><h4 class="">Author</h4><p class="paragraph">JSON.org</p></span></div>    </div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Constructors">Constructors</button><button class="section-tab" data-togglable="Functions">Functions</button></div>
+    <div class="tabs-section-body">
+      <h2 class="tabbedcontent">Constructors</h2>
+      <div class="table" data-togglable="Constructors"><a data-name="-1918755829%2FConstructors%2F1837590656" anchor-label="JSONWriter" id="-1918755829%2FConstructors%2F1837590656" data-filterable-set=":dokkaHtml/androidMain"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain">
+          <div class="main-subrow keyValue TabbedContent">
+            <div class=""><span class="inline-flex">
+                <div><a href="-j-s-o-n-writer.html"><span><span>JSONWriter</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1918755829%2FConstructors%2F1837590656"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                  <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain" data-active="" data-toggle=":dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/androidMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="-j-s-o-n-writer.html"><span class="token function">JSONWriter</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">w<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/Appendable.html">Appendable</a></span></span><span class="token punctuation">)</span></div><div class="brief ">Make a fresh JSONWriter.</div></div>                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="">Functions</h2>
+      <div class="table" data-togglable="Functions"><a data-name="-1029651533%2FFunctions%2F1837590656" anchor-label="array" id="-1029651533%2FFunctions%2F1837590656" data-filterable-set=":dokkaHtml/androidMain"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="array.html"><span><span>array</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1029651533%2FFunctions%2F1837590656"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                  <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain" data-active="" data-toggle=":dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/androidMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="array.html"><span class="token function">array</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">JSONWriter</a></div><div class="brief ">Begin appending a new array.</div></div>                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1097257808%2FFunctions%2F1837590656" anchor-label="endArray" id="-1097257808%2FFunctions%2F1837590656" data-filterable-set=":dokkaHtml/androidMain"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="end-array.html"><span>end</span><wbr></wbr><span><span>Array</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1097257808%2FFunctions%2F1837590656"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                  <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain" data-active="" data-toggle=":dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/androidMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="end-array.html"><span class="token function">endArray</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">JSONWriter</a></div><div class="brief ">End an array.</div></div>                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="427730354%2FFunctions%2F1837590656" anchor-label="endObject" id="427730354%2FFunctions%2F1837590656" data-filterable-set=":dokkaHtml/androidMain"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="end-object.html"><span>end</span><wbr></wbr><span><span>Object</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="427730354%2FFunctions%2F1837590656"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                  <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain" data-active="" data-toggle=":dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/androidMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="end-object.html"><span class="token function">endObject</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">JSONWriter</a></div><div class="brief ">End an object.</div></div>                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="94042664%2FFunctions%2F1837590656" anchor-label="key" id="94042664%2FFunctions%2F1837590656" data-filterable-set=":dokkaHtml/androidMain"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="key.html"><span><span>key</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="94042664%2FFunctions%2F1837590656"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                  <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain" data-active="" data-toggle=":dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/androidMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="key.html"><span class="token function">key</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">string<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">JSONWriter</a></div><div class="brief ">Append a key.</div></div>                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-1771442417%2FFunctions%2F1837590656" anchor-label="object" id="-1771442417%2FFunctions%2F1837590656" data-filterable-set=":dokkaHtml/androidMain"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="object.html"><span><span>object</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1771442417%2FFunctions%2F1837590656"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                  <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain" data-active="" data-toggle=":dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/androidMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="object.html"><span class="token function">object</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">JSONWriter</a></div><div class="brief ">Begin appending a new object.</div></div>                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1814178732%2FFunctions%2F1837590656" anchor-label="value" id="1814178732%2FFunctions%2F1837590656" data-filterable-set=":dokkaHtml/androidMain"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="value.html"><span><span>value</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1814178732%2FFunctions%2F1837590656"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                  <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain" data-active="" data-toggle=":dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/androidMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="value.html"><span class="token function">value</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">b<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">JSONWriter</a></div><div class="brief ">Append either the value <code class="lang-kotlin">true</code> or the value <code class="lang-kotlin">false</code>.</div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="value.html"><span class="token function">value</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">d<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-double/index.html">Double</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">JSONWriter</a></div><div class="brief ">Append a double value.</div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="value.html"><span class="token function">value</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">object<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">JSONWriter</a></div><div class="brief ">Append an object value.</div><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="value.html"><span class="token function">value</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">l<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-long/index.html">Long</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">JSONWriter</a></div><div class="brief ">Append a long value.</div></div>                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1841218972%2FFunctions%2F1837590656" anchor-label="valueToString" id="1841218972%2FFunctions%2F1837590656" data-filterable-set=":dokkaHtml/androidMain"></a>
+        <div class="table-row" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="value-to-string.html"><span>value</span><wbr></wbr><span>To</span><wbr></wbr><span><span>String</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1841218972%2FFunctions%2F1837590656"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+                  <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":dokkaHtml/androidMain" data-filterable-set=":dokkaHtml/androidMain" data-active="" data-toggle=":dokkaHtml/androidMain">android</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":dokkaHtml/androidMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="value-to-string.html"><span class="token function">valueToString</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">value<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a></div><div class="brief ">Make a JSON text of an Object value.</div></div>                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2023 Copyright</span><span
+                class="pull-right"><span>Generated by </span><a
+                href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+    </div>
+</div>
+</body>
+</html>

@@ -31,14 +31,16 @@ class DemoTest {
 
     @Test
     fun mainTest() {
-        var url = "https://www.instagram.com/p/Cn7ewxmyHeX/?igshid=NDdhMjNiZDg="
-        url = "https://twitter.com/NaguibSawiris/status/1622112587805593601?s=20&t=qYf-wd9fR2ICdebHDgFdbw"
+        var url = "https://twitter.com/NaguibSawiris/status/1622112587805593601?s=20&t=qYf-wd9fR2ICdebHDgFdbw"
         url = "https://fb.watch/ivvyC8pHKW/"
 //        url = "https://vimeo.com/771088289"
+        url = "https://www.instagram.com/p/Cn7ewxmyHeX/?igshid=NDdhMjNiZDg="
+        url = "https://www.instagram.com/reel/Co-V43eOaBW/?igshid=MDM4ZDc5MmU="
+        url = "https://www.facebook.com/100050816793/posts/pfbid02CWCFXf5EM3SMBxST2GnjuUjZe4sHPt8wVMsF1ixspAvd8wVsvs4LWjNil/?app=fbl"
         val extractor = Extractor.findExtractor(url)
         runBlocking {
             extractor?.apply {
-//                cookies="APPROPRIATE COOKIES"
+//                cookies = "asdsda"
                 start {
                     when (it) {
                         is Result.Failed -> {
