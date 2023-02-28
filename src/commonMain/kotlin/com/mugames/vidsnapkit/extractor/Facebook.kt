@@ -48,7 +48,7 @@ class Facebook internal constructor(url: String) : Extractor(url) {
 
     override suspend fun analyze() {
         localFormats.url = inputUrl
-        localFormats.src = "FaceBook"
+        localFormats.src = "Facebook"
         fun findVideoId(): String? {
             var pattern =
                 Pattern.compile("(?:https?://(?:[\\w-]+\\.)?(?:facebook\\.com|facebookcorewwwi\\.onion)/(?:[^#]*?#!/)?(?:(?:video/video\\.php|photo\\.php|video\\.php|video/embed|story\\.php|watch(?:/live)?/?)\\?(?:.*?)(?:v|video_id|story_fbid)=|[^/]+/videos/(?:[^/]+/)?|[^/]+/posts/|groups/[^/]+/permalink/|watchparty/)|facebook:)([0-9]+)")
@@ -333,17 +333,25 @@ class Facebook internal constructor(url: String) : Extractor(url) {
     private fun grabRelayPrefetchedData(webPage: String, filter: Array<String>): JSONObject? {
         val jsonString = grabRelayData(webPage, filter) ?: bruteForceJSON(webPage, filter)
 
-        if (!jsonString.isNullOrBlank()) {
-            val require = JSONObject(jsonString).getJSONArray("require")
+        fun searchFromRequireArray(require: JSONArray?): JSONObject? {
+            if (require == null) return null
             for (i in 0 until require.length()) {
                 val array = require.getJSONArray(i)
-                if (array.getString(0) == "RelayPrefetchedStreamCache") return array.getJSONArray(
-                    3
-                ).getJSONObject(1).getJSONObject("__bbox").getJSONObject("result")
+                if (array.getString(0) == "ScheduledServerJS") return searchFromRequireArray(
+                        array.getJSONArray(3)
+                            .getJSONObject(0)
+                            .getJSONObject("__bbox")
+                            .getJSONArray("require")
+                    )
+                if (array.getString(0) == "RelayPrefetchedStreamCache") return array.getJSONArray(3)
+                    .getJSONObject(1)
+                    .getJSONObject("__bbox")
+                    .getJSONObject("result")
                     .getJSONObject("data")
             }
+            return null
         }
-        return null
+        return searchFromRequireArray(jsonString?.toJSONObjectOrNull()?.getJSONArray("require"))
     }
 
     private fun parseGraphqlVideo(media: JSONObject) {
@@ -360,7 +368,7 @@ class Facebook internal constructor(url: String) : Extractor(url) {
         localFormats.title = media.getNullableString("name")
             ?: media.getNullableJSONObject("savable_description")
                 ?.getNullableString("text")
-                    ?: "FaceBook_Video"
+                    ?: "Facebook_Video"
 
         val dashXml = media.getNullableString("dash_manifest")
         dashXml?.let {
@@ -413,7 +421,8 @@ class Facebook internal constructor(url: String) : Extractor(url) {
         val videos = getRepresentationArray(adaptionSet, 0)
         val audios = getRepresentationArray(adaptionSet, 1)
 
-        fun safeGet(jsonObject: JSONObject, key: String) = jsonObject.getNullable("_$key") ?: jsonObject.getNullable(key) ?: "--NA--"
+        fun safeGet(jsonObject: JSONObject, key: String) =
+            jsonObject.getNullable("_$key") ?: jsonObject.getNullable(key) ?: "--NA--"
 
         fun addVideos() {
             for (i in 0 until videos.length()) {
@@ -487,6 +496,9 @@ class Facebook internal constructor(url: String) : Extractor(url) {
     }
 
     suspend fun testWebpage(string: String) {
+        onProgress = {
+
+        }
         scratchWebPage(string)
     }
 
