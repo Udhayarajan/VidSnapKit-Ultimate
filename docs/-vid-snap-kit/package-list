@@ -262,6 +262,10 @@ $dokka.location:com.mugames.vidsnapkit//toJSONObjectOrNull/kotlin.String#/Pointi
 $dokka.location:com.mugames.vidsnapkit//toJsonString/[Error type: Unresolved type for Hashtable<K, V>][TypeParam(bounds=[kotlin.Any?]),TypeParam(bounds=[kotlin.Any?])]#/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit/to-json-string.html
 $dokka.location:com.mugames.vidsnapkit//tryGroup/[Error type: Unresolved type for Matcher]#kotlin.Int/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit/try-group.html
 $dokka.location:com.mugames.vidsnapkit//tryGroup/[Error type: Unresolved type for Matcher]#kotlin.String/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit/try-group.html
+$dokka.location:com.mugames.vidsnapkit/HtmlDecoder///PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit/-html-decoder/index.html
+$dokka.location:com.mugames.vidsnapkit/HtmlDecoder/decodeHtml/#kotlin.String/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit/-html-decoder/decode-html.html
+$dokka.location:com.mugames.vidsnapkit/HtmlDecoderFactory///PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit/-html-decoder-factory/index.html
+$dokka.location:com.mugames.vidsnapkit/HtmlDecoderFactory/createDecoderFactory/#/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit/-html-decoder-factory/create-decoder-factory.html
 $dokka.location:com.mugames.vidsnapkit/MimeType.Companion///PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit/-mime-type/-companion/index.html
 $dokka.location:com.mugames.vidsnapkit/MimeType.Companion/APPLICATION_X_MPEG_URL/#/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit/-mime-type/-companion/-a-p-p-l-i-c-a-t-i-o-n_-x_-m-p-e-g_-u-r-l.html
 $dokka.location:com.mugames.vidsnapkit/MimeType.Companion/AUDIO_MP4/#/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit/-mime-type/-companion/-a-u-d-i-o_-m-p4.html
