@@ -48,7 +48,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
 
     private fun isProfileUrl(): Boolean {
         if (inputUrl.contains("/p/")) return false
-        return !inputUrl.contains("(/reel/|/tv/)[\\w-]{11}".toRegex())
+        return !inputUrl.contains("(/reel/|/tv/|/reels/)[\\w-]{11}".toRegex())
     }
 
     private fun isAccessible(jsonObject: JSONObject): Boolean {
