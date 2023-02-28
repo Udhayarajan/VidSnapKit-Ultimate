@@ -38,10 +38,11 @@ class Util {
          */
         fun decodeHTML(text: String?): String? {
             if (text == null) return null
-            var decoded: String?
+            val decoder = HtmlDecoderFactory.createDecoderFactory()
+            val decoded = decoder.decodeHtml(text)
 //            decoded = HtmlCompat.fromHtml(text, HtmlCompat.FROM_HTML_MODE_LEGACY).toString()
             try {
-                return URLDecoder.decode(text, "UTF-8")
+                return URLDecoder.decode(decoded, "UTF-8")
             } catch (e: UnsupportedEncodingException) {
                 e.printStackTrace()
             }
