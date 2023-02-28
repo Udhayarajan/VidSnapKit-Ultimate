@@ -27,7 +27,7 @@ plugins {
 }
 
 group = "io.github.udhayarajan"
-version = "3.3.5"
+version = "3.3.6"
 //Version Naming incremented if "<NEW_FEATURE_ADDED>.<WORKED_ON_BUG>.<BETA_VERSION_COUNT>"
 //Priority on incrementing Feature > BugFix > Beta
 
@@ -61,6 +61,8 @@ kotlin {
             dependencies {
                 // https://mvnrepository.com/artifact/org.json/json
                 implementation("org.json:json:20220924")
+                // https://mvnrepository.com/artifact/org.ccil.cowan.tagsoup/tagsoup
+                implementation("org.ccil.cowan.tagsoup:tagsoup:1.2.1")
             }
         }
 
