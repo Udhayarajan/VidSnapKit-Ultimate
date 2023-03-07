@@ -63,6 +63,7 @@ abstract class Extractor(
                 url.contains("vimeo") -> Vimeo(url)
                 url.contains("likee") -> Likee(url)
                 url.contains("twitter") -> Twitter(url)
+                url.contains("tiktok.com") -> TikTok(url)
                 else -> null
             }
         }

@@ -71,11 +71,11 @@ class MimeType {
 
         fun fromCodecs(codec: String, defaultCodec: String = "") = with(codec) {
             when {
-                contains("mp4a", ignoreCase = true) -> AUDIO_MP4
+                contains("mp4a", ignoreCase = true) || contains("mp3") -> AUDIO_MP4
                 contains("opus", ignoreCase = true) -> AUDIO_WEBM
-                contains("avc", ignoreCase = true) -> VIDEO_MP4
+                contains("avc", ignoreCase = true) || contains("mp4") || contains("h264") -> VIDEO_MP4
                 contains("vp8", ignoreCase = true) || contains("vp9", ignoreCase = true) -> MimeType.VIDEO_WEBM
-                else ->{
+                else -> {
                     println("Unable to find mimetype from codec $codec")
                     defaultCodec
                 }
