@@ -60,7 +60,7 @@ class HttpRequest(
      */
     suspend fun getSize() = createClient().getSize(url)
 
-    suspend fun postRequest(postData: Hashtable<String, Any>): String =
+    suspend fun postRequest(postData: Hashtable<String, Any>? = null): String =
         withContext(Dispatchers.IO) { createClient().postData(url, postData, headers) }
 
     suspend fun isAvailable(): Boolean =

@@ -62,6 +62,7 @@ abstract class Extractor(
                 url.contains("dailymotion|dai.ly".toRegex()) -> DailyMotion(url)
                 url.contains("vimeo") -> Vimeo(url)
                 url.contains("likee") -> Likee(url)
+                url.contains("twitter") -> Twitter(url)
                 else -> null
             }
         }
@@ -128,7 +129,7 @@ abstract class Extractor(
 
     protected abstract suspend fun analyze()
 
-    protected suspend fun finalize() {
+    protected open suspend fun finalize() {
         onProgress(Result.Progress(ProgressState.End))
         withContext(Dispatchers.IO) {
             for (format in videoFormats) {
@@ -193,5 +194,9 @@ abstract class Extractor(
 
     protected inline fun clientRequestError(msg: String = "The request video page missing. If you find it as false kindly contact us") {
         onProgress(Result.Failed(Error.NonFatalError(msg)))
+    }
+
+    protected inline fun internalError(msg: String, e: Exception? = null) {
+        onProgress(Result.Failed(Error.InternalError(msg, e)))
     }
 }
