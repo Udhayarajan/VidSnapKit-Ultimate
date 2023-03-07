@@ -19,6 +19,7 @@ package com.mugames.vidsnapkit
 
 import org.json.JSONObject
 import java.io.UnsupportedEncodingException
+import java.net.URI
 import java.net.URLDecoder
 import java.util.*
 import java.util.regex.Matcher
@@ -68,6 +69,25 @@ class Util {
          * @return title without newline and white tabs
          */
         fun filterName(name: String) = name.replace("[\n.\t]".toRegex(), "")
+
+        /**
+         * Joins two URLs together and returns the result as a String.
+         * If an error occurs during the process, the function returns null.
+         *
+         * @param url the base URL to join with the other URL
+         * @param uRL the URL to join with the base URL
+         * @return the joined URL as a String, or null if an error occurs
+         */
+        fun joinURL(url: String?, uRL: String): String? {
+            return try {
+                val uri = url?.let { URI(it) }
+                val joined = uri?.resolve(uRL.trim { it <= ' ' })?.toURL()
+                joined?.toString()
+            } catch (e: Exception) {
+                println("[join] $e")
+                null
+            }
+        }
     }
 }
 

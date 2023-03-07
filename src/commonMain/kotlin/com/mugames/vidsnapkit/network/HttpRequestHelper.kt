@@ -37,7 +37,7 @@ interface HttpInterface {
 
     suspend fun postData(
         url: String,
-        postData: Hashtable<String, Any>,
+        postData: Hashtable<String, Any>? = null,
         headers: Hashtable<String, String>? = null
     ): String
 
@@ -49,14 +49,15 @@ class HttpInterfaceImpl(
 ) : HttpInterface {
     override suspend fun postData(
         url: String,
-        postData: Hashtable<String, Any>,
+        postData: Hashtable<String, Any>?,
         headers: Hashtable<String, String>?
     ): String {
         return try {
             client.post {
                 url(url)
-                println(postData.toJsonString())
-                setBody(TextContent(postData.toJsonString(), ContentType.Application.Json))
+                postData?.let {
+                    setBody(TextContent(it.toJsonString(), ContentType.Application.Json))
+                }
             }.bodyAsText()
         } catch (e: Error) {
             throw e
