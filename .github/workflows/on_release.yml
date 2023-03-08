@@ -26,6 +26,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+      
+      - name: Change wrapper permissions
+        run: chmod +x ./gradlew
 
       - name: Generate Dokka HTML
         run: ./gradlew dokkahtml
@@ -74,6 +77,7 @@ jobs:
   publish:
     name: Release build and publish
     runs-on: ubuntu-latest
+    needs: generate-docs
     steps:
       - name: Check out code
         uses: actions/checkout@v2
