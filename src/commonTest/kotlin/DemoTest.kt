@@ -38,6 +38,7 @@ class DemoTest {
         url = "https://www.instagram.com/reel/Co-V43eOaBW/?igshid=MDM4ZDc5MmU="
         url = "https://www.facebook.com/100050816793/posts/pfbid02CWCFXf5EM3SMBxST2GnjuUjZe4sHPt8wVMsF1ixspAvd8wVsvs4LWjNil/?app=fbl"
         url = "https://www.linkedin.com/posts/therealusman_fastest-growing-it-company-with-1300-employees-activity-7035259328076877824-N_jR/"
+        url = "https://fb.watch/j7ch_D_pmN/"
         val extractor = Extractor.findExtractor(url)
         runBlocking {
             extractor?.apply {
