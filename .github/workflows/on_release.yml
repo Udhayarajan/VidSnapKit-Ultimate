@@ -1,4 +1,4 @@
-name: Generate Docs
+name: Generate Docs, publish docs and build & publish the code
 
 on:
   release:
