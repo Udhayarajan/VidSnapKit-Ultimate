@@ -1,0 +1,28 @@
+name: Generate Docs
+
+on:
+  release:
+    # We'll run this workflow when a new GitHub release is created
+    types: [ released ]
+
+jobs:
+  generate-docs:
+    name: Generate docs for current version and updates docs folder
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Generate Dokka HTML
+        run: ./gradlew dokkahtml
+
+      - name: Commit changes
+        run: |
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+          git commit -m "Docs updated" -a
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
