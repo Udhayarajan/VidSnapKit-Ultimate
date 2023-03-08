@@ -37,7 +37,8 @@ jobs:
         run: |
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
-          git commit -m "Docs updated" -a
+          git add .
+          git commit -m "Docs updated"
 
       - name: Push changes
         uses: ad-m/github-push-action@master
