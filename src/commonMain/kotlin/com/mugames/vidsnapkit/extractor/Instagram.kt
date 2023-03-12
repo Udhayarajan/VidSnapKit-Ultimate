@@ -43,8 +43,11 @@ class Instagram internal constructor(url: String) : Extractor(url) {
 
     private val formats = Formats()
 
-    private fun getMediaId(page: String) =
-        page.substringAfter("\"media_id\":\"").substringBefore("\"")
+    private fun getMediaId(page: String): String? {
+        val matcher = Pattern.compile("\"media_id\":\"(.*?)\"").matcher(page)
+        return if (matcher.find()) matcher.group(1) else null
+    }
+
 
     private fun isProfileUrl(): Boolean {
         if (inputUrl.contains("/p/")) return false
@@ -134,8 +137,9 @@ class Instagram internal constructor(url: String) : Extractor(url) {
     private suspend fun extractInfoShared(page: String) {
         suspend fun newApiRequest() {
             val mediaId = getMediaId(page)
-            val url = POST_API.format(mediaId)
             try {
+                if (mediaId == null) throw JSONException("mediaId is null purposely thrown wrong error")
+                val url = POST_API.format(mediaId)
                 extractFromItems(
                     JSONObject(
                         HttpRequest(
