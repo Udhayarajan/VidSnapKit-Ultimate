@@ -39,6 +39,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         const val POST_API = "https://i.instagram.com/api/v1/media/%s/info/"
         const val NO_VIDEO_STATUS_AVAILABLE = "No video Status available"
         const val NO_STATUS_AVAILABLE = "No stories Available to Download"
+        const val HIGHLIGHTS_API = "https://www.instagram.com/api/v1/feed/reels_media/?reel_ids=highlight%s"
     }
 
     private val formats = Formats()
@@ -52,6 +53,18 @@ class Instagram internal constructor(url: String) : Extractor(url) {
     private fun isProfileUrl(): Boolean {
         if (inputUrl.contains("/p/")) return false
         return !inputUrl.contains("(/reel/|/tv/|/reels/)[\\w-]{11}".toRegex())
+    }
+
+    private fun isHighlightsPost(): Boolean {
+        return inputUrl.contains("stories/highlights/".toRegex())
+    }
+
+    private fun getHighlightsId(): String? {
+        val matcher =
+            Pattern.compile("(?:https|http)://(?:www\\.|.*?)instagram.com/(?:stories/highlights/|)([A-Za-z0-9_.]+)")
+                .matcher(inputUrl)
+        return if (matcher.find()) matcher.group(1)
+        else null
     }
 
     private fun isAccessible(jsonObject: JSONObject): Boolean {
@@ -104,12 +117,31 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                 clientRequestError()
                 return
             })
-        else {
+        else if (isHighlightsPost()) {
+            val highlightsId = getHighlightsId()
+            highlightsId?.let {
+                extractHighlights(it)
+            }
+        } else {
             val userId = getUserID()
             userId?.let {
                 extractStories(it)
             }
         }
+    }
+
+    private suspend fun extractHighlights(highlightsId: String) {
+        val highlights = HttpRequest(HIGHLIGHTS_API.format("%3A$highlightsId"), getHeadersWithUserAgent()).getResponse()
+            ?.toJSONObjectOrNull()
+        highlights?.let {
+            if (it.getNullable("login_required") == "true") {
+                onProgress(Result.Failed(Error.LoginRequired))
+                return
+            }
+            val highlight = it.getJSONObject("reels").getJSONObject("highlight:$highlightsId")
+            formats.title = highlight.getNullableString("title") ?: "highlight:$highlightsId"
+            extractFromItems(highlight.getJSONArray("items"))
+        } ?: clientRequestError()
     }
 
     @Suppress("UNCHECKED_CAST")
