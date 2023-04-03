@@ -40,7 +40,6 @@ class Twitter internal constructor(url: String) : Extractor(url) {
     var query =
         "?cards_platform=Web-12&include_cards=1&include_reply_count=1&include_user_entities=0&tweet_mode=extended"
 
-    private var httpURL: String? = null
     private var tweetID: String? = null
 
     var localFormats = Formats()
@@ -79,12 +78,12 @@ class Twitter internal constructor(url: String) : Extractor(url) {
     private suspend fun getToken() {
         val response = HttpRequest(base_url + "guest/activate.json", headers).postRequest()
         headers["x-guest-token"] = response.toJSONObject().getString("guest_token")
-        if (httpURL!!.contains("status")) extractVideo()
-        if (httpURL!!.contains("broadcasts")) extractBroadcasts()
+        if (inputUrl.contains("status")) extractVideo()
+        if (inputUrl.contains("broadcasts")) extractBroadcasts()
     }
 
     private suspend fun extractVideo() {
-        val response = HttpRequest("${base_url}statuses/show/${tweetID}.json$query").getResponse()
+        val response = HttpRequest("${base_url}statuses/show/${tweetID}.json$query", headers).getResponse()
         response?.let {
             identifyDownloader(it)
         } ?: run {
