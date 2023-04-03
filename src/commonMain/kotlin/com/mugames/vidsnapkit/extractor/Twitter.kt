@@ -201,22 +201,23 @@ class Twitter internal constructor(url: String) : Extractor(url) {
     }
 
     private fun fromVideoInfo(media: JSONObject) {
-        val videoInfo = media.getJSONObject("video_info")
-        val variants = videoInfo.getJSONArray("variants")
-        for (i in 0 until variants.length()) {
-            val data: JSONObject = variants.getJSONObject(i)
-            if (data.getString("content_type").equals(MimeType.VIDEO_MP4)) {
-                val s: String = data.getString("url")
-                localFormats.videoData.add(
-                    VideoResource(
-                        s,
-                        MimeType.VIDEO_MP4,
-                        quality = resolution(s)
+        val videoInfo = media.getNullableJSONObject("video_info")
+        val variants = videoInfo?.getJSONArray("variants")
+        variants?.let {
+            for (i in 0 until variants.length()) {
+                val data: JSONObject = variants.getJSONObject(i)
+                if (data.getString("content_type").equals(MimeType.VIDEO_MP4)) {
+                    val s: String = data.getString("url")
+                    localFormats.videoData.add(
+                        VideoResource(
+                            s,
+                            MimeType.VIDEO_MP4,
+                            quality = resolution(s)
+                        )
                     )
-                )
+                }
             }
         }
-
         try {
 
             var thumbNailURL: String = media.getString("media_url")
