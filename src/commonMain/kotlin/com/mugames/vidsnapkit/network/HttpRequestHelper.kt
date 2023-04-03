@@ -55,6 +55,13 @@ class HttpInterfaceImpl(
         return try {
             client.post {
                 url(url)
+                headers?.let {
+                    if (it.isNotEmpty())
+                        headers {
+                            for ((key, value) in it)
+                                append(key, value)
+                        }
+                }
                 postData?.let {
                     setBody(TextContent(it.toJsonString(), ContentType.Application.Json))
                 }
