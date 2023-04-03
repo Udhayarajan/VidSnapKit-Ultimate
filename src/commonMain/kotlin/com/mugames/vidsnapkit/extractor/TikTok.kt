@@ -51,7 +51,7 @@ class TikTok internal constructor(url: String) : Extractor(url) {
             val itemList = json.getJSONObject("ItemList").getJSONObject("video").getJSONArray("list")
             val itemModule = json.getJSONObject("ItemModule")
             for (i in 0 until itemList.length()) {
-                val video = itemModule.getJSONObject(itemList.getString(i))
+                val videoId = itemModule.getJSONObject(itemList.getString(i))
                 val formats = localFormats.copy(
                     title = "",
                     audioData = mutableListOf(),
@@ -59,7 +59,8 @@ class TikTok internal constructor(url: String) : Extractor(url) {
                     imageData = mutableListOf()
                 )
 
-                formats.title = video.getString("desc")
+                formats.title = videoId.getString("desc")
+                val video = videoId.getJSONObject("video")
                 formats.imageData.add(
                     ImageResource(
                         video.getString("cover")
@@ -77,5 +78,12 @@ class TikTok internal constructor(url: String) : Extractor(url) {
             finalize()
         } else
             onProgress(Result.Failed(Error.MethodMissingLogic))
+    }
+
+    suspend fun testWithWebPage(string: String){
+        onProgress = {
+            println(it)
+        }
+        extractFromWebPage(string)
     }
 }
