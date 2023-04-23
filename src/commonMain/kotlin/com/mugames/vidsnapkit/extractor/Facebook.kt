@@ -338,11 +338,11 @@ class Facebook internal constructor(url: String) : Extractor(url) {
             for (i in 0 until require.length()) {
                 val array = require.getJSONArray(i)
                 if (array.getString(0) == "ScheduledServerJS") return searchFromRequireArray(
-                        array.getJSONArray(3)
-                            .getJSONObject(0)
-                            .getJSONObject("__bbox")
-                            .getJSONArray("require")
-                    )
+                    array.getJSONArray(3)
+                        .getJSONObject(0)
+                        .getJSONObject("__bbox")
+                        .getJSONArray("require")
+                )
                 if (array.getString(0) == "RelayPrefetchedStreamCache") return array.getJSONArray(3)
                     .getJSONObject(1)
                     .getJSONObject("__bbox")
@@ -354,8 +354,8 @@ class Facebook internal constructor(url: String) : Extractor(url) {
         return searchFromRequireArray(jsonString?.toJSONObjectOrNull()?.getJSONArray("require"))
     }
 
-    private fun parseGraphqlVideo(media: JSONObject) {
-        if (media.getNullableJSONObject("creation_story") != null) {
+    private fun parseGraphqlVideo(media: JSONObject, hasCreationStory: Boolean = true) {
+        if (media.getNullableJSONObject("creation_story") != null && hasCreationStory) {
             extractFromCreationStory(media)
             return
         }
@@ -395,10 +395,11 @@ class Facebook internal constructor(url: String) : Extractor(url) {
     }
 
     private fun extractFromCreationStory(media: JSONObject) {
-        parseGraphqlVideo(
-            media.getJSONObject("creation_story").getJSONObject("short_form_video_context")
-                .getJSONObject("playback_video")
-        )
+        val playbackVideo =
+            media.getNullableJSONObject("creation_story")?.getNullableJSONObject("short_form_video_context")
+                ?.getNullableJSONObject("playback_video")
+        if (playbackVideo != null) parseGraphqlVideo(playbackVideo)
+        else parseGraphqlVideo(media, false)
     }
 
     private fun extractFromDash(xml: String) {
