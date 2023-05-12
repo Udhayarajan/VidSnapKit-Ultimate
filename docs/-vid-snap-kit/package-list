@@ -212,6 +212,7 @@ $dokka.location:com.mugames.vidsnapkit.extractor/Facebook.Companion/log/#/Pointi
 $dokka.location:com.mugames.vidsnapkit.extractor/Facebook///PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-facebook/index.html
 $dokka.location:com.mugames.vidsnapkit.extractor/Facebook/testWebpage/#kotlin.String/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-facebook/test-webpage.html
 $dokka.location:com.mugames.vidsnapkit.extractor/Instagram.Companion///PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-instagram/-companion/index.html
+$dokka.location:com.mugames.vidsnapkit.extractor/Instagram.Companion/HIGHLIGHTS_API/#/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-instagram/-companion/-h-i-g-h-l-i-g-h-t-s_-a-p-i.html
 $dokka.location:com.mugames.vidsnapkit.extractor/Instagram.Companion/NO_STATUS_AVAILABLE/#/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-instagram/-companion/-n-o_-s-t-a-t-u-s_-a-v-a-i-l-a-b-l-e.html
 $dokka.location:com.mugames.vidsnapkit.extractor/Instagram.Companion/NO_VIDEO_STATUS_AVAILABLE/#/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-instagram/-companion/-n-o_-v-i-d-e-o_-s-t-a-t-u-s_-a-v-a-i-l-a-b-l-e.html
 $dokka.location:com.mugames.vidsnapkit.extractor/Instagram.Companion/POST_API/#/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-instagram/-companion/-p-o-s-t_-a-p-i.html
@@ -229,6 +230,7 @@ $dokka.location:com.mugames.vidsnapkit.extractor/Periscope/extractInfo/#/Pointin
 $dokka.location:com.mugames.vidsnapkit.extractor/Periscope/manifest/#/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-periscope/manifest.html
 $dokka.location:com.mugames.vidsnapkit.extractor/ShareChat///PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-share-chat/index.html
 $dokka.location:com.mugames.vidsnapkit.extractor/TikTok///PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-tik-tok/index.html
+$dokka.location:com.mugames.vidsnapkit.extractor/TikTok/testWithWebPage/#kotlin.String/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-tik-tok/test-with-web-page.html
 $dokka.location:com.mugames.vidsnapkit.extractor/Twitch///PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-twitch/index.html
 $dokka.location:com.mugames.vidsnapkit.extractor/Twitch/extractURLFromClips/#/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-twitch/extract-u-r-l-from-clips.html
 $dokka.location:com.mugames.vidsnapkit.extractor/Twitter///PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-twitter/index.html
