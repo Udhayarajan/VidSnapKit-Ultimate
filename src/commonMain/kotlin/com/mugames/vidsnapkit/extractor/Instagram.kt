@@ -111,7 +111,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
 
     override suspend fun analyze() {
         formats.src = "Instagram"
-        formats.url = inputUrl
+        formats.url = inputUrl.replace("/reels/", "/reel/")
         if (!isProfileUrl())
             extractInfoShared(HttpRequest(inputUrl, headers).getResponse() ?: run {
                 clientRequestError()
@@ -191,7 +191,11 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         val jsonString = if (matcher.find()) {
             matcher.group(1)
         } else {
-            newApiRequest()
+            val json = getFromBrutForcing(page)
+            if (json != null) {
+                brutForcedExtraction(json.toJSONObject())
+                return
+            } else newApiRequest()
             return
         }
         val jsonObject = JSONObject(jsonString)
@@ -230,6 +234,76 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                 else onProgress(Result.Failed(Error.InternalError("can't find problem")))
             }
         }
+    }
+
+    private suspend fun brutForcedExtraction(jsonObject: JSONObject) {
+        formats.title = jsonObject.getString("articleBody")
+        var isMultiple = true
+        val images = jsonObject.getJSONArray("image")
+        for (i in 0 until images.length()) {
+            val image = images.getJSONObject(0)
+            if (images.length() == 1) {
+                isMultiple = false
+                formats.imageData.add(
+                    ImageResource(
+                        url = image.getString("url"),
+                        resolution = image.getString("width") + "x" + image.getString("height")
+                    )
+                )
+                continue
+            }
+            val localFormat = formats.copy(title = "", imageData = mutableListOf(), videoData = mutableListOf())
+            localFormat.title = image.getString("caption")
+            localFormat.imageData.add(
+                ImageResource(
+                    url = image.getString("url"),
+                    resolution = image.getString("width") + "x" + image.getString("height")
+                )
+            )
+            videoFormats.add(localFormat)
+        }
+
+        val videos = jsonObject.getJSONArray("video")
+        for (i in 0 until videos.length()) {
+            val video = videos.getJSONObject(0)
+            if (video.length() == 1) {
+                isMultiple = false
+                formats.videoData.add(
+                    VideoResource(
+                        url = video.getString("contentUrl"),
+                        mimeType = MimeType.VIDEO_MP4,
+                        quality = video.getString("width") + "x" + video.getString("height")
+                    )
+                )
+                formats.imageData.add(ImageResource(url = video.getString("thumbnailUrl")))
+                continue
+            }
+            val localFormat = formats.copy(title = "", imageData = mutableListOf(), videoData = mutableListOf())
+            localFormat.title = video.getString("caption")
+            localFormat.imageData.add(ImageResource(url = video.getString("thumbnailUrl")))
+            localFormat.videoData.add(
+                VideoResource(
+                    url = video.getString("contentUrl"),
+                    mimeType = MimeType.VIDEO_MP4,
+                    quality = video.getString("width") + "x" + video.getString("height")
+                )
+            )
+            videoFormats.add(localFormat)
+        }
+
+        if (!isMultiple) videoFormats.add(formats)
+        finalize()
+    }
+
+    private fun getFromBrutForcing(page: String): String? {
+        val matcher = Pattern.compile("<script type=\"application\\/ld\\+json\".*?>(.*?)<\\/script>").matcher(page)
+        if (matcher.find()) {
+            val res = matcher.group(1)
+            if (res.contains("articleBody")) {
+                return res
+            }
+        }
+        return null
     }
 
     private suspend fun setInfo(media: JSONObject) {
