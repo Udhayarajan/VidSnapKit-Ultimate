@@ -113,7 +113,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         formats.src = "Instagram"
         formats.url = inputUrl.replace("/reels/", "/reel/")
         if (!isProfileUrl())
-            extractInfoShared(HttpRequest(inputUrl, headers).getResponse() ?: run {
+            extractInfoShared(HttpRequest(inputUrl, getHeadersWithUserAgent()).getResponse() ?: run {
                 clientRequestError()
                 return
             })
