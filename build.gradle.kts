@@ -27,7 +27,7 @@ plugins {
 }
 
 group = "io.github.udhayarajan"
-version = "4.1.1"
+version = "4.2.0"
 //Version Naming incremented if "<NEW_FEATURE_ADDED>.<WORKED_ON_BUG>.<BETA_VERSION_COUNT>"
 //Priority on incrementing Feature > BugFix > Beta
 
@@ -110,7 +110,7 @@ android {
 }
 
 dependencies {
-    implementation("androidx.core:core-ktx:1.9.0")
+    implementation("androidx.core:core-ktx:1.10.1")
     testImplementation(project(mapOf("path" to ":")))
     testImplementation(project(mapOf("path" to ":")))
     testImplementation(project(mapOf("path" to ":")))
