@@ -131,7 +131,7 @@ class Facebook internal constructor(url: String) : Extractor(url) {
                 if (matcher.find()) serverJsData = matcher.group(1)
             }
             if (!serverJsData.isNullOrBlank()) videoData =
-                grabFromJSModsInstance(JSONObject(serverJsData))
+                grabFromJSModsInstance(serverJsData.toJSONObject())
         }
         if (videoData == null) {
             videoData = grabRelayPrefetchedDataSearchUrl(webPage)
@@ -360,11 +360,12 @@ class Facebook internal constructor(url: String) : Extractor(url) {
             return
         }
         val thumbnailUrl = media.getNullableJSONObject("thumbnailImage")?.getString("uri")
-            ?: media.getJSONObject("preferred_thumbnail")
-                .getJSONObject("image")
-                .getString("uri")
+            ?: media.getNullableJSONObject("preferred_thumbnail")
+                ?.getJSONObject("image")
+                ?.getString("uri") ?: ""
         val thumbnailRes = Util.getResolutionFromUrl(thumbnailUrl)
-        localFormats.imageData.add(ImageResource(resolution = thumbnailRes, url = thumbnailUrl))
+        if (thumbnailUrl != "")
+            localFormats.imageData.add(ImageResource(resolution = thumbnailRes, url = thumbnailUrl))
         localFormats.title = media.getNullableString("name")
             ?: media.getNullableJSONObject("savable_description")
                 ?.getNullableString("text")
@@ -415,12 +416,19 @@ class Facebook internal constructor(url: String) : Extractor(url) {
 
         var xmlDecoded = xml.replace("x3C".toRegex(), "<")
         xmlDecoded = xmlDecoded.replace("\\\\\u003C".toRegex(), "<")
-        val adaptionSet: JSONArray =
-            XMLParserFactory.createParserFactory().xmlToJsonObject(xmlDecoded).getJSONObject("MPD")
-                .getJSONObject("Period")
-                .getJSONArray("AdaptationSet")
-        val videos = getRepresentationArray(adaptionSet, 0)
-        val audios = getRepresentationArray(adaptionSet, 1)
+        var videos = JSONArray()
+        var audios = JSONArray()
+        XMLParserFactory.createParserFactory().xmlToJsonObject(xmlDecoded).getJSONObject("MPD")
+            .getJSONObject("Period").run {
+                "AdaptationSet".let { adaptationSet ->
+                    getNullableJSONArray(adaptationSet)?.let {
+                        videos = getRepresentationArray(it, 0)
+                        audios = getRepresentationArray(it, 1)
+                    } ?: run {
+                        videos = getJSONObject(adaptationSet).getJSONArray("Representation")
+                    }
+                }
+            }
 
         fun safeGet(jsonObject: JSONObject, key: String) =
             jsonObject.getNullable("_$key") ?: jsonObject.getNullable(key) ?: "--NA--"
@@ -483,8 +491,8 @@ class Facebook internal constructor(url: String) : Extractor(url) {
                         VideoResource(
                             url,
                             MimeType.VIDEO_MP4,
-                            videoData.getString("original_width") + "x" +
-                                    videoData.getString("original_height") + "(" +
+                            videoData.get("original_width").toString() + "x" +
+                                    videoData.get("original_height") + "(" +
                                     s.uppercase() + ")",
 
                             )

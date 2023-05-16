@@ -61,7 +61,7 @@ fun JSONObject.getNullable(name: String): String? = try {
     null
 }
 
-fun String.toJSONObject() = JSONObject(this)
+fun String.toJSONObject() = JSONObject(this.replace("\\x3C", "<"))
 
 fun String.toJSONArray() = JSONArray(this)
 
