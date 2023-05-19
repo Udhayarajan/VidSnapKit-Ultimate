@@ -111,7 +111,8 @@ class Instagram internal constructor(url: String) : Extractor(url) {
 
     override suspend fun analyze() {
         formats.src = "Instagram"
-        formats.url = inputUrl.replace("/reels/", "/reel/")
+        inputUrl = inputUrl.replace("/reels/", "/reel/")
+        formats.url = inputUrl
         if (!isProfileUrl())
             extractInfoShared(HttpRequest(inputUrl, getHeadersWithUserAgent()).getResponse() ?: run {
                 clientRequestError()
