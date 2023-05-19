@@ -39,9 +39,9 @@ class HttpRequest(
     private val headers: Hashtable<String, String>? = null,
 ) {
     private companion object {
-        fun createClient(): HttpInterface {
+        fun createClient(requiresRedirection: Boolean = true): HttpInterface {
             return HttpInterfaceImpl(HttpClient(Android) {
-                followRedirects = true
+                followRedirects = requiresRedirection
             })
         }
     }
@@ -51,7 +51,7 @@ class HttpRequest(
      *
      * @return Text format of entire webpage for given [url]
      */
-    suspend fun getResponse(): String? = withContext(Dispatchers.IO) { createClient().getData(url, headers) }
+    suspend fun getResponse(needsRedirection: Boolean = true): String? = withContext(Dispatchers.IO) { createClient(needsRedirection).getData(url, headers) }
 
     /**
      * Used to estimate size of given url in bytes
@@ -64,6 +64,6 @@ class HttpRequest(
         withContext(Dispatchers.IO) { createClient().postData(url, postData, headers) }
 
     suspend fun isAvailable(): Boolean =
-        withContext(Dispatchers.IO) { createClient().checkWebPage(url, headers) }
+        withContext(Dispatchers.IO) { createClient(false).checkWebPage(url, headers) }
 
 }

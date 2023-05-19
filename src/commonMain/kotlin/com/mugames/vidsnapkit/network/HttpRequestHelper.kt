@@ -20,12 +20,14 @@ package com.mugames.vidsnapkit.network
 import com.mugames.vidsnapkit.toJsonString
 import io.ktor.client.*
 import io.ktor.client.call.*
+import io.ktor.client.engine.android.*
 import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.http.content.*
 import java.util.*
+import java.util.regex.Pattern
 
 /**
  * @author Udhaya
@@ -47,6 +49,13 @@ interface HttpInterface {
 class HttpInterfaceImpl(
     private val client: HttpClient,
 ) : HttpInterface {
+
+    private val redirectionStatusCode = setOf(
+        HttpStatusCode.MovedPermanently,
+        HttpStatusCode.Found,
+        HttpStatusCode.TemporaryRedirect
+    )
+
     override suspend fun postData(
         url: String,
         postData: Hashtable<String, Any>?,
@@ -74,6 +83,18 @@ class HttpInterfaceImpl(
     // Instagram Server crashes with 500 if we sent wrong cookies
     // So it is tackled by hardcoding and making it as true to prevent NonFatal Error
     override suspend fun checkWebPage(url: String, headers: Hashtable<String, String>?): Boolean {
+        val acceptedStatusCode = setOf(
+            HttpStatusCode.OK,
+            HttpStatusCode.Accepted,
+            HttpStatusCode.Created,
+            HttpStatusCode.NonAuthoritativeInformation,
+            HttpStatusCode.NoContent,
+            HttpStatusCode.PartialContent,
+            HttpStatusCode.ResetContent,
+            HttpStatusCode.MultiStatus,
+            if (url.contains("instagram")) HttpStatusCode.InternalServerError else HttpStatusCode.OK
+        )
+
         return try {
             client.get {
                 url(url)
@@ -85,17 +106,13 @@ class HttpInterfaceImpl(
                         }
                 }
             }.run {
-                status in setOf(
-                    HttpStatusCode.OK,
-                    HttpStatusCode.Accepted,
-                    HttpStatusCode.Created,
-                    HttpStatusCode.NonAuthoritativeInformation,
-                    HttpStatusCode.NoContent,
-                    HttpStatusCode.PartialContent,
-                    HttpStatusCode.ResetContent,
-                    HttpStatusCode.MultiStatus,
-                    if (url.contains("instagram")) HttpStatusCode.InternalServerError else HttpStatusCode.OK
-                )
+                status in acceptedStatusCode || run {
+                    if (status in redirectionStatusCode) {
+                        val res = getLastPossibleRedirectedResponse(this, headers)
+                        return res.status in acceptedStatusCode || res.status in redirectionStatusCode
+                    }
+                    false
+                }
             }
         } catch (e: ClientRequestException) {
             false
@@ -117,7 +134,9 @@ class HttpInterfaceImpl(
             }.run {
                 if (status == HttpStatusCode.OK)
                     body()
-                else if (url.contains("instagram") && status == HttpStatusCode.InternalServerError) "{error:\"Invalid Cookies\"}"
+                else if (status in redirectionStatusCode) {
+                    getLastPossibleRedirectedResponse(this, headers).body()
+                } else if (url.contains("instagram") && status == HttpStatusCode.InternalServerError) "{error:\"Invalid Cookies\"}"
                 else null
             }
         } catch (e: ClientRequestException) {
@@ -138,4 +157,33 @@ class HttpInterfaceImpl(
         }
     }
 
+    private suspend fun getLastPossibleRedirectedResponse(
+        response: HttpResponse,
+        headers: Hashtable<String, String>?
+    ): HttpResponse {
+        var cacheResponse = response
+        do {
+            var locationUrl = cacheResponse.headers[HttpHeaders.Location]!!
+
+            val matcher = Pattern.compile("^(?:https?:\\/\\/)?(?:[^@\\n]+@)?(?:www\\.)?([^:\\/\\n?]+)")
+                .matcher(locationUrl)
+            if (!matcher.find() || matcher.group(1) != null)
+                locationUrl = cacheResponse.request.url.protocolWithAuthority + locationUrl
+            val nonRedirectingClient = HttpClient(Android) {
+                followRedirects = false
+            }
+            val tempResponse = nonRedirectingClient.get(locationUrl) {
+                this.headers {
+                    headers?.let {
+                        for ((key, value) in it)
+                            append(key, value)
+                    }
+                }
+            }
+            if (cacheResponse.request.url == tempResponse.request.url)
+                break
+            cacheResponse = tempResponse
+        } while (cacheResponse.status in redirectionStatusCode)
+        return if (cacheResponse.request.url.host == "localhost") response else cacheResponse
+    }
 }
