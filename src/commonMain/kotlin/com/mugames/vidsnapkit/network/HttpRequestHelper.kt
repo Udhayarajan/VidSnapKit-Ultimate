@@ -167,7 +167,7 @@ class HttpInterfaceImpl(
 
             val matcher = Pattern.compile("^(?:https?:\\/\\/)?(?:[^@\\n]+@)?(?:www\\.)?([^:\\/\\n?]+)")
                 .matcher(locationUrl)
-            if (!matcher.find() || matcher.group(1) != null)
+            if (!matcher.find())
                 locationUrl = cacheResponse.request.url.protocolWithAuthority + locationUrl
             val nonRedirectingClient = HttpClient(Android) {
                 followRedirects = false
