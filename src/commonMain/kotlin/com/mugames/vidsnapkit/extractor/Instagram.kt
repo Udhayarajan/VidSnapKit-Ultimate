@@ -40,6 +40,8 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         const val NO_VIDEO_STATUS_AVAILABLE = "No video Status available"
         const val NO_STATUS_AVAILABLE = "No stories Available to Download"
         const val HIGHLIGHTS_API = "https://www.instagram.com/api/v1/feed/reels_media/?reel_ids=highlight%s"
+        const val GRAPHQL_URL =
+            "https://www.instagram.com/graphql/query/?query_hash=b3055c01b4b222b8a47dc12b090e4e64&variables={\"shortcode\":\"%s\"}"
     }
 
     private val formats = Formats()
@@ -113,6 +115,8 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         formats.src = "Instagram"
         inputUrl = inputUrl.replace("/reels/", "/reel/")
         formats.url = inputUrl
+        if (!inputUrl.endsWith("/")) inputUrl = "$inputUrl/"
+        inputUrl = "${inputUrl.replace("/[^/?]*\$|/*\\?.*\$".toRegex(), "")}/?img_index=1"
         if (!isProfileUrl())
             extractInfoShared(HttpRequest(inputUrl, getHeadersWithUserAgent()).getResponse() ?: run {
                 clientRequestError()
@@ -194,7 +198,9 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         } else {
             val json = getFromBrutForcing(page)
             if (json != null) {
-                brutForcedExtraction(json.toJSONObject())
+                brutForcedExtraction(json.toJSONObjectOrNull() ?: run {
+                    json.toJSONArray().getJSONObject(0)
+                })
                 return
             } else newApiRequest()
             return
@@ -305,6 +311,28 @@ class Instagram internal constructor(url: String) : Extractor(url) {
             }
         }
         return null
+    }
+
+    private suspend fun getQueryHash(js: String): List<String> {
+        val list = mutableListOf<String>()
+        val matcher = Pattern.compile("\\w=\"([a-z0-9]{32})\";").matcher(js)
+        while (matcher.find()) {
+            list.add(matcher.group(1))
+        }
+        return list
+    }
+
+    private suspend fun getQueryHashFromAllJSInPage(page: String): MutableList<String>? {
+        val ids = mutableListOf<String>()
+        val matcher = Pattern.compile("<link rel=\"preload\" href=\"(.*?)\" as=\"script\"").matcher(page)
+        while (matcher.find()) {
+            ids.addAll(
+                getQueryHash(HttpRequest(matcher.group(1)).getResponse() ?: run {
+                    return null
+                })
+            )
+        }
+        return ids
     }
 
     private suspend fun setInfo(media: JSONObject) {
