@@ -425,7 +425,10 @@ class Facebook internal constructor(url: String) : Extractor(url) {
                         videos = getRepresentationArray(it, 0)
                         audios = getRepresentationArray(it, 1)
                     } ?: run {
-                        videos = getJSONObject(adaptationSet).getJSONArray("Representation")
+                        videos = getJSONObject(adaptationSet).getNullableJSONArray("Representation") ?: run {
+                            val arr = JSONArray()
+                            arr.put(getJSONObject(adaptationSet).getJSONObject("Representation"))
+                        }
                     }
                 }
             }
