@@ -19,6 +19,7 @@ package com.mugames.vidsnapkit.network
 
 import io.ktor.client.*
 import io.ktor.client.engine.android.*
+import io.ktor.client.request.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.*
@@ -38,12 +39,39 @@ class HttpRequest(
     private val url: String,
     private val headers: Hashtable<String, String>? = null,
 ) {
-    private companion object {
-        fun createClient(requiresRedirection: Boolean = true): HttpInterface {
-            return HttpInterfaceImpl(HttpClient(Android) {
-                followRedirects = requiresRedirection
-            })
+    companion object {
+        private var prefixUrl = ""
+        private var client: HttpClient? = null
+        private var additionHeader: Hashtable<String, String>? = null
+        private fun createClient(requiresRedirection: Boolean = true): HttpInterface {
+            return HttpInterfaceImpl(
+                (client ?: synchronized(this) {
+                    client ?: HttpClient(Android).also { client = it }
+                }).also { it.config { followRedirects = requiresRedirection } }
+            )
         }
+
+        /**
+         * @param client custom client with custom modification. Note: `followRedirects` will be ignored
+         * @param prefixUrl is used when you need to forward requests to a proxy API.
+         * The prefixUrl may include the API key and the hostname of the proxy provider.
+         * @param headers is used when you may need to provide username:password auth to the requests when using proxy,
+         * So you can add auth header to every request that will be sent via your proxy provider
+         */
+        fun setClient(client: HttpClient, prefixUrl: String = "", headers: Hashtable<String, String>? = null) {
+            this.prefixUrl = prefixUrl
+            this.client = client
+            additionHeader = headers
+        }
+    }
+
+    private fun getUrl() = prefixUrl + url
+
+    private fun getHeader(): Hashtable<String, String>? {
+        val result = Hashtable<String, String>()
+        additionHeader?.let { result.putAll(it) }
+        headers?.let { result.putAll(it) }
+        return result.ifEmpty { null }
     }
 
     /**
@@ -51,7 +79,8 @@ class HttpRequest(
      *
      * @return Text format of entire webpage for given [url]
      */
-    suspend fun getResponse(needsRedirection: Boolean = true): String? = withContext(Dispatchers.IO) { createClient(needsRedirection).getData(url, headers) }
+    suspend fun getResponse(needsRedirection: Boolean = true): String? =
+        withContext(Dispatchers.IO) { createClient(needsRedirection).getData(getUrl(), getHeader()) }
 
     /**
      * Used to estimate size of given url in bytes
@@ -61,9 +90,9 @@ class HttpRequest(
     suspend fun getSize() = createClient().getSize(url)
 
     suspend fun postRequest(postData: Hashtable<String, Any>? = null): String =
-        withContext(Dispatchers.IO) { createClient().postData(url, postData, headers) }
+        withContext(Dispatchers.IO) { createClient().postData(getUrl(), postData, getHeader()) }
 
     suspend fun isAvailable(): Boolean =
-        withContext(Dispatchers.IO) { createClient(false).checkWebPage(url, headers) }
+        withContext(Dispatchers.IO) { createClient(false).checkWebPage(getUrl(), getHeader()) }
 
 }
