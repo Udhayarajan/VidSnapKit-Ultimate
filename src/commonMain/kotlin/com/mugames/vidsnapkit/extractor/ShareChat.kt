@@ -32,7 +32,7 @@ import java.util.regex.Pattern
 class ShareChat internal constructor(url: String) : Extractor(url) {
     private val formats = Formats()
 
-    override suspend fun analyze() {
+    override suspend fun analyze(payload: Any?) {
         formats.url = inputUrl
         formats.src = "ShareChat"
         onProgress(Result.Progress(ProgressState.Start))

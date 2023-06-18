@@ -41,26 +41,37 @@ class HttpRequest(
 ) {
     companion object {
         private var prefixUrl = ""
-        private var client: HttpClient? = null
         private var additionHeader: Hashtable<String, String>? = null
+        private fun defaultClient(requiresRedirection: Boolean = true) = HttpClient(Android).also {
+            it.config {
+                followRedirects = requiresRedirection
+            }
+        }.run {
+            HttpInterfaceImpl(this)
+        }
+
+        private var clientGenerator: () -> HttpClient = {
+            HttpClient(Android)
+        }
+
         private fun createClient(requiresRedirection: Boolean = true): HttpInterface {
-            return HttpInterfaceImpl(
-                (client ?: synchronized(this) {
-                    client ?: HttpClient(Android).also { client = it }
-                }).also { it.config { followRedirects = requiresRedirection } }
-            )
+            return HttpInterfaceImpl(clientGenerator().also { it.config { followRedirects = requiresRedirection } })
         }
 
         /**
-         * @param client custom client with custom modification. Note: `followRedirects` will be ignored
+         * @param clientGenerator custom client with custom modification. Note: `followRedirects` will be ignored
          * @param prefixUrl is used when you need to forward requests to a proxy API.
          * The prefixUrl may include the API key and the hostname of the proxy provider.
          * @param headers is used when you may need to provide username:password auth to the requests when using proxy,
          * So you can add auth header to every request that will be sent via your proxy provider
          */
-        fun setClient(client: HttpClient, prefixUrl: String = "", headers: Hashtable<String, String>? = null) {
+        fun setClient(
+            clientGenerator: () -> HttpClient,
+            prefixUrl: String = "",
+            headers: Hashtable<String, String>? = null
+        ) {
             this.prefixUrl = prefixUrl
-            this.client = client
+            this.clientGenerator = clientGenerator
             additionHeader = headers
         }
     }
@@ -87,12 +98,12 @@ class HttpRequest(
      *
      * @return bytes count of given [url]
      */
-    suspend fun getSize() = createClient().getSize(url)
+    suspend fun getSize() = defaultClient().getSize(url)
 
     suspend fun postRequest(postData: Hashtable<String, Any>? = null): String =
         withContext(Dispatchers.IO) { createClient().postData(getUrl(), postData, getHeader()) }
 
     suspend fun isAvailable(): Boolean =
-        withContext(Dispatchers.IO) { createClient(false).checkWebPage(getUrl(), getHeader()) }
+        withContext(Dispatchers.IO) { defaultClient(false).checkWebPage(getUrl(), getHeader()) }
 
 }

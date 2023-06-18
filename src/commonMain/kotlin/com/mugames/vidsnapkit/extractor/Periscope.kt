@@ -39,7 +39,7 @@ class Periscope internal constructor(url: String) : Extractor(url) {
 
     private val localFormats = Formats()
 
-    override suspend fun analyze() {
+    override suspend fun analyze(payload: Any?) {
         TODO("Not yet implemented")
     }
 

@@ -49,7 +49,7 @@ class Vimeo internal constructor(url: String) : Extractor(url) {
             if (find()) group(1) else null
         }
 
-    override suspend fun analyze() {
+    override suspend fun analyze(payload: Any?) {
         formats.src = "Vimeo"
         formats.url = inputUrl
         val id = getVideoId()

@@ -98,6 +98,7 @@ class HttpInterfaceImpl(
         return try {
             client.get {
                 url(url)
+                method = HttpMethod.Head
                 headers?.let {
                     if (it.isNotEmpty())
                         headers {

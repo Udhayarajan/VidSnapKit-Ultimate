@@ -42,7 +42,7 @@ class DailyMotion(url: String) : Extractor(url) {
         return null
     }
 
-    override suspend fun analyze() {
+    override suspend fun analyze(payload: Any?) {
         localFormats = Formats()
         val id = getVideoId()
         id?.let {
