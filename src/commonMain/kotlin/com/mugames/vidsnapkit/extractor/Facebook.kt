@@ -29,14 +29,13 @@ import java.util.logging.Level
 import java.util.logging.Logger
 import java.util.regex.Matcher
 import java.util.regex.Pattern
+import kotlin.system.measureTimeMillis
 
 /**
  * @author Udhaya
  * Created on 21-01-2022
  */
 class Facebook internal constructor(url: String) : Extractor(url) {
-    private var triedWithForceEng = false
-
     private val localFormats = Formats()
 
 
@@ -46,7 +45,7 @@ class Facebook internal constructor(url: String) : Extractor(url) {
         Chrome/69.0.3497.122 Safari/537.36
     """.trimIndent().replace("\n", "")
 
-    override suspend fun analyze() {
+    override suspend fun analyze(payload: Any?) {
         localFormats.url = inputUrl
         localFormats.src = "Facebook"
         fun findVideoId(): String? {
@@ -67,9 +66,12 @@ class Facebook internal constructor(url: String) : Extractor(url) {
         }
         headers["Accept"] =
             "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"
+        headers["Accept-Language"] = "en-GB, en-US, en"
         headers["User-Agent"] = userAgent
         if (inputUrl.startsWith("facebook:")) inputUrl =
             "https://www.facebook.com/video/video.php?v=${findVideoId()}"
+        inputUrl = inputUrl.replace("://m.facebook\\.com/".toRegex(), "://en-gb.facebook.com/")
+        inputUrl = inputUrl.replace("://www.facebook\\.com/".toRegex(), "://en-gb.facebook.com/")
         try {
             onProgress(Result.Progress(ProgressState.Start))
             extractInfo()
@@ -83,22 +85,15 @@ class Facebook internal constructor(url: String) : Extractor(url) {
     }
 
     private suspend fun extractInfo() {
-        inputUrl = inputUrl.replace("://m.facebook\\.com/".toRegex(), "://www.facebook.com/")
-        scratchWebPage(HttpRequest(inputUrl, headers).getResponse() ?: run {
-            clientRequestError()
-            return
-        })
-    }
-
-    private suspend fun extractForceEng() {
-        inputUrl = inputUrl.replace("://m.facebook\\.com/".toRegex(), "://www.facebook.com/")
-        inputUrl = inputUrl.replace("://www.facebook\\.com/".toRegex(), "://en-gb.facebook.com/")
-        triedWithForceEng = true
-        headers["Accept-Language"] = "en-GB, en-US, en"
-        scratchWebPage(HttpRequest(inputUrl, headers).getResponse() ?: run {
-            clientRequestError()
-            return
-        })
+        var page = ""
+        val delay = measureTimeMillis {
+            page = HttpRequest(inputUrl, headers).getResponse() ?: run {
+                clientRequestError()
+                return
+            }
+        }
+        println(delay)
+        scratchWebPage(page)
     }
 
     private suspend fun scratchWebPage(webPage: String) {
@@ -205,9 +200,7 @@ class Facebook internal constructor(url: String) : Extractor(url) {
             videoFormats.add(localFormats)
             finalize()
         } ?: apply {
-            if (!triedWithForceEng) extractForceEng() else onProgress(
-                Result.Failed(Error.NonFatalError("This video can't be Downloaded"))
-            )
+            Result.Failed(Error.NonFatalError("This video can't be Downloaded"))
         }
     }
 

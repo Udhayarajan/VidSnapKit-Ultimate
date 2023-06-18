@@ -52,7 +52,7 @@ class Twitter internal constructor(url: String) : Extractor(url) {
     var info: JSONObject? = null
 
 
-    override suspend fun analyze() {
+    override suspend fun analyze(payload: Any?) {
         localFormats.url = inputUrl
         localFormats.src = "Twitter"
         headers["Authorization"] = auth

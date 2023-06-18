@@ -39,7 +39,7 @@ class Likee internal constructor(url: String) : Extractor(url) {
 
     private val formats = Formats()
 
-    override suspend fun analyze() {
+    override suspend fun analyze(payload: Any?) {
         formats.src = "Likee"
         formats.url = inputUrl
         val postId = getPostId() ?: run {

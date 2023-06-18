@@ -34,7 +34,7 @@ class TikTok internal constructor(url: String) : Extractor(url) {
     private val localFormats = Formats()
 
 
-    override suspend fun analyze() {
+    override suspend fun analyze(payload: Any?) {
         localFormats.src = "TikTok"
         localFormats.url = inputUrl
         val response = HttpRequest(inputUrl).getResponse()

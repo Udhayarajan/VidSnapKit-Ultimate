@@ -116,6 +116,8 @@ abstract class Extractor(
         try {
             if (HttpRequest(inputUrl, headers).isAvailable())
                 analyze()
+            else if (inputUrl.contains("instagram") && cookies != null)
+                analyze(hashMapOf("forced" to true))
             else clientRequestError()
         } catch (e: Exception) {
             if (e is SSLHandshakeException)
@@ -128,7 +130,7 @@ abstract class Extractor(
     }
 
 
-    protected abstract suspend fun analyze()
+    protected abstract suspend fun analyze(payload: Any? = null)
 
     protected open suspend fun finalize() {
         onProgress(Result.Progress(ProgressState.End))

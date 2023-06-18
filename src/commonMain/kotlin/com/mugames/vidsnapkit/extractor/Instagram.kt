@@ -47,14 +47,14 @@ class Instagram internal constructor(url: String) : Extractor(url) {
     private val formats = Formats()
 
     private fun getMediaId(page: String): String? {
-        val matcher = Pattern.compile("\"media_id\":\"(.*?)\"").matcher(page)
+        val matcher = Pattern.compile("\"media_id\":\"?(.*?)[\",_]").matcher(page)
         return if (matcher.find()) matcher.group(1) else null
     }
 
 
-    private fun isProfileUrl(): Boolean {
-        if (inputUrl.contains("/p/")) return false
-        return !inputUrl.contains("(/reel/|/tv/|/reels/)[\\w-]{11}".toRegex())
+    private fun isPostUrl(): Boolean {
+        if (inputUrl.contains("/p/")) return true
+        return inputUrl.contains("(/reel/|/tv/|/reels/)[\\w-]{11}".toRegex())
     }
 
     private fun isHighlightsPost(): Boolean {
@@ -111,23 +111,37 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         null
     }
 
-    override suspend fun analyze() {
+    override suspend fun analyze(payload: Any?) {
         formats.src = "Instagram"
-        inputUrl = inputUrl.replace("/reels/", "/reel/")
         formats.url = inputUrl
+
+        val load = payload as? HashMap<*, *>
+
+        inputUrl = inputUrl.replace("/reels/", "/reel/")
         if (!inputUrl.endsWith("/")) inputUrl = "$inputUrl/"
         inputUrl = "${inputUrl.replace("/[^/?]*\$|/*\\?.*\$".toRegex(), "")}/?img_index=1"
-        if (!isProfileUrl())
+
+        if (isPostUrl()) {
+            if (load?.get("forced") == true) {
+                val items =
+                    HttpRequest(inputUrl.plus("&__a=1&__d=dis"), getHeadersWithUserAgent()).getResponse(true) ?: run {
+                        clientRequestError("unable to get post event with __a=1&__d=dis")
+                        return
+                    }
+                extractFromItems(items.toJSONObject().getJSONArray("items"))
+                return
+            }
             extractInfoShared(HttpRequest(inputUrl, getHeadersWithUserAgent()).getResponse() ?: run {
                 clientRequestError()
                 return
             })
-        else if (isHighlightsPost()) {
+        } else if (isHighlightsPost()) {
             val highlightsId = getHighlightsId()
             highlightsId?.let {
                 extractHighlights(it)
             }
         } else {
+            // possibly user url
             val userId = getUserID()
             userId?.let {
                 extractStories(it)
@@ -178,12 +192,11 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                 if (mediaId == null) throw JSONException("mediaId is null purposely thrown wrong error")
                 val url = POST_API.format(mediaId)
                 extractFromItems(
-                    JSONObject(
-                        HttpRequest(
-                            url,
-                            getHeadersWithUserAgent()
-                        ).getResponse().toString()
-                    ).getJSONArray("items")
+                    HttpRequest(url, getHeadersWithUserAgent())
+                        .getResponse()
+                        .toString()
+                        .toJSONObject()
+                        .getJSONArray("items")
                 )
             } catch (e: JSONException) {
                 onProgress(Result.Failed(Error.LoginRequired))
@@ -504,7 +517,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                 }
             }
         }
-        if (isProfileUrl() && videoFormats.isEmpty()) {
+        if (!isPostUrl() && videoFormats.isEmpty()) {
             onProgress(Result.Failed(Error.NonFatalError(NO_VIDEO_STATUS_AVAILABLE)))
         } else
             finalize()

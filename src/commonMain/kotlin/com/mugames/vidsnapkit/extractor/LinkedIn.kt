@@ -32,7 +32,7 @@ import java.util.regex.Pattern
 class LinkedIn internal constructor(url: String) : Extractor(url) {
     private val formats = Formats()
 
-    override suspend fun analyze() {
+    override suspend fun analyze(payload: Any?) {
         formats.url = inputUrl
         formats.src = "LinkedIn"
         onProgress(Result.Progress(ProgressState.Start))
