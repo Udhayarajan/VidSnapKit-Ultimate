@@ -124,6 +124,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         if (isPostUrl()) {
             if (load?.get("forced") == true) {
                 inputUrl = inputUrl.replace("/reel/", "/p/")
+                inputUrl = inputUrl.replace("https://instagram.com", "https://www.instagram.com")
                 val items =
                     HttpRequest(inputUrl.plus("&__a=1&__d=dis"), getHeadersWithUserAgent()).getResponse(true) ?: run {
                         clientRequestError("unable to get post event with __a=1&__d=dis")
