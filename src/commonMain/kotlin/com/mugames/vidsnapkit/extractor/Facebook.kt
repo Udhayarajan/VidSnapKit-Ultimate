@@ -200,7 +200,7 @@ class Facebook internal constructor(url: String) : Extractor(url) {
             videoFormats.add(localFormats)
             finalize()
         } ?: apply {
-            Result.Failed(Error.NonFatalError("This video can't be Downloaded"))
+            onProgress(Result.Failed(Error.NonFatalError("This video can't be Downloaded")))
         }
     }
 
@@ -341,6 +341,11 @@ class Facebook internal constructor(url: String) : Extractor(url) {
                     .getJSONObject("__bbox")
                     .getJSONObject("result")
                     .getJSONObject("data")
+                if (array.getString(0) == "ScheduledServerJSWithServer") return searchFromRequireArray(
+                    array.getJSONObject(0)
+                        .getJSONObject("__box")
+                        .getJSONArray("require")
+                )
             }
             return null
         }
