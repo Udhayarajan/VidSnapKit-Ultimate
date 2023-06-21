@@ -188,6 +188,10 @@ class Instagram internal constructor(url: String) : Extractor(url) {
 
 
     private suspend fun extractInfoShared(page: String) {
+        if (page == "{error:\"Invalid Cookies\"}") {
+            onProgress(Result.Failed(Error.LoginRequired))
+            return
+        }
         suspend fun newApiRequest() {
             val mediaId = getMediaId(page)
             try {

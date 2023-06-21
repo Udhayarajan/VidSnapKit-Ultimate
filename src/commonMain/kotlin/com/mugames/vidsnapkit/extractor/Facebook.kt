@@ -330,7 +330,11 @@ class Facebook internal constructor(url: String) : Extractor(url) {
             if (require == null) return null
             for (i in 0 until require.length()) {
                 val array = require.getJSONArray(i)
-                if (array.getString(0) == "ScheduledServerJS") return searchFromRequireArray(
+                if (array.getString(0) in listOf(
+                        "ScheduledServerJS",
+                        "ScheduledServerJSWithCSS"
+                    )
+                ) return searchFromRequireArray(
                     array.getJSONArray(3)
                         .getJSONObject(0)
                         .getJSONObject("__bbox")

@@ -114,7 +114,11 @@ abstract class Extractor(
 
     private suspend fun safeAnalyze() {
         try {
-            if (inputUrl.contains("instagram") && cookies != null) inputUrl = inputUrl.replace("/reels/", "/reel/")
+            if (inputUrl.contains("instagram"))
+                inputUrl = if (cookies != null) {
+                    inputUrl.replace("/reels/", "/reel/")
+                } else inputUrl.replace("/reel/", "/reels/")
+
             if (HttpRequest(inputUrl, headers).isAvailable())
                 analyze()
             else if (inputUrl.contains("instagram") && cookies != null)

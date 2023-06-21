@@ -20,7 +20,6 @@ package com.mugames.vidsnapkit.network
 import com.mugames.vidsnapkit.toJsonString
 import io.ktor.client.*
 import io.ktor.client.call.*
-import io.ktor.client.engine.android.*
 import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -142,6 +141,10 @@ class HttpInterfaceImpl(
             }
         } catch (e: ClientRequestException) {
             null
+        } catch (e: SendCountExceedException) {
+            if (url.contains("instagram") && headers?.containsKey("Cookie") == true)
+                "{error:\"Invalid Cookies\"}"
+            else throw e
         } catch (e: Exception) {
             throw e
         }
@@ -170,7 +173,7 @@ class HttpInterfaceImpl(
                 .matcher(locationUrl)
             if (!matcher.find())
                 locationUrl = cacheResponse.request.url.protocolWithAuthority + locationUrl
-            val nonRedirectingClient = HttpClient(Android) {
+            val nonRedirectingClient = client.config {
                 followRedirects = false
             }
             val tempResponse = nonRedirectingClient.get(locationUrl) {

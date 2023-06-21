@@ -27,7 +27,7 @@ plugins {
 }
 
 group = "io.github.udhayarajan"
-version = "5.2.0"
+version = "5.3.0"
 //Version Naming incremented if "<NEW_FEATURE_ADDED>.<WORKED_ON_BUG>.<BETA_VERSION_COUNT>"
 //Priority on incrementing Feature > BugFix > Beta
 
@@ -54,7 +54,7 @@ kotlin {
 
     }
     sourceSets {
-        val ktor_version = "2.0.1"
+        val ktor_version = "2.3.1"
 
         @SuppressLint("DuplicatePlatformClasses")
         val jvmMain by getting {
