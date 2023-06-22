@@ -90,8 +90,13 @@ class HttpRequest(
      *
      * @return Text format of entire webpage for given [url]
      */
-    suspend fun getResponse(needsRedirection: Boolean = true): String? =
-        withContext(Dispatchers.IO) { createClient(needsRedirection).getData(getUrl(), getHeader()) }
+    suspend fun getResponse(needsRedirection: Boolean = true, useCustomClient: Boolean = true): String? =
+        withContext(Dispatchers.IO) {
+            (if (useCustomClient) createClient(needsRedirection) else defaultClient()).getData(
+                getUrl(),
+                getHeader()
+            )
+        }
 
     /**
      * Used to estimate size of given url in bytes
@@ -100,10 +105,21 @@ class HttpRequest(
      */
     suspend fun getSize() = defaultClient().getSize(url)
 
-    suspend fun postRequest(postData: Hashtable<String, Any>? = null): String =
-        withContext(Dispatchers.IO) { createClient().postData(getUrl(), postData, getHeader()) }
+    suspend fun postRequest(postData: Hashtable<String, Any>? = null, useCustomClient: Boolean = true): String =
+        withContext(Dispatchers.IO) {
+            (if (useCustomClient) createClient() else defaultClient()).postData(
+                getUrl(),
+                postData,
+                getHeader()
+            )
+        }
 
-    suspend fun isAvailable(): Boolean =
-        withContext(Dispatchers.IO) { defaultClient(false).checkWebPage(getUrl(), getHeader()) }
+    suspend fun isAvailable(useCustomClient: Boolean = true): Boolean =
+        withContext(Dispatchers.IO) {
+            (if (useCustomClient) createClient() else defaultClient(false)).checkWebPage(
+                getUrl(),
+                getHeader()
+            )
+        }
 
 }
