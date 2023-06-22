@@ -263,11 +263,11 @@ class Instagram internal constructor(url: String) : Extractor(url) {
     }
 
     private suspend fun brutForcedExtraction(jsonObject: JSONObject) {
-        formats.title = jsonObject.getString("articleBody")
+        formats.title = jsonObject.getString("articleBody").ifEmpty { jsonObject.getString("headline") }
         var isMultiple = true
         val images = jsonObject.getJSONArray("image")
         for (i in 0 until images.length()) {
-            val image = images.getJSONObject(0)
+            val image = images.getJSONObject(i)
             if (images.length() == 1) {
                 isMultiple = false
                 formats.imageData.add(
@@ -280,6 +280,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
             }
             val localFormat = formats.copy(title = "", imageData = mutableListOf(), videoData = mutableListOf())
             localFormat.title = image.getString("caption")
+                .ifEmpty { image.getString("name").ifEmpty { image.getString("description") } }
             localFormat.imageData.add(
                 ImageResource(
                     url = image.getString("url"),
@@ -291,7 +292,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
 
         val videos = jsonObject.getJSONArray("video")
         for (i in 0 until videos.length()) {
-            val video = videos.getJSONObject(0)
+            val video = videos.getJSONObject(i)
             if (video.length() == 1) {
                 isMultiple = false
                 formats.videoData.add(
@@ -306,6 +307,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
             }
             val localFormat = formats.copy(title = "", imageData = mutableListOf(), videoData = mutableListOf())
             localFormat.title = video.getString("caption")
+                .ifEmpty { video.getString("name").ifEmpty { video.getString("description") } }
             localFormat.imageData.add(ImageResource(url = video.getString("thumbnailUrl")))
             localFormat.videoData.add(
                 VideoResource(
