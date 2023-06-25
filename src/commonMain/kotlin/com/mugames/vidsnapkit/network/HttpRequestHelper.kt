@@ -160,8 +160,12 @@ class HttpInterfaceImpl(
         } catch (e: SendCountExceedException) {
             if (url.contains("instagram") && headers?.containsKey("Cookie") == true)
                 "{error:\"Invalid Cookies\"}"
-            else throw e
+            else{
+                logger.error("getData() url=${url} header=${headers.toString()} SendCountExceedException:", e)
+                throw e
+            }
         } catch (e: Exception) {
+            logger.error("getData() url=${url} header=${headers.toString()} Generic exception:", e)
             throw e
         }
     }

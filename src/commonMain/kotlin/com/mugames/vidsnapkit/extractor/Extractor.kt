@@ -27,6 +27,7 @@ import com.mugames.vidsnapkit.sanitizeAsHeaderValue
 import io.ktor.client.plugins.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.future.future
+import org.slf4j.LoggerFactory
 import java.util.*
 import javax.net.ssl.SSLHandshakeException
 
@@ -67,6 +68,8 @@ abstract class Extractor(
                 else -> null
             }
         }
+
+        private val logger = LoggerFactory.getLogger(Extractor::class.java)
     }
 
     protected var inputUrl: String = url
@@ -83,7 +86,7 @@ abstract class Extractor(
         set(value) {
             value?.let {
                 headers["Cookie"] = it.sanitizeAsHeaderValue()
-            }?:run {
+            } ?: run {
                 headers.remove("Cookie")
             }
             field = value
@@ -117,15 +120,16 @@ abstract class Extractor(
     private suspend fun safeAnalyze() {
         try {
             if (inputUrl.contains("instagram"))
-                inputUrl = if (cookies != null) {
+                inputUrl = if (cookies == null) {
                     inputUrl.replace("/reels/", "/reel/")
                 } else inputUrl.replace("/reel/", "/reels/")
 
             if (HttpRequest(inputUrl, headers).isAvailable())
                 analyze()
-            else if (inputUrl.contains("instagram") && cookies != null)
+            else if (inputUrl.contains("instagram") && cookies != null) {
+                logger.info("Forcing instagram")
                 analyze(hashMapOf("forced" to true))
-            else clientRequestError()
+            } else clientRequestError()
         } catch (e: Exception) {
             if (e is SSLHandshakeException)
                 clientRequestError()

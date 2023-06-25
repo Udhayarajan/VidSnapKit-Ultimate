@@ -24,6 +24,7 @@ import io.ktor.http.*
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
+import org.slf4j.LoggerFactory
 import java.util.*
 import java.util.regex.Pattern
 
@@ -43,6 +44,8 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         const val HIGHLIGHTS_API = "https://www.instagram.com/api/v1/feed/reels_media/?reel_ids=highlight%s"
         const val GRAPHQL_URL =
             "https://www.instagram.com/graphql/query/?query_hash=b3055c01b4b222b8a47dc12b090e4e64&variables={\"shortcode\":\"%s\"}"
+
+        private val logger = LoggerFactory.getLogger(Instagram::class.java)
     }
 
     private val formats = Formats()
@@ -57,10 +60,11 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                 newLoc.contains(keyword, ignoreCase = true)
             }
 
-            if (newLoc == "https://www.instagram.com/" || !containsRestrictedKeyword){
+            if (newLoc == "https://www.instagram.com/" || !containsRestrictedKeyword) {
                 return true
             }
         }
+        logger.info("Oops!, Cookie is invalid so removing it from header")
         return false
     }
 
@@ -143,8 +147,13 @@ class Instagram internal constructor(url: String) : Extractor(url) {
             if (!isCookieValid())
                 cookies = null
             if (load?.get("forced") == true) {
+                if (cookies == null) {
+                    onProgress(Result.Failed(Error.LoginRequired))
+                    return
+                }
                 inputUrl = inputUrl.replace("/reel/", "/p/")
                 inputUrl = inputUrl.replace("https://instagram.com", "https://www.instagram.com")
+                logger.info("The new url is $inputUrl&__a=1&__d=dis")
                 val items =
                     HttpRequest(inputUrl.plus("&__a=1&__d=dis"), getHeadersWithUserAgent()).getResponse(true) ?: run {
                         clientRequestError("unable to get post event with __a=1&__d=dis")
