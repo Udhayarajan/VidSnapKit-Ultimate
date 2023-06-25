@@ -80,7 +80,7 @@ class HttpInterfaceImpl(
                     setBody(TextContent(it.toJsonString(), ContentType.Application.Json))
                 }
             }.bodyAsText()
-        } catch (e: Error) {
+        } catch (e: Exception) {
             logger.error(
                 "postData() url=${url} header=${headers.toString()} & postData=${postData.toString()} Error:",
                 e
@@ -128,6 +128,9 @@ class HttpInterfaceImpl(
         } catch (e: ClientRequestException) {
             logger.error("checkWebPage() url=${url} header=${headers.toString()} ClientRequestException:", e)
             false
+        } catch (e: Exception) {
+            logger.error("checkWebPage() url=${url} header=${headers.toString()} GenericException:", e)
+            false
         }
     }
 
@@ -160,7 +163,7 @@ class HttpInterfaceImpl(
         } catch (e: SendCountExceedException) {
             if (url.contains("instagram") && headers?.containsKey("Cookie") == true)
                 "{error:\"Invalid Cookies\"}"
-            else{
+            else {
                 logger.error("getData() url=${url} header=${headers.toString()} SendCountExceedException:", e)
                 throw e
             }
@@ -208,6 +211,7 @@ class HttpInterfaceImpl(
                 .matcher(locationUrl)
             if (!matcher.find())
                 locationUrl = cacheResponse.request.url.protocolWithAuthority + locationUrl
+            logger.info("redirection ${cacheResponse.request.url}->${locationUrl} [${cacheResponse.status.value}]")
             val nonRedirectingClient = client.config {
                 followRedirects = false
             }
