@@ -83,6 +83,8 @@ abstract class Extractor(
         set(value) {
             value?.let {
                 headers["Cookie"] = it.sanitizeAsHeaderValue()
+            }?:run {
+                headers.remove("Cookie")
             }
             field = value
         }

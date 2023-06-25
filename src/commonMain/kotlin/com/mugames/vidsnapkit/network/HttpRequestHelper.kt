@@ -34,6 +34,7 @@ import java.util.regex.Pattern
  */
 interface HttpInterface {
     suspend fun getData(url: String, headers: Hashtable<String, String>? = null): String?
+    suspend fun getRawResponse(url: String, headers: Hashtable<String, String>? = null): HttpResponse
     suspend fun getSize(url: String, headers: Hashtable<String, String>? = null): Long
 
     suspend fun postData(
@@ -150,6 +151,25 @@ class HttpInterfaceImpl(
         }
     }
 
+    override suspend fun getRawResponse(url: String, headers: Hashtable<String, String>?): HttpResponse {
+        return client.get {
+            url(url)
+            headers?.let {
+                if (it.isNotEmpty()) {
+                    headers {
+                        for ((key, value) in it)
+                            append(key, value)
+                    }
+                }
+            }
+        }.run {
+            if (status in redirectionStatusCode) {
+                return getLastPossibleRedirectedResponse(this, headers)
+            }
+            this
+        }
+    }
+
     override suspend fun getSize(url: String, headers: Hashtable<String, String>?): Long {
         return client.request {
             method = HttpMethod.Head
@@ -165,6 +185,7 @@ class HttpInterfaceImpl(
         response: HttpResponse,
         headers: Hashtable<String, String>?
     ): HttpResponse {
+        var cnt = 0
         var cacheResponse = response
         do {
             var locationUrl = cacheResponse.headers[HttpHeaders.Location]!!
@@ -187,7 +208,8 @@ class HttpInterfaceImpl(
             if (cacheResponse.request.url == tempResponse.request.url)
                 break
             cacheResponse = tempResponse
-        } while (cacheResponse.status in redirectionStatusCode)
+            cnt++
+        } while (cacheResponse.status in redirectionStatusCode || cnt < 20)
         return if (cacheResponse.request.url.host == "localhost") response else cacheResponse
     }
 }

@@ -20,6 +20,7 @@ package com.mugames.vidsnapkit.extractor
 import com.mugames.vidsnapkit.*
 import com.mugames.vidsnapkit.dataholders.*
 import com.mugames.vidsnapkit.network.HttpRequest
+import io.ktor.http.*
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -45,6 +46,22 @@ class Instagram internal constructor(url: String) : Extractor(url) {
     }
 
     private val formats = Formats()
+
+    private suspend fun isCookieValid(): Boolean {
+        val res = HttpRequest("https://www.instagram.com/accounts/login/", headers).getRawResponse()
+        if (res.status == HttpStatusCode.Found) {
+            val newLoc = res.headers["location"]!!
+            val restrictedKeywords = listOf("privacy/checks", "challenge", "coig_restricted")
+            val containsRestrictedKeyword = restrictedKeywords.any { keyword ->
+                newLoc.contains(keyword, ignoreCase = true)
+            }
+
+            if (newLoc == "https://www.instagram.com/" || !containsRestrictedKeyword){
+                return true
+            }
+        }
+        return false
+    }
 
     private fun getMediaId(page: String): String? {
         val matcher = Pattern.compile("\"media_id\":\"?(.*?)[\",_]").matcher(page)
@@ -122,6 +139,8 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         inputUrl = "${inputUrl.replace("/[^/?]*\$|/*\\?.*\$".toRegex(), "")}/?img_index=1"
 
         if (isPostUrl()) {
+            if (!isCookieValid())
+                cookies = null
             if (load?.get("forced") == true) {
                 inputUrl = inputUrl.replace("/reel/", "/p/")
                 inputUrl = inputUrl.replace("https://instagram.com", "https://www.instagram.com")

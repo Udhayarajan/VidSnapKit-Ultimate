@@ -103,7 +103,8 @@ class HttpRequest(
      *
      * @return bytes count of given [url]
      */
-    suspend fun getSize() = defaultClient().getSize(url)
+    suspend fun getSize(useCustomClient: Boolean = true) =
+        (if (useCustomClient) createClient() else defaultClient()).getSize(url)
 
     suspend fun postRequest(postData: Hashtable<String, Any>? = null, useCustomClient: Boolean = true): String =
         withContext(Dispatchers.IO) {
@@ -113,6 +114,9 @@ class HttpRequest(
                 getHeader()
             )
         }
+
+    suspend fun getRawResponse(useCustomClient: Boolean = true) =
+        (if (useCustomClient) createClient() else defaultClient()).getRawResponse(getUrl(), getHeader())
 
     suspend fun isAvailable(useCustomClient: Boolean = true): Boolean =
         withContext(Dispatchers.IO) {
