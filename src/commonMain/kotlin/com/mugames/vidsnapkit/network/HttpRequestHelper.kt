@@ -25,6 +25,7 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.http.content.*
+import org.slf4j.LoggerFactory
 import java.util.*
 import java.util.regex.Pattern
 
@@ -56,6 +57,10 @@ class HttpInterfaceImpl(
         HttpStatusCode.TemporaryRedirect
     )
 
+    companion object {
+        private val logger = LoggerFactory.getLogger(HttpInterfaceImpl::class.java)
+    }
+
     override suspend fun postData(
         url: String,
         postData: Hashtable<String, Any>?,
@@ -76,6 +81,10 @@ class HttpInterfaceImpl(
                 }
             }.bodyAsText()
         } catch (e: Error) {
+            logger.error(
+                "postData() url=${url} header=${headers.toString()} & postData=${postData.toString()} Error:",
+                e
+            )
             throw e
         }
     }
@@ -112,10 +121,12 @@ class HttpInterfaceImpl(
                         val res = getLastPossibleRedirectedResponse(this, headers)
                         return res.status in acceptedStatusCode || res.status in redirectionStatusCode
                     }
+                    logger.warn("Unhandled in checkWebPage() status code=${status} for url=${url} with headers=${headers.toString()} & response=${bodyAsText()}")
                     false
                 }
             }
         } catch (e: ClientRequestException) {
+            logger.error("checkWebPage() url=${url} header=${headers.toString()} ClientRequestException:", e)
             false
         }
     }
@@ -138,9 +149,13 @@ class HttpInterfaceImpl(
                 else if (status in redirectionStatusCode) {
                     getLastPossibleRedirectedResponse(this, headers).body()
                 } else if (url.contains("instagram") && status == HttpStatusCode.InternalServerError) "{error:\"Invalid Cookies\"}"
-                else null
+                else {
+                    logger.warn("Unhandled in getData() status code=${status} for url=${url} with headers=${headers.toString()} & response=${bodyAsText()}")
+                    null
+                }
             }
         } catch (e: ClientRequestException) {
+            logger.error("getData() url=${url} header=${headers.toString()} ClientRequestException:", e)
             null
         } catch (e: SendCountExceedException) {
             if (url.contains("instagram") && headers?.containsKey("Cookie") == true)

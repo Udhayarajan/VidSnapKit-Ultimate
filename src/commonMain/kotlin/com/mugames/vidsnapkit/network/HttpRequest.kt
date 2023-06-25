@@ -92,7 +92,7 @@ class HttpRequest(
      */
     suspend fun getResponse(needsRedirection: Boolean = true, useCustomClient: Boolean = true): String? =
         withContext(Dispatchers.IO) {
-            (if (useCustomClient) createClient(needsRedirection) else defaultClient()).getData(
+            (if (useCustomClient) createClient(needsRedirection) else defaultClient(needsRedirection)).getData(
                 getUrl(),
                 getHeader()
             )
