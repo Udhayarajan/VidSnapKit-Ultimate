@@ -52,7 +52,8 @@ class Instagram internal constructor(url: String) : Extractor(url) {
 
     private suspend fun isCookieValid(): Boolean {
         if (cookies.isNullOrEmpty()) return false
-        val res = HttpRequest("https://www.instagram.com/accounts/login/", headers).getRawResponse(false)
+        val res =
+            HttpRequest("https://www.instagram.com/accounts/login/", headers).getRawResponse(false) ?: return false
         if (res.status == HttpStatusCode.Found) {
             val newLoc = res.headers["location"]!!
             val restrictedKeywords = listOf("privacy/checks", "challenge", "coig_restricted")

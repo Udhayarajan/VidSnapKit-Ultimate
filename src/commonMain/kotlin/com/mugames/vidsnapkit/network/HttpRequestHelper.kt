@@ -35,7 +35,7 @@ import java.util.regex.Pattern
  */
 interface HttpInterface {
     suspend fun getData(url: String, headers: Hashtable<String, String>? = null): String?
-    suspend fun getRawResponse(url: String, headers: Hashtable<String, String>? = null): HttpResponse
+    suspend fun getRawResponse(url: String, headers: Hashtable<String, String>? = null): HttpResponse?
     suspend fun getSize(url: String, headers: Hashtable<String, String>? = null): Long
 
     suspend fun postData(
@@ -173,17 +173,27 @@ class HttpInterfaceImpl(
         }
     }
 
-    override suspend fun getRawResponse(url: String, headers: Hashtable<String, String>?): HttpResponse {
-        return client.get {
-            url(url)
-            headers?.let {
-                if (it.isNotEmpty()) {
-                    headers {
-                        for ((key, value) in it)
-                            append(key, value)
+    override suspend fun getRawResponse(url: String, headers: Hashtable<String, String>?): HttpResponse? {
+        return try {
+            client.get {
+                url(url)
+                headers?.let {
+                    if (it.isNotEmpty()) {
+                        headers {
+                            for ((key, value) in it)
+                                append(key, value)
+                        }
                     }
                 }
             }
+        } catch (e: Exception) {
+            var x = false
+            client.config { x = followRedirects }
+            logger.error(
+                "getRawResponse() url=${url} header=${headers.toString()} clientRedirection=${x} Generic exception:",
+                e
+            )
+            null
         }
     }
 
