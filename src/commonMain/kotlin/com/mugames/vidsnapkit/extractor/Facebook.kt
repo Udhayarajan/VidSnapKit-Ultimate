@@ -46,8 +46,9 @@ class Facebook internal constructor(url: String) : Extractor(url) {
         Chrome/69.0.3497.122 Safari/537.36
     """.trimIndent().replace("\n", "")
 
-    suspend fun isCookieValid(): Boolean {
-        val res = HttpRequest("https://www.instagram.com/accounts/login/", headers).getResponse() ?: return false
+    private suspend fun isCookieValid(): Boolean {
+        if (cookies.isNullOrEmpty()) return false
+        val res = HttpRequest("https://www.facebook.com/", headers).getResponse() ?: return false
         val restrictedKeywords = listOf("Create new account", "log in or sign up", "Forgotten password")
         val containsRestrictedKeyword = restrictedKeywords.any { keyword ->
             res.contains(keyword, ignoreCase = true)

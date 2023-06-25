@@ -120,7 +120,7 @@ class HttpRequest(
 
     suspend fun isAvailable(useCustomClient: Boolean = true): Boolean =
         withContext(Dispatchers.IO) {
-            (if (useCustomClient) createClient() else defaultClient(false)).checkWebPage(
+            (if (useCustomClient) createClient(false) else defaultClient(false)).checkWebPage(
                 getUrl(),
                 getHeader()
             )
