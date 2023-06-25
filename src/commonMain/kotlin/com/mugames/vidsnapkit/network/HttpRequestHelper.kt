@@ -162,11 +162,6 @@ class HttpInterfaceImpl(
                     }
                 }
             }
-        }.run {
-            if (status in redirectionStatusCode) {
-                return getLastPossibleRedirectedResponse(this, headers)
-            }
-            this
         }
     }
 

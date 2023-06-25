@@ -115,8 +115,8 @@ class HttpRequest(
             )
         }
 
-    suspend fun getRawResponse(useCustomClient: Boolean = true) =
-        (if (useCustomClient) createClient() else defaultClient()).getRawResponse(getUrl(), getHeader())
+    suspend fun getRawResponse(needsRedirection: Boolean = true, useCustomClient: Boolean = true) =
+        (if (useCustomClient) createClient(needsRedirection) else defaultClient(needsRedirection)).getRawResponse(getUrl(), getHeader())
 
     suspend fun isAvailable(useCustomClient: Boolean = true): Boolean =
         withContext(Dispatchers.IO) {
