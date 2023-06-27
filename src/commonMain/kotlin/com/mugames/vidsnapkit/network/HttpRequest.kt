@@ -53,7 +53,7 @@ class HttpRequest(
         }
 
         private fun createClient(requiresRedirection: Boolean = true): HttpInterface {
-            return HttpInterfaceImpl(clientGenerator().also { it.config { followRedirects = requiresRedirection } })
+            return HttpInterfaceImpl(clientGenerator().apply { config { followRedirects = requiresRedirection } })
         }
 
         /**
