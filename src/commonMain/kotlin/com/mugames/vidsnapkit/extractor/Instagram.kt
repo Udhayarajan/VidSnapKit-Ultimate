@@ -54,12 +54,15 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         if (cookies.isNullOrEmpty()) return false
         val res =
             HttpRequest("https://www.instagram.com/accounts/login/", headers).getRawResponse(false) ?: return false
+        logger.info("status code=${res.status.value} & http response=${res}")
         if (res.status == HttpStatusCode.Found) {
             val newLoc = res.headers["location"]!!
             val restrictedKeywords = listOf("privacy/checks", "challenge", "coig_restricted")
             val containsRestrictedKeyword = restrictedKeywords.any { keyword ->
                 newLoc.contains(keyword, ignoreCase = true)
             }
+
+            logger.info("response header=${res.headers}")
 
             if (newLoc == "https://www.instagram.com/" || !containsRestrictedKeyword) {
                 return true
