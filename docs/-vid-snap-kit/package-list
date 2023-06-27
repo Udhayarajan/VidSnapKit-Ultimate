@@ -196,6 +196,7 @@ $dokka.location:com.mugames.vidsnapkit.extractor/DailyMotion.Companion/METADATA_
 $dokka.location:com.mugames.vidsnapkit.extractor/DailyMotion///PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-daily-motion/index.html
 $dokka.location:com.mugames.vidsnapkit.extractor/DailyMotion/DailyMotion/#kotlin.String/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-daily-motion/-daily-motion.html
 $dokka.location:com.mugames.vidsnapkit.extractor/DailyMotion/localFormats/#/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-daily-motion/local-formats.html
+$dokka.location:com.mugames.vidsnapkit.extractor/DailyMotion/testWebpage/#kotlin.String/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-daily-motion/test-webpage.html
 $dokka.location:com.mugames.vidsnapkit.extractor/Extractor.Companion///PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-extractor/-companion/index.html
 $dokka.location:com.mugames.vidsnapkit.extractor/Extractor.Companion/findExtractor/#kotlin.String/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-extractor/-companion/find-extractor.html
 $dokka.location:com.mugames.vidsnapkit.extractor/Extractor///PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-extractor/index.html
@@ -204,6 +205,7 @@ $dokka.location:com.mugames.vidsnapkit.extractor/Extractor/cookies/#/PointingToD
 $dokka.location:com.mugames.vidsnapkit.extractor/Extractor/start/#com.mugames.vidsnapkit.ProgressCallback/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-extractor/start.html
 $dokka.location:com.mugames.vidsnapkit.extractor/Extractor/start/#kotlin.Function1[com.mugames.vidsnapkit.dataholders.Result,kotlin.Unit]/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-extractor/start.html
 $dokka.location:com.mugames.vidsnapkit.extractor/Extractor/startAsync/#com.mugames.vidsnapkit.ProgressCallback/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-extractor/start-async.html
+$dokka.location:com.mugames.vidsnapkit.extractor/Extractor/testWebpage/#kotlin.String/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-extractor/test-webpage.html
 $dokka.location:com.mugames.vidsnapkit.extractor/Facebook.Companion///PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-facebook/-companion/index.html
 $dokka.location:com.mugames.vidsnapkit.extractor/Facebook.Companion/PAGELET_REGEX/#/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-facebook/-companion/-p-a-g-e-l-e-t_-r-e-g-e-x.html
 $dokka.location:com.mugames.vidsnapkit.extractor/Facebook.Companion/SUCCESS/#/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-facebook/-companion/-s-u-c-c-e-s-s.html
@@ -222,18 +224,24 @@ $dokka.location:com.mugames.vidsnapkit.extractor/Instagram.Companion/STORIES_API
 $dokka.location:com.mugames.vidsnapkit.extractor/Instagram.Companion/STORIES_URL/#/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-instagram/-companion/-s-t-o-r-i-e-s_-u-r-l.html
 $dokka.location:com.mugames.vidsnapkit.extractor/Instagram.Companion/TAG/#/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-instagram/-companion/-t-a-g.html
 $dokka.location:com.mugames.vidsnapkit.extractor/Instagram///PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-instagram/index.html
+$dokka.location:com.mugames.vidsnapkit.extractor/Instagram/testWebpage/#kotlin.String/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-instagram/test-webpage.html
 $dokka.location:com.mugames.vidsnapkit.extractor/Likee.Companion///PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-likee/-companion/index.html
 $dokka.location:com.mugames.vidsnapkit.extractor/Likee///PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-likee/index.html
+$dokka.location:com.mugames.vidsnapkit.extractor/Likee/testWebpage/#kotlin.String/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-likee/test-webpage.html
 $dokka.location:com.mugames.vidsnapkit.extractor/LinkedIn///PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-linked-in/index.html
+$dokka.location:com.mugames.vidsnapkit.extractor/LinkedIn/testWebpage/#kotlin.String/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-linked-in/test-webpage.html
 $dokka.location:com.mugames.vidsnapkit.extractor/Periscope///PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-periscope/index.html
 $dokka.location:com.mugames.vidsnapkit.extractor/Periscope/data/#/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-periscope/data.html
 $dokka.location:com.mugames.vidsnapkit.extractor/Periscope/extractInfo/#/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-periscope/extract-info.html
 $dokka.location:com.mugames.vidsnapkit.extractor/Periscope/manifest/#/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-periscope/manifest.html
+$dokka.location:com.mugames.vidsnapkit.extractor/Periscope/testWebpage/#kotlin.String/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-periscope/test-webpage.html
 $dokka.location:com.mugames.vidsnapkit.extractor/ShareChat///PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-share-chat/index.html
+$dokka.location:com.mugames.vidsnapkit.extractor/ShareChat/testWebpage/#kotlin.String/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-share-chat/test-webpage.html
 $dokka.location:com.mugames.vidsnapkit.extractor/TikTok///PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-tik-tok/index.html
-$dokka.location:com.mugames.vidsnapkit.extractor/TikTok/testWithWebPage/#kotlin.String/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-tik-tok/test-with-web-page.html
+$dokka.location:com.mugames.vidsnapkit.extractor/TikTok/testWebpage/#kotlin.String/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-tik-tok/test-webpage.html
 $dokka.location:com.mugames.vidsnapkit.extractor/Twitch///PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-twitch/index.html
 $dokka.location:com.mugames.vidsnapkit.extractor/Twitch/extractURLFromClips/#/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-twitch/extract-u-r-l-from-clips.html
+$dokka.location:com.mugames.vidsnapkit.extractor/Twitch/testWebpage/#kotlin.String/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-twitch/test-webpage.html
 $dokka.location:com.mugames.vidsnapkit.extractor/Twitter///PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-twitter/index.html
 $dokka.location:com.mugames.vidsnapkit.extractor/Twitter/TAG/#/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-twitter/-t-a-g.html
 $dokka.location:com.mugames.vidsnapkit.extractor/Twitter/auth/#/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-twitter/auth.html
@@ -242,9 +250,11 @@ $dokka.location:com.mugames.vidsnapkit.extractor/Twitter/info/#/PointingToDeclar
 $dokka.location:com.mugames.vidsnapkit.extractor/Twitter/localFormats/#/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-twitter/local-formats.html
 $dokka.location:com.mugames.vidsnapkit.extractor/Twitter/query/#/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-twitter/query.html
 $dokka.location:com.mugames.vidsnapkit.extractor/Twitter/resolution/#kotlin.String?/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-twitter/resolution.html
+$dokka.location:com.mugames.vidsnapkit.extractor/Twitter/testWebpage/#kotlin.String/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-twitter/test-webpage.html
 $dokka.location:com.mugames.vidsnapkit.extractor/Vimeo.Companion///PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-vimeo/-companion/index.html
 $dokka.location:com.mugames.vidsnapkit.extractor/Vimeo.Companion/CONFIG_URL/#/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-vimeo/-companion/-c-o-n-f-i-g_-u-r-l.html
 $dokka.location:com.mugames.vidsnapkit.extractor/Vimeo///PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-vimeo/index.html
+$dokka.location:com.mugames.vidsnapkit.extractor/Vimeo/testWebpage/#kotlin.String/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-vimeo/test-webpage.html
 $dokka.location:com.mugames.vidsnapkit.network////PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.network/index.html
 $dokka.location:com.mugames.vidsnapkit.network/HttpInterface///PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.network/-http-interface/index.html
 $dokka.location:com.mugames.vidsnapkit.network/HttpInterface/checkWebPage/#kotlin.String#[Error type: Unresolved type for Hashtable<String, String>][kotlin.String,kotlin.String]?/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.network/-http-interface/check-web-page.html
