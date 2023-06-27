@@ -21,6 +21,8 @@ import com.mugames.vidsnapkit.*
 import com.mugames.vidsnapkit.Util.Companion.decodeHTML
 import com.mugames.vidsnapkit.dataholders.*
 import com.mugames.vidsnapkit.network.HttpRequest
+import io.ktor.client.statement.*
+import io.ktor.http.*
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -46,14 +48,22 @@ class Facebook internal constructor(url: String) : Extractor(url) {
 
     private suspend fun isCookieValid(): Boolean {
         if (cookies.isNullOrEmpty()) return false
-        val res = HttpRequest("https://www.facebook.com/", headers).getResponse(false) ?: return false
-        val restrictedKeywords = listOf("Create new account", "log in or sign up", "Forgotten password")
-        val containsRestrictedKeyword = restrictedKeywords.any { keyword ->
-            res.contains(keyword, ignoreCase = true)
+        val res = HttpRequest("https://www.facebook.com/", headers).getRawResponse(false) ?: return false
+        if (res.status == HttpStatusCode.OK) {
+            val restrictedKeywords = listOf("Create new account", "log in or sign up", "Forgotten password")
+            val containsRestrictedKeyword = restrictedKeywords.any { keyword ->
+                res.bodyAsText().contains(keyword, ignoreCase = true)
+            }
+            logger.info("Check cookie containsRestrictedKeyword=${containsRestrictedKeyword} ")
+            return !containsRestrictedKeyword
         }
-
-        logger.info("Check cookie containsRestrictedKeyword=${containsRestrictedKeyword} ")
-        return !containsRestrictedKeyword
+        if (res.status == HttpStatusCode.Found){
+            logger.info("Oops! redirection found for ${res.headers["location"]}")
+            if (res.call.request.url.toString().contains("checkpoint")){
+                return false
+            }
+        }
+        return true
     }
 
     override suspend fun analyze(payload: Any?) {

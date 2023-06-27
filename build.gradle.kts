@@ -27,7 +27,7 @@ plugins {
 }
 
 group = "io.github.udhayarajan"
-version = "5.3.15"
+version = "5.3.16"
 //Version Naming incremented if "<NEW_FEATURE_ADDED>.<WORKED_ON_BUG>.<BETA_VERSION_COUNT>"
 //Priority on incrementing Feature > BugFix > Beta
 
