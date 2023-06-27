@@ -62,12 +62,11 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                 newLoc.contains(keyword, ignoreCase = true)
             }
 
-            logger.info("response header=${res.headers}")
-
             if (newLoc == "https://www.instagram.com/" || !containsRestrictedKeyword) {
                 return true
             }
         }
+        // if redirection is not set
         if (res.status == HttpStatusCode.OK) {
             if (res.call.request.url.toString() == "https://www.instagram.com/") {
                 return true
