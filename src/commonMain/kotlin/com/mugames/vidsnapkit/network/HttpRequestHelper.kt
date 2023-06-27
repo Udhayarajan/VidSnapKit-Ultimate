@@ -41,7 +41,7 @@ interface HttpInterface {
     suspend fun postData(
         url: String,
         postData: Hashtable<String, Any>? = null,
-        headers: Hashtable<String, String>? = null
+        headers: Hashtable<String, String>? = null,
     ): String
 
     suspend fun checkWebPage(url: String, headers: Hashtable<String, String>?): Boolean
@@ -64,7 +64,7 @@ class HttpInterfaceImpl(
     override suspend fun postData(
         url: String,
         postData: Hashtable<String, Any>?,
-        headers: Hashtable<String, String>?
+        headers: Hashtable<String, String>?,
     ): String {
         return try {
             client.post {
@@ -210,12 +210,12 @@ class HttpInterfaceImpl(
 
     private suspend fun getLastPossibleRedirectedResponse(
         response: HttpResponse,
-        headers: Hashtable<String, String>?
+        headers: Hashtable<String, String>?,
     ): HttpResponse {
         var cnt = 0
         var cacheResponse = response
         do {
-            var locationUrl = cacheResponse.headers[HttpHeaders.Location]!!
+            var locationUrl = cacheResponse.headers[HttpHeaders.Location] ?: return cacheResponse
 
             val matcher = Pattern.compile("^(?:https?:\\/\\/)?(?:[^@\\n]+@)?(?:www\\.)?([^:\\/\\n?]+)")
                 .matcher(locationUrl)

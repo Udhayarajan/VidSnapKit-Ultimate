@@ -123,12 +123,16 @@ abstract class Extractor(
                 inputUrl = if (cookies == null) {
                     inputUrl.replace("/reels/", "/reel/")
                 } else inputUrl.replace("/reel/", "/reels/")
-                headers["User-Agent"] = "Mozilla/5.0 (iPhone; CPU iPhone OS 12_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 105.0.0.11.118 (iPhone11,8; iOS 12_3_1; en_US; en-US; scale=2.00; 828x1792; 165586599)"
+                headers["User-Agent"] =
+                    "Mozilla/5.0 (iPhone; CPU iPhone OS 12_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 105.0.0.11.118 (iPhone11,8; iOS 12_3_1; en_US; en-US; scale=2.00; 828x1792; 165586599)"
             }
             if (HttpRequest(inputUrl, headers).isAvailable())
                 analyze()
             else if (inputUrl.contains("instagram") && cookies != null) {
                 logger.info("Forcing instagram")
+                analyze(hashMapOf("forced" to true))
+            } else if ((inputUrl.contains("facebook") || inputUrl.contains("fb")) && cookies != null) {
+                logger.info("Forcing FB")
                 analyze(hashMapOf("forced" to true))
             } else clientRequestError()
         } catch (e: Exception) {

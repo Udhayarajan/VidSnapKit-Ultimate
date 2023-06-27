@@ -57,9 +57,10 @@ class Facebook internal constructor(url: String) : Extractor(url) {
             logger.info("Check cookie containsRestrictedKeyword=${containsRestrictedKeyword} ")
             return !containsRestrictedKeyword
         }
-        if (res.status == HttpStatusCode.Found){
-            logger.info("Oops! redirection found for ${res.headers["location"]}")
-            if (res.call.request.url.toString().contains("checkpoint")){
+        if (res.status == HttpStatusCode.Found) {
+            val loc = res.headers["location"]
+            logger.info("Oops! redirection found for $loc")
+            if (loc.toString().contains("checkpoint")) {
                 return false
             }
         }
