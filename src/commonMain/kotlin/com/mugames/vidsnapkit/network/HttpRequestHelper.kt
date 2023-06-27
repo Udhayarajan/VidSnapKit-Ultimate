@@ -237,7 +237,7 @@ class HttpInterfaceImpl(
                 break
             cacheResponse = tempResponse
             cnt++
-        } while (cacheResponse.status in redirectionStatusCode || cnt < 20)
+        } while (cacheResponse.status in redirectionStatusCode && cnt < 20)
         return if (cacheResponse.request.url.host == "localhost") response else cacheResponse
     }
 }
