@@ -235,6 +235,10 @@ class Twitter internal constructor(url: String) : Extractor(url) {
         super.finalize()
     }
 
+    override suspend fun testWebpage(string: String) {
+        TODO("Not yet implemented")
+    }
+
 
     fun resolution(url: String?): String {
         val pattern: Pattern = Pattern.compile("/(\\d+x\\d+)/")

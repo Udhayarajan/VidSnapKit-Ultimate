@@ -64,6 +64,10 @@ class Vimeo internal constructor(url: String) : Extractor(url) {
         }
     }
 
+    override suspend fun testWebpage(string: String) {
+        TODO("Not yet implemented")
+    }
+
     private suspend fun parseConfigRequest(response: String) {
         val json = response.toJSONObject()
         val hls = json.getJSONObject("request").getJSONObject("files").getJSONObject("dash")

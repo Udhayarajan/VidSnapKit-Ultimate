@@ -38,6 +38,10 @@ class Twitch internal constructor(url: String) : Extractor(url) {
         TODO("Not yet implemented")
     }
 
+    override suspend fun testWebpage(string: String) {
+        TODO("Not yet implemented")
+    }
+
     private fun getId(s: String?): String? {
         return s?.run {
             val matcher =

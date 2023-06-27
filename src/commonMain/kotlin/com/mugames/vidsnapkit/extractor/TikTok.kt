@@ -80,7 +80,7 @@ class TikTok internal constructor(url: String) : Extractor(url) {
             onProgress(Result.Failed(Error.MethodMissingLogic))
     }
 
-    suspend fun testWithWebPage(string: String){
+    override suspend fun testWebpage(string: String) {
         onProgress = {
             println(it)
         }

@@ -107,6 +107,10 @@ class DailyMotion(url: String) : Extractor(url) {
         }
     }
 
+    override suspend fun testWebpage(string: String) {
+        TODO("Not yet implemented")
+    }
+
     private suspend fun extractFromM3U8(response: String) {
         fun valueForKey(key: String, line: String): String? {
             val matcher = Pattern.compile("$key=(?:\"(.*?)\"|(.*?),)").matcher(line)

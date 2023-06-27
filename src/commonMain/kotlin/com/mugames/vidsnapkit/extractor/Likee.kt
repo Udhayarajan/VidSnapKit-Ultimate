@@ -57,6 +57,10 @@ class Likee internal constructor(url: String) : Extractor(url) {
         }
     }
 
+    override suspend fun testWebpage(string: String) {
+        TODO("Not yet implemented")
+    }
+
     private suspend fun extractVideoList(jsonArray: JSONArray) {
         for (i in 0 until jsonArray.length()) {
             val localFormats = formats.copy(title = "", videoData = mutableListOf(), imageData = mutableListOf())

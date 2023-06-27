@@ -523,7 +523,7 @@ class Facebook internal constructor(url: String) : Extractor(url) {
         return null
     }
 
-    suspend fun testWebpage(string: String) {
+    override suspend fun testWebpage(string: String) {
         onProgress = {
 
         }

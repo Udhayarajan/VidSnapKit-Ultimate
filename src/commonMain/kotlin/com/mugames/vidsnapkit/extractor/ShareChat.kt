@@ -42,6 +42,10 @@ class ShareChat internal constructor(url: String) : Extractor(url) {
         })
     }
 
+    override suspend fun testWebpage(string: String) {
+        TODO("Not yet implemented")
+    }
+
     private suspend fun scratchWebPage(response: String) {
         val matcher =
             Pattern.compile("""<script data-rh="true" type="application\/ld\+json">(\{"@context":"http:\/\/schema\.org","@type":"(?:Image|Video)Object".*?\})<\/script>""")

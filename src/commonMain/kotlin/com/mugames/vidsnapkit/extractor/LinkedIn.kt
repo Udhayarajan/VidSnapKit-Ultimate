@@ -42,6 +42,10 @@ class LinkedIn internal constructor(url: String) : Extractor(url) {
         })
     }
 
+    override suspend fun testWebpage(string: String) {
+        TODO("Not yet implemented")
+    }
+
     private suspend fun scratchWebpage(page: String) {
         val matcher = Pattern.compile("data-sources=\"(.*?)\"").matcher(page)
         if (matcher.find()) {

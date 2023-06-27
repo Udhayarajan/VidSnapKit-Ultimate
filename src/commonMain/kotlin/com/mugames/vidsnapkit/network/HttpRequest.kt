@@ -42,13 +42,11 @@ class HttpRequest(
     companion object {
         private var prefixUrl = ""
         private var additionHeader: Hashtable<String, String>? = null
-        private fun defaultClient(requiresRedirection: Boolean = true) = HttpClient(Android).also {
-            it.config {
+        private fun defaultClient(requiresRedirection: Boolean = true) = HttpInterfaceImpl(
+            HttpClient(Android).config {
                 followRedirects = requiresRedirection
             }
-        }.run {
-            HttpInterfaceImpl(this)
-        }
+        )
 
         private var clientGenerator: () -> HttpClient = {
             HttpClient(Android)
@@ -104,7 +102,7 @@ class HttpRequest(
      * @return bytes count of given [url]
      */
     suspend fun getSize(useCustomClient: Boolean = true) =
-        (if (useCustomClient) createClient() else defaultClient()).getSize(url)
+        (if (useCustomClient) createClient() else defaultClient()).getSize(url, getHeader())
 
     suspend fun postRequest(postData: Hashtable<String, Any>? = null, useCustomClient: Boolean = true): String =
         withContext(Dispatchers.IO) {

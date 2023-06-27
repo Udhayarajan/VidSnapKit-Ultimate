@@ -119,11 +119,12 @@ abstract class Extractor(
 
     private suspend fun safeAnalyze() {
         try {
-            if (inputUrl.contains("instagram"))
+            if (inputUrl.contains("instagram")) {
                 inputUrl = if (cookies == null) {
                     inputUrl.replace("/reels/", "/reel/")
                 } else inputUrl.replace("/reel/", "/reels/")
-
+                headers["User-Agent"] = "Mozilla/5.0 (iPhone; CPU iPhone OS 12_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 105.0.0.11.118 (iPhone11,8; iOS 12_3_1; en_US; en-US; scale=2.00; 828x1792; 165586599)"
+            }
             if (HttpRequest(inputUrl, headers).isAvailable())
                 analyze()
             else if (inputUrl.contains("instagram") && cookies != null) {
@@ -180,7 +181,7 @@ abstract class Extractor(
         val sizes = mutableListOf<Deferred<Long>>()
         coroutineScope {
             for (videoData in format.videoData) {
-                sizes.add(async { HttpRequest(videoData.url).getSize() })
+                sizes.add(async { HttpRequest(videoData.url, headers).getSize() })
             }
         }
         return sizes.awaitAll()
@@ -190,7 +191,7 @@ abstract class Extractor(
         val sizes = mutableListOf<Deferred<Long>>()
         coroutineScope {
             for (audioData in format.audioData) {
-                sizes.add(async { HttpRequest(audioData.url).getSize() })
+                sizes.add(async { HttpRequest(audioData.url, headers).getSize() })
             }
         }
         return sizes.awaitAll()
@@ -200,7 +201,7 @@ abstract class Extractor(
         val sizes = mutableListOf<Deferred<Long>>()
         coroutineScope {
             for (imageData in format.imageData) {
-                sizes.add(async { HttpRequest(imageData.url).getSize() })
+                sizes.add(async { HttpRequest(imageData.url, headers).getSize() })
             }
         }
         return sizes.awaitAll()
@@ -213,4 +214,6 @@ abstract class Extractor(
     protected inline fun internalError(msg: String, e: Exception? = null) {
         onProgress(Result.Failed(Error.InternalError(msg, e)))
     }
+
+    abstract suspend fun testWebpage(string: String)
 }

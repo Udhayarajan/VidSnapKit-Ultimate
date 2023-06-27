@@ -156,14 +156,14 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                 inputUrl = inputUrl.replace("https://instagram.com", "https://www.instagram.com")
                 logger.info("The new url is $inputUrl&__a=1&__d=dis")
                 val items =
-                    HttpRequest(inputUrl.plus("&__a=1&__d=dis"), getHeadersWithUserAgent()).getResponse(true) ?: run {
+                    HttpRequest(inputUrl.plus("&__a=1&__d=dis"), headers).getResponse(true) ?: run {
                         clientRequestError("unable to get post event with __a=1&__d=dis")
                         return
                     }
                 extractFromItems(items.toJSONObject().getJSONArray("items"))
                 return
             }
-            extractInfoShared(HttpRequest(inputUrl, getHeadersWithUserAgent()).getResponse() ?: run {
+            extractInfoShared(HttpRequest(inputUrl, headers).getResponse() ?: run {
                 clientRequestError()
                 return
             })
@@ -182,7 +182,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
     }
 
     private suspend fun extractHighlights(highlightsId: String) {
-        val highlights = HttpRequest(HIGHLIGHTS_API.format("%3A$highlightsId"), getHeadersWithUserAgent()).getResponse()
+        val highlights = HttpRequest(HIGHLIGHTS_API.format("%3A$highlightsId"), headers).getResponse()
             ?.toJSONObjectOrNull()
         highlights?.let {
             if (it.getNullable("login_required") == "true") {
@@ -197,8 +197,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
 
     @Suppress("UNCHECKED_CAST")
     private suspend fun extractStories(userId: String) {
-        val dupHeader = getHeadersWithUserAgent()
-        val stories = HttpRequest(STORIES_API.format(userId), dupHeader).getResponse()
+        val stories = HttpRequest(STORIES_API.format(userId), headers).getResponse()
         val reel = JSONObject(stories).getNullableJSONObject("reel")
         reel?.let { extractFromItems(it.getJSONArray("items")) } ?: onProgress(
             Result.Failed(
@@ -209,12 +208,6 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         )
     }
 
-    private fun getHeadersWithUserAgent(): Hashtable<String, String> {
-        val dupHeader: Hashtable<String, String> = headers.clone() as Hashtable<String, String>
-        dupHeader["User-Agent"] =
-            "Mozilla/5.0 (iPhone; CPU iPhone OS 12_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 105.0.0.11.118 (iPhone11,8; iOS 12_3_1; en_US; en-US; scale=2.00; 828x1792; 165586599)"
-        return dupHeader
-    }
 
 
     private suspend fun extractInfoShared(page: String) {
@@ -228,7 +221,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                 if (mediaId == null) throw JSONException("mediaId is null purposely thrown wrong error")
                 val url = POST_API.format(mediaId)
                 extractFromItems(
-                    HttpRequest(url, getHeadersWithUserAgent())
+                    HttpRequest(url, headers)
                         .getResponse()
                         .toString()
                         .toJSONObject()
@@ -378,7 +371,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         val matcher = Pattern.compile("<link rel=\"preload\" href=\"(.*?)\" as=\"script\"").matcher(page)
         while (matcher.find()) {
             ids.addAll(
-                getQueryHash(HttpRequest(matcher.group(1)).getResponse() ?: run {
+                getQueryHash(HttpRequest(matcher.group(1), headers).getResponse() ?: run {
                     return null
                 })
             )
@@ -560,4 +553,12 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         } else
             finalize()
     }
+
+    override suspend fun testWebpage(string: String) {
+        onProgress = {
+            println(it)
+        }
+        extractInfoShared(string)
+    }
+
 }

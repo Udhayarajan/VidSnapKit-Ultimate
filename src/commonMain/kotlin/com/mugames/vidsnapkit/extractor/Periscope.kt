@@ -43,6 +43,10 @@ class Periscope internal constructor(url: String) : Extractor(url) {
         TODO("Not yet implemented")
     }
 
+    override suspend fun testWebpage(string: String) {
+        TODO("Not yet implemented")
+    }
+
     var manifest: ArrayList<ArrayList<String>>? = ArrayList()
 
 
