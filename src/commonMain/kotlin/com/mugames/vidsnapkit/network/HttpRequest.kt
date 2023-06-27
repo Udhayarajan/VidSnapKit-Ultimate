@@ -53,7 +53,7 @@ class HttpRequest(
         }
 
         private fun createClient(requiresRedirection: Boolean = true): HttpInterface {
-            return HttpInterfaceImpl(clientGenerator().apply { config { followRedirects = requiresRedirection } })
+            return HttpInterfaceImpl(clientGenerator().config { followRedirects = requiresRedirection })
         }
 
         /**
@@ -66,7 +66,7 @@ class HttpRequest(
         fun setClient(
             clientGenerator: () -> HttpClient,
             prefixUrl: String = "",
-            headers: Hashtable<String, String>? = null
+            headers: Hashtable<String, String>? = null,
         ) {
             this.prefixUrl = prefixUrl
             this.clientGenerator = clientGenerator
@@ -114,7 +114,10 @@ class HttpRequest(
         }
 
     suspend fun getRawResponse(needsRedirection: Boolean = true, useCustomClient: Boolean = true) =
-        (if (useCustomClient) createClient(needsRedirection) else defaultClient(needsRedirection)).getRawResponse(getUrl(), getHeader())
+        (if (useCustomClient) createClient(needsRedirection) else defaultClient(needsRedirection)).getRawResponse(
+            getUrl(),
+            getHeader()
+        )
 
     suspend fun isAvailable(useCustomClient: Boolean = true): Boolean =
         withContext(Dispatchers.IO) {

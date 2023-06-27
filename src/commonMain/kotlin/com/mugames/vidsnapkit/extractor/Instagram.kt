@@ -68,6 +68,11 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                 return true
             }
         }
+        if (res.status == HttpStatusCode.OK) {
+            if (res.call.request.url.toString() == "https://www.instagram.com/") {
+                return true
+            }
+        }
         logger.info("Oops!, Cookie is invalid so removing it from header")
         return false
     }
@@ -210,7 +215,6 @@ class Instagram internal constructor(url: String) : Extractor(url) {
             )
         )
     }
-
 
 
     private suspend fun extractInfoShared(page: String) {
