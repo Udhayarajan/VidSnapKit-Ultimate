@@ -24,9 +24,8 @@ import com.mugames.vidsnapkit.network.HttpRequest
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
+import org.slf4j.LoggerFactory
 import java.util.*
-import java.util.logging.Level
-import java.util.logging.Logger
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 import kotlin.collections.set
@@ -39,7 +38,6 @@ import kotlin.system.measureTimeMillis
 class Facebook internal constructor(url: String) : Extractor(url) {
     private val localFormats = Formats()
 
-
     private var userAgent = """
         Mozilla/5.0 (Windows NT 10.0; Win64; x64) 
         AppleWebKit/537.36 (KHTML, like Gecko) 
@@ -48,11 +46,13 @@ class Facebook internal constructor(url: String) : Extractor(url) {
 
     private suspend fun isCookieValid(): Boolean {
         if (cookies.isNullOrEmpty()) return false
-        val res = HttpRequest("https://www.facebook.com/", headers).getResponse() ?: return false
+        val res = HttpRequest("https://www.facebook.com/", headers).getResponse(false) ?: return false
         val restrictedKeywords = listOf("Create new account", "log in or sign up", "Forgotten password")
         val containsRestrictedKeyword = restrictedKeywords.any { keyword ->
             res.contains(keyword, ignoreCase = true)
         }
+
+        logger.info("Check cookie containsRestrictedKeyword=${containsRestrictedKeyword} ")
         return !containsRestrictedKeyword
     }
 
@@ -82,7 +82,7 @@ class Facebook internal constructor(url: String) : Extractor(url) {
         if (inputUrl.startsWith("facebook:")) inputUrl =
             "https://www.facebook.com/video/video.php?v=${findVideoId()}"
 
-        if (isCookieValid())
+        if (!isCookieValid())
             cookies = null
         inputUrl = inputUrl.replace("://m.facebook\\.com/".toRegex(), "://en-gb.facebook.com/")
         inputUrl = inputUrl.replace("://www.facebook\\.com/".toRegex(), "://en-gb.facebook.com/")
@@ -93,7 +93,7 @@ class Facebook internal constructor(url: String) : Extractor(url) {
             e.printStackTrace()
             onProgress(Result.Failed(Error.InternalError("Something went wrong", e)))
         } catch (e: Exception) {
-            log.log(Level.WARNING, "$TAG+ analyze: ", e)
+            logger.warn("$TAG+ analyze: ", e)
             throw e
         }
     }
@@ -532,9 +532,9 @@ class Facebook internal constructor(url: String) : Extractor(url) {
 
 
     companion object {
-        val log = Logger.getLogger(javaClass.name)
         const val TAG: String = Statics.TAG.plus(":Facebook")
         const val SUCCESS = -1 //Null if fails
+        val logger = LoggerFactory.getLogger(Facebook::class.java)
         var PAGELET_REGEX =
             "(?:pagelet_group_mall|permalink_video_pagelet|hyperfeed_story_id_[0-9a-f]+)".toRegex()
     }
