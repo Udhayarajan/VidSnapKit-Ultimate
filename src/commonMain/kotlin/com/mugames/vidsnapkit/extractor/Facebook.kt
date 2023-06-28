@@ -70,6 +70,7 @@ class Facebook internal constructor(url: String) : Extractor(url) {
     override suspend fun analyze(payload: Any?) {
         localFormats.url = inputUrl
         localFormats.src = "Facebook"
+
         if (inputUrl.contains("instagram.com")) {
             logger.info("Insta embedded FB post, redirecting to Instagram")
             val instaURL = Pattern.compile("\\?.*?u=(.*?)&").matcher(inputUrl).run {
@@ -85,6 +86,7 @@ class Facebook internal constructor(url: String) : Extractor(url) {
             })
             return
         }
+
         fun findVideoId(): String? {
             var pattern =
                 Pattern.compile("(?:https?://(?:[\\w-]+\\.)?(?:facebook\\.com|facebookcorewwwi\\.onion)/(?:[^#]*?#!/)?(?:(?:video/video\\.php|photo\\.php|video\\.php|video/embed|story\\.php|watch(?:/live)?/?)\\?(?:.*?)(?:v|video_id|story_fbid)=|[^/]+/videos/(?:[^/]+/)?|[^/]+/posts/|groups/[^/]+/permalink/|watchparty/)|facebook:)([0-9]+)")
@@ -110,8 +112,10 @@ class Facebook internal constructor(url: String) : Extractor(url) {
 
         if (!isCookieValid())
             cookies = null
+
         inputUrl = inputUrl.replace("://m.facebook\\.com/".toRegex(), "://en-gb.facebook.com/")
         inputUrl = inputUrl.replace("://www.facebook\\.com/".toRegex(), "://en-gb.facebook.com/")
+
         try {
             onProgress(Result.Progress(ProgressState.Start))
             extractInfo()

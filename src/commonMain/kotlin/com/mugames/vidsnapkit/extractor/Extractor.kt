@@ -211,11 +211,11 @@ abstract class Extractor(
         return sizes.awaitAll()
     }
 
-    protected inline fun clientRequestError(msg: String = "The request video page missing. If you find it as false kindly contact us") {
+    protected fun clientRequestError(msg: String = "The request video page missing. If you find it as false kindly contact us") {
         onProgress(Result.Failed(Error.NonFatalError(msg)))
     }
 
-    protected inline fun internalError(msg: String, e: Exception? = null) {
+    protected fun internalError(msg: String, e: Exception? = null) {
         onProgress(Result.Failed(Error.InternalError(msg, e)))
     }
 
