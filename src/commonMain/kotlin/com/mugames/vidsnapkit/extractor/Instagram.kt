@@ -56,27 +56,24 @@ class Instagram internal constructor(url: String) : Extractor(url) {
             HttpRequest("https://www.instagram.com/accounts/login/", headers).getRawResponse(false) ?: return false
         logger.info("status code=${res.status.value} & http response=${res}")
         if (res.status == HttpStatusCode.Found) {
-            val newLoc = res.headers["location"]!!
+            val newLoc = res.headers["location"].toString()
+            logger.info("new loc = $newLoc")
             val restrictedKeywords = listOf("privacy/checks", "challenge", "coig_restricted")
             val containsRestrictedKeyword = restrictedKeywords.any { keyword ->
                 newLoc.contains(keyword, ignoreCase = true)
             }
 
             if (newLoc == "https://www.instagram.com/" || !containsRestrictedKeyword) {
+                logger.info("valid cookie")
                 return true
             }
         }
         // if redirection is not set
         if (res.status == HttpStatusCode.OK) {
             if (res.call.request.url.toString() == "https://www.instagram.com/") {
+                logger.info("valid cookie")
                 return true
             }
-        }
-        if (res.status == HttpStatusCode.TooManyRequests) {
-            // in such case allow cookie no need to block either valid or invalid
-            // Not a guarantee to be worked
-            logger.warn("Failed to verify as 429 arises anyway let's allow the cookie")
-            return true
         }
         logger.info("Oops!, Cookie is invalid so removing it from header")
         return false
@@ -177,7 +174,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                 extractFromItems(items.toJSONObject().getJSONArray("items"))
                 return
             }
-            if (!isCookieValid()) {
+            if (!isCookieValid() && !isSkippableCookie) {
                 cookies = null
             }
             extractInfoShared(HttpRequest(inputUrl, headers).getResponse() ?: run {
