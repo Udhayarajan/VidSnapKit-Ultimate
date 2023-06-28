@@ -119,7 +119,9 @@ class HttpInterfaceImpl(
                 status in acceptedStatusCode || run {
                     if (status in redirectionStatusCode) {
                         val res = getLastPossibleRedirectedResponse(this, headers)
-                        return res.status in acceptedStatusCode || res.status in redirectionStatusCode
+                        val isPageAvailable = res.status in acceptedStatusCode
+                        logger.info("page availability = $isPageAvailable")
+                        return isPageAvailable
                     }
                     logger.warn("Unhandled in checkWebPage() status code=${status} for url=${url} with headers=${headers.toString()} & response=${bodyAsText()}")
                     false
