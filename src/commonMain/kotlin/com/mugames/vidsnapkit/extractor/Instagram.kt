@@ -161,9 +161,12 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         inputUrl = "${inputUrl.replace("/[^/?]*\$|/*\\?.*\$".toRegex(), "")}/?img_index=1"
 
         if (isPostUrl()) {
+            if (!isCookieValid()) {
+                cookies = null
+            }
             if (load?.get("forced") == true) {
-                inputUrl = inputUrl.replace("/reel/", "/p/")
                 inputUrl = inputUrl.replace("/reels/", "/p/")
+                inputUrl = inputUrl.replace("/reel/", "/p/")
                 inputUrl = inputUrl.replace("https://instagram.com", "https://www.instagram.com")
                 logger.info("The new url is $inputUrl&__a=1&__d=dis")
                 val items =
@@ -173,9 +176,6 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                     }
                 extractFromItems(items.toJSONObject().getJSONArray("items"))
                 return
-            }
-            if (!isCookieValid() && !isSkippableCookie) {
-                cookies = null
             }
             extractInfoShared(HttpRequest(inputUrl, headers).getResponse() ?: run {
                 clientRequestError()

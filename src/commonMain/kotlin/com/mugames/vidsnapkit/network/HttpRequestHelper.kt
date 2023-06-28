@@ -119,7 +119,7 @@ class HttpInterfaceImpl(
                 status in acceptedStatusCode || run {
                     if (status in redirectionStatusCode) {
                         val res = getLastPossibleRedirectedResponse(this, headers)
-                        val isPageAvailable = res.status in acceptedStatusCode
+                        val isPageAvailable = res.status in acceptedStatusCode || res.status in redirectionStatusCode
                         logger.info("page availability = $isPageAvailable")
                         return isPageAvailable
                     }

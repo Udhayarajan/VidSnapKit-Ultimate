@@ -94,17 +94,6 @@ abstract class Extractor(
             field = value
         }
 
-    protected var isSkippableCookie = false
-
-    /**
-     * @param cookie cookie of the account
-     * @param skippable tells extractor to ignore if invalid
-     */
-    fun setCookies(cookie: String, skippable: Boolean = false) {
-        isSkippableCookie = skippable
-        cookies = cookie
-    }
-
 
     protected val videoFormats = mutableListOf<Formats>()
 
