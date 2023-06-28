@@ -157,10 +157,14 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         if (!inputUrl.endsWith("/")) inputUrl = "$inputUrl/"
         inputUrl = "${inputUrl.replace("/[^/?]*\$|/*\\?.*\$".toRegex(), "")}/?img_index=1"
 
+        var isForced = load?.get("forced") == true
+
         if (isPostUrl()) {
-            if (!isCookieValid())
+            if (!isCookieValid()) {
                 cookies = null
-            if (load?.get("forced") == true) {
+                isForced = true
+            }
+            if (isForced) {
                 if (cookies == null) {
                     onProgress(Result.Failed(Error.LoginRequired))
                     return
