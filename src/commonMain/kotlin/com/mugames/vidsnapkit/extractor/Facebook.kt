@@ -70,6 +70,21 @@ class Facebook internal constructor(url: String) : Extractor(url) {
     override suspend fun analyze(payload: Any?) {
         localFormats.url = inputUrl
         localFormats.src = "Facebook"
+        if (inputUrl.contains("instagram.com")) {
+            logger.info("Insta embedded FB post, redirecting to Instagram")
+            val instaURL = Pattern.compile("\\?.*?u=(.*?)&").matcher(inputUrl).run {
+                if (find())
+                    decodeHTML(group(1))
+                else
+                    null
+            }
+            Instagram(instaURL ?: run {
+                logger.error("Fail to match the regex url=${inputUrl}")
+                onProgress(Result.Failed(Error.InternalError("unable to match the instagram url")))
+                return
+            })
+            return
+        }
         fun findVideoId(): String? {
             var pattern =
                 Pattern.compile("(?:https?://(?:[\\w-]+\\.)?(?:facebook\\.com|facebookcorewwwi\\.onion)/(?:[^#]*?#!/)?(?:(?:video/video\\.php|photo\\.php|video\\.php|video/embed|story\\.php|watch(?:/live)?/?)\\?(?:.*?)(?:v|video_id|story_fbid)=|[^/]+/videos/(?:[^/]+/)?|[^/]+/posts/|groups/[^/]+/permalink/|watchparty/)|facebook:)([0-9]+)")
