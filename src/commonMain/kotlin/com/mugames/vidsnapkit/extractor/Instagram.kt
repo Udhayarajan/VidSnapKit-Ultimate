@@ -165,16 +165,8 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                 cookies = null
             }
             if (load?.get("forced") == true) {
-                inputUrl = inputUrl.replace("/reels/", "/p/")
-                inputUrl = inputUrl.replace("/reel/", "/p/")
-                inputUrl = inputUrl.replace("https://instagram.com", "https://www.instagram.com")
-                logger.info("The new url is $inputUrl&__a=1&__d=dis")
-                val items =
-                    HttpRequest(inputUrl.plus("&__a=1&__d=dis"), headers).getResponse(true) ?: run {
-                        clientRequestError("unable to get post event with __a=1&__d=dis")
-                        return
-                    }
-                extractFromItems(items.toJSONObject().getJSONArray("items"))
+                logger.info("direct ex as forced")
+                directExtraction()
                 return
             }
             extractInfoShared(HttpRequest(inputUrl, headers).getResponse() ?: run {
@@ -193,6 +185,19 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                 extractStories(it)
             }
         }
+    }
+
+    private suspend fun directExtraction() {
+        inputUrl = inputUrl.replace("/reels/", "/p/")
+        inputUrl = inputUrl.replace("/reel/", "/p/")
+        inputUrl = inputUrl.replace("https://instagram.com", "https://www.instagram.com")
+        logger.info("The new url is $inputUrl&__a=1&__d=dis")
+        val items =
+            HttpRequest(inputUrl.plus("&__a=1&__d=dis"), headers).getResponse(true) ?: run {
+                clientRequestError("check the log")
+                return
+            }
+        extractFromItems(items.toJSONObject().getJSONArray("items"))
     }
 
     private suspend fun extractHighlights(highlightsId: String) {
@@ -225,7 +230,8 @@ class Instagram internal constructor(url: String) : Extractor(url) {
 
     private suspend fun extractInfoShared(page: String) {
         if (page == "{error:\"Invalid Cookies\"}") {
-            onProgress(Result.Failed(Error.LoginRequired))
+            logger.info("direct ex as Invalid cookie arises in extractInfoShared()")
+            directExtraction()
             return
         }
         suspend fun newApiRequest() {
@@ -241,7 +247,8 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                         .getJSONArray("items")
                 )
             } catch (e: JSONException) {
-                onProgress(Result.Failed(Error.LoginRequired))
+                logger.info("direct ex as JSONException arises")
+                directExtraction()
             }
         }
 
@@ -484,7 +491,8 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         } else null
 
         if (jsonString.isNullOrEmpty()) {
-            onProgress(Result.Failed(Error.LoginRequired))
+            logger.info("direct ex as json string isn't matching")
+            directExtraction()
             return
         }
         val jsonObject = JSONObject(jsonString)
