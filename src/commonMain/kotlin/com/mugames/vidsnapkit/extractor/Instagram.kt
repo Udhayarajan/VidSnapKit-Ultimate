@@ -99,13 +99,15 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         else null
     }
 
-    private fun isAccessible(jsonObject: JSONObject): Boolean {
+    private fun isAccessible(jsonObject: JSONObject, scarpingProfileName: String? = null): Boolean {
         val user = jsonObject.getJSONObject("graphql")
             .getJSONObject("user")
         val isBlocked = user.getBoolean("has_blocked_viewer")
         val isPrivate = user.getBoolean("is_private")
         val followedByViewer = user.getBoolean("followed_by_viewer")
-        return ((isPrivate && followedByViewer) || !isPrivate) && !isBlocked
+        val isSameUser =
+            user.getString("username") == scarpingProfileName // When user tires to download their own story
+        return isSameUser || ((isPrivate && followedByViewer) || !isPrivate) && !isBlocked
     }
 
     private fun getUserName(): String? {
@@ -127,7 +129,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                 clientRequestError()
                 return null
             }
-            if (!isAccessible(response)) {
+            if (!isAccessible(response, it)) {
                 onProgress(Result.Failed(Error.InvalidCookies))
                 return null
             }
