@@ -121,8 +121,12 @@ class Instagram internal constructor(url: String) : Extractor(url) {
     private suspend fun getUserID(): String? = cookies?.let { _ ->
 
         getUserName()?.let {
-            val response = HttpRequest(String.format(PROFILE_API, it), headers).getResponse()?.toJSONObject() ?: run {
+            val res = HttpRequest(String.format(PROFILE_API, it), headers).getResponse() ?: run {
                 clientRequestError()
+                return null
+            }
+            val response = res.toJSONObjectOrNull() ?: run {
+                onProgress(Result.Failed(Error.LoginRequired))
                 return null
             }
             if (response.toString() == "{}") {
@@ -311,7 +315,12 @@ class Instagram internal constructor(url: String) : Extractor(url) {
             }
             val localFormat = formats.copy(title = "", imageData = mutableListOf(), videoData = mutableListOf())
             localFormat.title = image.getString("caption")
-                .ifEmpty { image.getString("name").ifEmpty { image.getString("description") } }
+                .ifEmpty {
+                    (image.getNullableString("name") ?: "").ifEmpty {
+                        image.getNullableString("description")
+                            ?: (formats.title.ifEmpty { "Instagram Image Carousel " } + i)
+                    }
+                }
             localFormat.imageData.add(
                 ImageResource(
                     url = image.getString("url"),
@@ -338,7 +347,12 @@ class Instagram internal constructor(url: String) : Extractor(url) {
             }
             val localFormat = formats.copy(title = "", imageData = mutableListOf(), videoData = mutableListOf())
             localFormat.title = video.getString("caption")
-                .ifEmpty { video.getString("name").ifEmpty { video.getString("description") } }
+                .ifEmpty {
+                    (video.getNullableString("name") ?: "").ifEmpty {
+                        video.getNullableString("description")
+                            ?: (formats.title.ifEmpty { "Instagram Video Carousel " } + i)
+                    }
+                }
             localFormat.imageData.add(ImageResource(url = video.getString("thumbnailUrl")))
             localFormat.videoData.add(
                 VideoResource(
