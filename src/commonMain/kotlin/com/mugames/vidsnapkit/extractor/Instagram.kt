@@ -72,6 +72,12 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                 return true
             }
         }
+        if (res.status == HttpStatusCode.TooManyRequests) {
+            // in such case allow cookie no need to block either valid or invalid
+            // Not a guarantee to be worked
+            logger.warn("Failed to verify as 429 arises anyway let's allow the cookie")
+            return true
+        }
         logger.info("Oops!, Cookie is invalid so removing it from header")
         return false
     }
