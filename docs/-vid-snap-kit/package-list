@@ -202,7 +202,6 @@ $dokka.location:com.mugames.vidsnapkit.extractor/Extractor.Companion/findExtract
 $dokka.location:com.mugames.vidsnapkit.extractor/Extractor///PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-extractor/index.html
 $dokka.location:com.mugames.vidsnapkit.extractor/Extractor/Extractor/#kotlin.String/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-extractor/-extractor.html
 $dokka.location:com.mugames.vidsnapkit.extractor/Extractor/cookies/#/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-extractor/cookies.html
-$dokka.location:com.mugames.vidsnapkit.extractor/Extractor/setCookies/#kotlin.String#kotlin.Boolean/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-extractor/set-cookies.html
 $dokka.location:com.mugames.vidsnapkit.extractor/Extractor/start/#com.mugames.vidsnapkit.ProgressCallback/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-extractor/start.html
 $dokka.location:com.mugames.vidsnapkit.extractor/Extractor/start/#kotlin.Function1[com.mugames.vidsnapkit.dataholders.Result,kotlin.Unit]/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-extractor/start.html
 $dokka.location:com.mugames.vidsnapkit.extractor/Extractor/startAsync/#com.mugames.vidsnapkit.ProgressCallback/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-extractor/start-async.html
