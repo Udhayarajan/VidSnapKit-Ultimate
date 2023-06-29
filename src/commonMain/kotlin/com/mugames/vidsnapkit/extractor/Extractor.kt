@@ -123,7 +123,7 @@ abstract class Extractor(
         try {
             if (inputUrl.contains("facebook") || inputUrl.contains("fb")) {
                 if (inputUrl.contains("instagram.com")) {
-                    Facebook.logger.info("Insta embedded FB post, redirecting to Instagram")
+                    logger.info("Insta embedded FB post, redirecting to Instagram")
                     val instaURL = Pattern.compile("\\?.*?u=(.*?)&").matcher(inputUrl).run {
                         if (find())
                             Util.decodeHTML(group(1))
@@ -131,7 +131,7 @@ abstract class Extractor(
                             null
                     }
                     Instagram(instaURL ?: run {
-                        Facebook.logger.error("Fail to match the regex url=${inputUrl}")
+                        logger.error("Fail to match the regex url=${inputUrl}")
                         internalError("unable to match the instagram url")
                         return
                     })

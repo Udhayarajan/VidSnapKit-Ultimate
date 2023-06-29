@@ -197,7 +197,10 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                 clientRequestError("check the log")
                 return
             }
-        extractFromItems(items.toJSONObject().getJSONArray("items"))
+        extractFromItems(items.toJSONObjectOrNull()?.getJSONArray("items") ?: run {
+            onProgress(Result.Failed(Error.LoginRequired))
+            return
+        })
     }
 
     private suspend fun extractHighlights(highlightsId: String) {
@@ -217,7 +220,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
     @Suppress("UNCHECKED_CAST")
     private suspend fun extractStories(userId: String) {
         val stories = HttpRequest(STORIES_API.format(userId), headers).getResponse()
-        val reel = JSONObject(stories).getNullableJSONObject("reel")
+        val reel = stories?.toJSONObjectOrNull()?.getNullableJSONObject("reel")
         reel?.let { extractFromItems(it.getJSONArray("items")) } ?: onProgress(
             Result.Failed(
                 Error.NonFatalError(
