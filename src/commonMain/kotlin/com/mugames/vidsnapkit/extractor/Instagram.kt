@@ -58,7 +58,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         if (res.status == HttpStatusCode.Found) {
             val newLoc = res.headers["location"].toString()
             logger.info("new loc = $newLoc")
-            val restrictedKeywords = listOf("privacy/checks", "challenge", "coig_restricted")
+            val restrictedKeywords = listOf("privacy/checks", "challenge", "coig_restricted", "accounts/login")
             val containsRestrictedKeyword = restrictedKeywords.any { keyword ->
                 newLoc.contains(keyword, ignoreCase = true)
             }
@@ -164,7 +164,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
             if (!isCookieValid()) {
                 cookies = null
             }
-            if (load?.get("forced") == true) {
+            if (load?.get("forced") == true && cookies != null) {
                 logger.info("direct ex as forced")
                 directExtraction()
                 return
@@ -250,8 +250,8 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                         .getJSONArray("items")
                 )
             } catch (e: JSONException) {
-                logger.info("direct ex as JSONException arises")
-                directExtraction()
+                onProgress(Result.Failed(Error.LoginRequired))
+                return
             }
         }
 

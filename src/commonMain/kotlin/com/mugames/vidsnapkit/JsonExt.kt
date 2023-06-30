@@ -39,7 +39,7 @@ fun JSONObject.getNullableJSONObject(name: String): JSONObject? = try {
 fun JSONArray.getNullableJSONObject(index: Int): JSONObject? = try {
     getJSONObject(index)
 } catch (e: JSONException) {
-    logger.warn("${toString()} \nis only available")
+    logger.warn("keyIdx=$index ${toString()} \nis only available")
     null
 }
 
@@ -53,21 +53,21 @@ fun JSONArray.getNullableJSONArray(index: Int): JSONArray? = try {
 fun JSONObject.getNullableJSONArray(name: String): JSONArray? = try {
     getJSONArray(name)
 } catch (e: JSONException) {
-    logger.warn("${toString()} \nis only available")
+    logger.warn("key =${name} ${toString()} \nis only available")
     null
 }
 
 fun JSONObject.getNullableString(name: String): String? = try {
     getString(name)
 } catch (e: JSONException) {
-    logger.warn("${toString()} \nis only available")
+    logger.warn("key =${name} ${toString()} \nis only available")
     null
 }
 
 fun JSONObject.getNullable(name: String): String? = try {
     get(name).toString()
 } catch (e: JSONException) {
-    logger.warn("${toString()} \nis only available")
+    logger.warn("key =${name}  ${toString()} \nis only available")
     null
 }
 

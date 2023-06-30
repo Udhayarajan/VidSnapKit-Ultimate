@@ -121,7 +121,7 @@ abstract class Extractor(
 
     private suspend fun safeAnalyze() {
         try {
-            if (inputUrl.contains("facebook") || inputUrl.contains("fb")) {
+            if (inputUrl.contains("facebook")) {
                 if (inputUrl.contains("instagram.com")) {
                     logger.info("Insta embedded FB post, redirecting to Instagram")
                     val instaURL = Pattern.compile("\\?.*?u=(.*?)&").matcher(inputUrl).run {
