@@ -20,44 +20,54 @@ package com.mugames.vidsnapkit
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
+import org.slf4j.LoggerFactory
 
 /**
  * @author Udhaya
  * Created on 22-01-2022
  */
+
+private val logger = LoggerFactory.getLogger("JsonExt.kt")
+
 fun JSONObject.getNullableJSONObject(name: String): JSONObject? = try {
     getJSONObject(name)
 } catch (e: JSONException) {
+    logger.warn("${toString()} \nis only available")
     null
 }
 
 fun JSONArray.getNullableJSONObject(index: Int): JSONObject? = try {
     getJSONObject(index)
 } catch (e: JSONException) {
+    logger.warn("${toString()} \nis only available")
     null
 }
 
 fun JSONArray.getNullableJSONArray(index: Int): JSONArray? = try {
     getJSONArray(index)
 } catch (e: JSONException) {
+    logger.warn("${toString()} \nis only available")
     null
 }
 
 fun JSONObject.getNullableJSONArray(name: String): JSONArray? = try {
     getJSONArray(name)
 } catch (e: JSONException) {
+    logger.warn("${toString()} \nis only available")
     null
 }
 
 fun JSONObject.getNullableString(name: String): String? = try {
     getString(name)
 } catch (e: JSONException) {
+    logger.warn("${toString()} \nis only available")
     null
 }
 
 fun JSONObject.getNullable(name: String): String? = try {
     get(name).toString()
 } catch (e: JSONException) {
+    logger.warn("${toString()} \nis only available")
     null
 }
 

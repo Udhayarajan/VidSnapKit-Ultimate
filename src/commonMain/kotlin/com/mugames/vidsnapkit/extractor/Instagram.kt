@@ -197,7 +197,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                 clientRequestError("check the log")
                 return
             }
-        extractFromItems(items.toJSONObjectOrNull()?.getJSONArray("items") ?: run {
+        extractFromItems(items.toJSONObjectOrNull()?.getNullableJSONArray("items") ?: run {
             onProgress(Result.Failed(Error.LoginRequired))
             return
         })
