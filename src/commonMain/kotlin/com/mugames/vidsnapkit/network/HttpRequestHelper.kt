@@ -154,6 +154,7 @@ class HttpInterfaceImpl(
                 else if (status in redirectionStatusCode) {
                     getLastPossibleRedirectedResponse(this, headers).body()
                 } else if (url.contains("instagram") && status == HttpStatusCode.InternalServerError) "{error:\"Invalid Cookies\"}"
+                else if (status == HttpStatusCode.TooManyRequests) "429"
                 else {
                     logger.warn("Unhandled in getData() status code=${status} for url=${url} with headers=${headers.toString()} & response=${bodyAsText()}")
                     null

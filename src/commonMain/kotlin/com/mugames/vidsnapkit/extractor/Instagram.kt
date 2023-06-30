@@ -169,10 +169,15 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                 directExtraction()
                 return
             }
-            extractInfoShared(HttpRequest(inputUrl, headers).getResponse() ?: run {
-                clientRequestError()
-                return
-            })
+            when (val res = HttpRequest(inputUrl, headers).getResponse()) {
+                null -> {
+                    clientRequestError()
+                    return
+                }
+
+                "429" -> directExtraction()
+                else -> extractInfoShared(res)
+            }
         } else if (isHighlightsPost()) {
             val highlightsId = getHighlightsId()
             highlightsId?.let {
