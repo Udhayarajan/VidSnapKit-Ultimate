@@ -82,7 +82,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
     }
 
     private fun getShortcode(): String? {
-        val matcher = Pattern.compile("(?:reel|reels|p)/(.*)[/?]").matcher(inputUrl)
+        val matcher = Pattern.compile("(?:reel|reels|p)/(.*?)[/?]").matcher(inputUrl)
         return if (matcher.find()) matcher.group(1) else {
             logger.error("unable to find shortcode from the url=${inputUrl}")
             null
@@ -218,15 +218,16 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         if (res == "429") {
             val mediaID = shortcodeToMediaID(getShortcode())
             mediaID?.let {
-                val items = HttpRequest(POST_API.format(getShortcode()), headers).getResponse()?.let {
-                    it.toJSONObjectOrNull()?.getNullableJSONArray("items") ?: run {
+                val items =
+                    HttpRequest(POST_API.format(shortcodeToMediaID(getShortcode())), headers).getResponse()?.let {
+                        it.toJSONObjectOrNull()?.getNullableJSONArray("items") ?: run {
+                            loginRequired()
+                            return
+                        }
+                    } ?: run {
                         loginRequired()
                         return
                     }
-                } ?: run {
-                    loginRequired()
-                    return
-                }
                 extractFromItems(items)
                 return
             } ?: run {
