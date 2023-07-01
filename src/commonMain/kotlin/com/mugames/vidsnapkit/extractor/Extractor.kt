@@ -233,6 +233,10 @@ abstract class Extractor(
         onProgress(Result.Failed(Error.NonFatalError(msg)))
     }
 
+    protected fun loginRequired() {
+        onProgress(Result.Failed(Error.LoginRequired))
+    }
+
     protected fun internalError(msg: String, e: Exception? = null) {
         onProgress(Result.Failed(Error.InternalError(msg, e)))
     }

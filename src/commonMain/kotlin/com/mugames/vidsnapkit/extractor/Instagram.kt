@@ -25,6 +25,7 @@ import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import org.slf4j.LoggerFactory
+import java.math.BigInteger
 import java.util.*
 import java.util.regex.Pattern
 
@@ -80,9 +81,19 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         return false
     }
 
+    private fun getShortcode(): String? {
+        val matcher = Pattern.compile("(?:reel|reels|p)/(.*)[/?]").matcher(inputUrl)
+        return if (matcher.find()) matcher.group(1) else {
+            logger.error("unable to find shortcode from the url=${inputUrl}")
+            null
+        }
+    }
+
     private fun getMediaId(page: String): String? {
         val matcher = Pattern.compile("\"media_id\":\"?(.*?)[\",_]").matcher(page)
-        return if (matcher.find()) matcher.group(1) else null
+        return if (matcher.find()) matcher.group(1) else getShortcode()?.run {
+            shortcodeToMediaID(this)
+        }
     }
 
 
@@ -130,7 +141,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                 return null
             }
             val response = res.toJSONObjectOrNull() ?: run {
-                onProgress(Result.Failed(Error.LoginRequired))
+                loginRequired()
                 return null
             }
             if (response.toString() == "{}") {
@@ -147,7 +158,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         }
         return null
     } ?: run {
-        onProgress(Result.Failed(Error.LoginRequired))
+        loginRequired()
         null
     }
 
@@ -203,7 +214,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         logger.info("The new url is $inputUrl&__a=1&__d=dis")
         var res = HttpRequest(inputUrl.plus("&__a=1&__d=dis"), headers).getResponse(true)
         if (res == null) {
-            clientRequestError("check the log")
+            loginRequired()
             return
         }
         if (res == "429") {
@@ -211,19 +222,29 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                 var url = nonModURL.replace("/reel/", "/reels/")
                 url = url.replace("/p/", "/reels/")
 
-                res = HttpRequest(url, headers).getResponse()
-                if (res == null) {
-                    clientRequestError("check the log")
+                res = HttpRequest(url, headers).getResponse() ?: run {
+                    loginRequired()
                     return
+                }
+                if (res == "429") {
+                    res = HttpRequest(POST_API.format(getShortcode()), headers).getResponse() ?: run {
+                        loginRequired()
+                        return
+                    }
+                    val items = res.toJSONObjectOrNull()?.getNullableJSONArray("items") ?: run {
+                        loginRequired()
+                        return
+                    }
+                    extractFromItems(items)
                 }
                 extractInfoShared(res)
                 return
             } else {
-                onProgress(Result.Failed(Error.LoginRequired))
+                loginRequired()
             }
         }
         extractFromItems(res.toJSONObjectOrNull()?.getNullableJSONArray("items") ?: run {
-            onProgress(Result.Failed(Error.LoginRequired))
+            loginRequired()
             return
         })
     }
@@ -233,7 +254,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
             ?.toJSONObjectOrNull()
         highlights?.let {
             if (it.getNullable("login_required") == "true") {
-                onProgress(Result.Failed(Error.LoginRequired))
+                loginRequired()
                 return
             }
             val highlight = it.getJSONObject("reels").getJSONObject("highlight:$highlightsId")
@@ -275,7 +296,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                         .getJSONArray("items")
                 )
             } catch (e: JSONException) {
-                onProgress(Result.Failed(Error.LoginRequired))
+                loginRequired()
                 return
             }
         }
@@ -315,7 +336,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                     ?.getNullableJSONArray(objectName) != null
             }
             if (isObjectPresentInEntryData("LoginAndSignupPage")) {
-                onProgress(Result.Failed(Error.LoginRequired))
+                loginRequired()
             } else if (isObjectPresentInEntryData("HttpErrorPage")) {
                 onProgress(Result.Failed(Error.Instagram404Error(cookies != null)))
             } else {
@@ -612,6 +633,20 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         } else
             finalize()
     }
+
+    private fun shortcodeToMediaID(shortcode: String): String {
+        var id = BigInteger.ZERO
+        val alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"
+
+        for (i in shortcode.indices) {
+            val char = shortcode[i]
+            val charIndex = alphabet.indexOf(char)
+            id = id * BigInteger.valueOf(64) + BigInteger.valueOf(charIndex.toLong())
+        }
+
+        return id.toString()
+    }
+
 
     override suspend fun testWebpage(string: String) {
         onProgress = {
