@@ -204,7 +204,11 @@ class Instagram internal constructor(url: String) : Extractor(url) {
             return
         }
         if (res == "429") {
-            res = HttpRequest(nonModURL.replace("/reel/", "/reels/"), headers).getResponse()
+            var url = nonModURL.replace("/?img_index=1", "")
+            url = url.replace("/reel/", "/reels/")
+            url = url.replace("/p/", "/reels/")
+
+            res = HttpRequest(url, headers).getResponse()
             if (res == null) {
                 clientRequestError("check the log")
                 return
