@@ -49,6 +49,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
     }
 
     private val formats = Formats()
+    private var isReel = false
 
     private suspend fun isCookieValid(): Boolean {
         if (cookies.isNullOrEmpty()) return false
@@ -156,6 +157,8 @@ class Instagram internal constructor(url: String) : Extractor(url) {
 
         val load = payload as? HashMap<*, *>
 
+        isReel = inputUrl.contains("/reel/") || inputUrl.contains("/reels/")
+
         inputUrl = inputUrl.replace("/reels/", "/reel/")
         if (!inputUrl.endsWith("/")) inputUrl = "$inputUrl/"
         inputUrl = "${inputUrl.replace("/[^/?]*\$|/*\\?.*\$".toRegex(), "")}/?img_index=1"
@@ -204,16 +207,21 @@ class Instagram internal constructor(url: String) : Extractor(url) {
             return
         }
         if (res == "429") {
-            var url = nonModURL.replace("/?img_index=1", "")
-            url = url.replace("/reel/", "/reels/")
-            url = url.replace("/p/", "/reels/")
+            if (isReel) {
+                var url = nonModURL.replace("/?img_index=1", "")
+                url = url.replace("/reel/", "/reels/")
+                url = url.replace("/p/", "/reels/")
 
-            res = HttpRequest(url, headers).getResponse()
-            if (res == null) {
-                clientRequestError("check the log")
+                res = HttpRequest(url, headers).getResponse()
+                if (res == null) {
+                    clientRequestError("check the log")
+                    return
+                }
+                extractInfoShared(res)
                 return
+            } else {
+                onProgress(Result.Failed(Error.LoginRequired))
             }
-            extractInfoShared(res)
         }
         extractFromItems(res.toJSONObjectOrNull()?.getNullableJSONArray("items") ?: run {
             onProgress(Result.Failed(Error.LoginRequired))
