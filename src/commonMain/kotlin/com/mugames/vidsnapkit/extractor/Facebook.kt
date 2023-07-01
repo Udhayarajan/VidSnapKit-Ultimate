@@ -328,6 +328,9 @@ class Facebook internal constructor(url: String) : Extractor(url) {
                     for (j in 0 until attachments.length()) {
                         parseAttachment(attachments.getJSONObject(j), "media")
                     }
+                } else {
+                    extractFromCreationStory(video)
+                    return SUCCESS
                 }
                 if (localFormats.videoData.isEmpty()) parseGraphqlVideo(video)
             }

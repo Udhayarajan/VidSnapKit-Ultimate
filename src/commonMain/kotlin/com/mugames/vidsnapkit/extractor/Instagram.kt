@@ -193,16 +193,25 @@ class Instagram internal constructor(url: String) : Extractor(url) {
     }
 
     private suspend fun directExtraction() {
+        val nonModURL = inputUrl
         inputUrl = inputUrl.replace("/reels/", "/p/")
         inputUrl = inputUrl.replace("/reel/", "/p/")
         inputUrl = inputUrl.replace("https://instagram.com", "https://www.instagram.com")
         logger.info("The new url is $inputUrl&__a=1&__d=dis")
-        val items =
-            HttpRequest(inputUrl.plus("&__a=1&__d=dis"), headers).getResponse(true) ?: run {
+        var res = HttpRequest(inputUrl.plus("&__a=1&__d=dis"), headers).getResponse(true)
+        if (res == null) {
+            clientRequestError("check the log")
+            return
+        }
+        if (res == "429") {
+            res = HttpRequest(nonModURL.replace("/reel/", "/reels/"), headers).getResponse()
+            if (res == null) {
                 clientRequestError("check the log")
                 return
             }
-        extractFromItems(items.toJSONObjectOrNull()?.getNullableJSONArray("items") ?: run {
+            extractInfoShared(res)
+        }
+        extractFromItems(res.toJSONObjectOrNull()?.getNullableJSONArray("items") ?: run {
             onProgress(Result.Failed(Error.LoginRequired))
             return
         })
