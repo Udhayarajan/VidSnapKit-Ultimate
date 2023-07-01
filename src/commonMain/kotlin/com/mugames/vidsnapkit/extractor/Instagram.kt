@@ -207,40 +207,32 @@ class Instagram internal constructor(url: String) : Extractor(url) {
     }
 
     private suspend fun directExtraction() {
-        val nonModURL = inputUrl
         inputUrl = inputUrl.replace("/reels/", "/p/")
         inputUrl = inputUrl.replace("/reel/", "/p/")
         inputUrl = inputUrl.replace("https://instagram.com", "https://www.instagram.com")
         logger.info("The new url is $inputUrl&__a=1&__d=dis")
-        var res = HttpRequest(inputUrl.plus("&__a=1&__d=dis"), headers).getResponse(true)
-        if (res == null) {
+        val res = HttpRequest(inputUrl.plus("&__a=1&__d=dis"), headers).getResponse(true) ?: run {
             loginRequired()
             return
         }
         if (res == "429") {
-            if (isReel) {
-                var url = nonModURL.replace("/reel/", "/reels/")
-                url = url.replace("/p/", "/reels/")
-
-                res = HttpRequest(url, headers).getResponse() ?: run {
+            val mediaID = shortcodeToMediaID(getShortcode())
+            mediaID?.let {
+                val items = HttpRequest(POST_API.format(getShortcode()), headers).getResponse()?.let {
+                    it.toJSONObjectOrNull()?.getNullableJSONArray("items") ?: run {
+                        loginRequired()
+                        return
+                    }
+                } ?: run {
                     loginRequired()
                     return
                 }
-                if (res == "429") {
-                    res = HttpRequest(POST_API.format(getShortcode()), headers).getResponse() ?: run {
-                        loginRequired()
-                        return
-                    }
-                    val items = res.toJSONObjectOrNull()?.getNullableJSONArray("items") ?: run {
-                        loginRequired()
-                        return
-                    }
-                    extractFromItems(items)
-                }
-                extractInfoShared(res)
+                extractFromItems(items)
                 return
-            } else {
+            } ?: run {
+                logger.error("unable to find mediaID for url $inputUrl")
                 loginRequired()
+                return
             }
         }
         extractFromItems(res.toJSONObjectOrNull()?.getNullableJSONArray("items") ?: run {
@@ -634,7 +626,8 @@ class Instagram internal constructor(url: String) : Extractor(url) {
             finalize()
     }
 
-    private fun shortcodeToMediaID(shortcode: String): String {
+    private fun shortcodeToMediaID(shortcode: String?): String? {
+        if (shortcode == null) return null
         var id = BigInteger.ZERO
         val alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"
 
