@@ -158,7 +158,7 @@ class HttpInterfaceImpl(
                     logger.warn("Unhandled in getData() TooManyRequest for url=${url} with headers=${headers.toString()} & response=${bodyAsText()}")
                     "429"
                 } else {
-                    logger.warn("Unhandled in getData() status code=${status} for url=${url} with headers=${headers.toString()} & response=${bodyAsText()}")
+                    logger.warn("Unhandled in getData() status code=${status} for url=${url} with headers=${headers.toString()} &\n response=${bodyAsText()}")
                     null
                 }
             }
