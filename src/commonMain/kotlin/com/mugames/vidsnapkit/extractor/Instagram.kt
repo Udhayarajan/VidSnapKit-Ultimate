@@ -189,7 +189,11 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                     return
                 }
 
-                "429" -> directExtraction()
+                "429" -> {
+                    logger.info("direct ex as 429 unsafe, cookies not validated")
+                    directExtraction()
+                }
+
                 else -> extractInfoShared(res)
             }
         } else if (isHighlightsPost()) {
@@ -215,7 +219,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
             loginRequired()
             return
         }
-        if (res == "429") {
+        if (res == "429" && isCookieValid()) {
             val mediaID = shortcodeToMediaID(getShortcode())
             mediaID?.let {
                 val items =
@@ -306,7 +310,10 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                     json.toJSONArray().getJSONObject(0)
                 })
                 return
-            } else newApiRequest()
+            } else {
+                logger.info("finally calling direct ex in unsafe, cookies are not validated")
+                directExtraction()
+            }
             return
         }
         val jsonObject = JSONObject(jsonString)
