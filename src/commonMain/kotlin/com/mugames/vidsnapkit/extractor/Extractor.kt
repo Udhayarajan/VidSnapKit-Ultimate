@@ -124,7 +124,7 @@ abstract class Extractor(
             if (inputUrl.contains("facebook")) {
                 if (inputUrl.contains("instagram.com")) {
                     logger.info("Insta embedded FB post, redirecting to Instagram")
-                    val instaURL = Pattern.compile("\\?.*?u=(.*?)&").matcher(inputUrl).run {
+                    val instaURL = Pattern.compile("\\?.*?u=(.*?)(?:&|/|)\$").matcher(inputUrl).run {
                         if (find())
                             Util.decodeHTML(group(1))
                         else
