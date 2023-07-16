@@ -19,7 +19,7 @@ package com.mugames.vidsnapkit.network
 
 import com.mugames.vidsnapkit.toJsonString
 import io.ktor.client.*
-import io.ktor.client.call.*
+import io.ktor.client.network.sockets.*
 import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -67,7 +67,7 @@ class HttpInterfaceImpl(
         headers: Hashtable<String, String>?,
     ): String {
         return try {
-            client.post {
+            val data = client.post {
                 url(url)
                 headers?.let {
                     if (it.isNotEmpty())
@@ -80,11 +80,14 @@ class HttpInterfaceImpl(
                     setBody(TextContent(it.toJsonString(), ContentType.Application.Json))
                 }
             }.bodyAsText()
+            client.close()
+            data
         } catch (e: Exception) {
             logger.error(
                 "postData() url=${url} header=${headers.toString()} & postData=${postData.toString()} Error:",
                 e
             )
+            client.close()
             throw e
         }
     }
@@ -116,22 +119,27 @@ class HttpInterfaceImpl(
                         }
                 }
             }.run {
-                status in acceptedStatusCode || run {
+                val data = status in acceptedStatusCode || run {
                     if (status in redirectionStatusCode) {
                         val res = getLastPossibleRedirectedResponse(this, headers)
                         val isPageAvailable = res.status in acceptedStatusCode || res.status in redirectionStatusCode
                         logger.info("page availability = $isPageAvailable")
+                        client.close()
                         return isPageAvailable
                     }
                     logger.warn("Unhandled in checkWebPage() status code=${status} for url=${url} with headers=${headers.toString()} & response=${bodyAsText()}")
                     false
                 }
+                client.close()
+                data
             }
         } catch (e: ClientRequestException) {
             logger.error("checkWebPage() url=${url} header=${headers.toString()} ClientRequestException:", e)
+            client.close()
             false
         } catch (e: Exception) {
             logger.error("checkWebPage() url=${url} header=${headers.toString()} GenericException:", e)
+            client.close()
             false
         }
     }
@@ -149,38 +157,50 @@ class HttpInterfaceImpl(
                     }
                 }
             }.run {
-                if (status == HttpStatusCode.OK)
-                    body()
-                else if (status in redirectionStatusCode) {
-                    getLastPossibleRedirectedResponse(this, headers).body()
-                } else if (url.contains("instagram") && status == HttpStatusCode.InternalServerError) "{error:\"Invalid Cookies\"}"
-                else if (status == HttpStatusCode.TooManyRequests) {
+                if (status == HttpStatusCode.OK) {
+                    val data = bodyAsText()
+                    client.close()
+                    data
+                } else if (status in redirectionStatusCode) {
+                    val data = getLastPossibleRedirectedResponse(this, headers).bodyAsText()
+                    client.close()
+                    data
+                } else if (url.contains("instagram") && status == HttpStatusCode.InternalServerError) {
+                    client.close()
+                    "{error:\"Invalid Cookies\"}"
+                } else if (status == HttpStatusCode.TooManyRequests) {
                     logger.warn("Unhandled in getData() TooManyRequest for url=${url} with headers=${headers.toString()} & response=${bodyAsText()}")
+                    client.close()
                     "429"
                 } else {
                     logger.warn("Unhandled in getData() status code=${status} for url=${url} with headers=${headers.toString()} &\n response=${bodyAsText()}")
+                    client.close()
                     null
                 }
             }
         } catch (e: ClientRequestException) {
             logger.error("getData() url=${url} header=${headers.toString()} ClientRequestException:", e)
+            client.close()
             null
         } catch (e: SendCountExceedException) {
-            if (url.contains("instagram") && headers?.containsKey("Cookie") == true)
+            if (url.contains("instagram") && headers?.containsKey("Cookie") == true) {
+                client.close()
                 "{error:\"Invalid Cookies\"}"
-            else {
+            } else {
                 logger.error("getData() url=${url} header=${headers.toString()} SendCountExceedException:", e)
+                client.close()
                 throw e
             }
         } catch (e: Exception) {
             logger.error("getData() url=${url} header=${headers.toString()} Generic exception:", e)
+            client.close()
             throw e
         }
     }
 
     override suspend fun getRawResponse(url: String, headers: Hashtable<String, String>?): HttpResponse? {
         return try {
-            client.get {
+            val response = client.get {
                 url(url)
                 headers?.let {
                     if (it.isNotEmpty()) {
@@ -191,11 +211,12 @@ class HttpInterfaceImpl(
                     }
                 }
             }
+            client.close()
+            response
         } catch (e: Exception) {
-            var x = false
-            client.config { x = followRedirects }
+            client.close()
             logger.error(
-                "getRawResponse() url=${url} header=${headers.toString()} clientRedirection=${x} Generic exception:",
+                "getRawResponse() url=${url} header=${headers.toString()} Generic exception:",
                 e
             )
             null
@@ -203,13 +224,32 @@ class HttpInterfaceImpl(
     }
 
     override suspend fun getSize(url: String, headers: Hashtable<String, String>?): Long {
-        return client.request {
-            method = HttpMethod.Head
-            url(url)
-        }.run {
-            if (status == HttpStatusCode.OK)
-                this.headers["content-length"]?.toLong() ?: Long.MIN_VALUE
-            else Long.MIN_VALUE
+        return try {
+            client.request {
+                method = HttpMethod.Head
+                url(url)
+                timeout {
+                    socketTimeoutMillis = 13_000
+                    requestTimeoutMillis = 13_000
+                    connectTimeoutMillis = 13_000
+                }
+            }.run {
+                if (status == HttpStatusCode.OK) {
+                    val data = this.headers["content-length"]?.toLong() ?: Long.MIN_VALUE
+                    client.close()
+                    data
+                } else Long.MIN_VALUE
+            }
+        } catch (e: Exception) {
+            client.close()
+            when (e) {
+                is HttpRequestTimeoutException, is ConnectTimeoutException, is SocketTimeoutException -> {
+                    // handle the exception
+                    1
+                }
+
+                else -> throw e
+            }
         }
     }
 
@@ -238,6 +278,7 @@ class HttpInterfaceImpl(
                     }
                 }
             }
+            nonRedirectingClient.close()
             if (cacheResponse.request.url == tempResponse.request.url)
                 break
             cacheResponse = tempResponse

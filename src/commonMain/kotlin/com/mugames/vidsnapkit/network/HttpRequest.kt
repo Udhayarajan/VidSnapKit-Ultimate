@@ -19,6 +19,7 @@ package com.mugames.vidsnapkit.network
 
 import io.ktor.client.*
 import io.ktor.client.engine.android.*
+import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -42,18 +43,22 @@ class HttpRequest(
     companion object {
         private var prefixUrl = ""
         private var additionHeader: Hashtable<String, String>? = null
-        private fun defaultClient(requiresRedirection: Boolean = true) = HttpInterfaceImpl(
-            HttpClient(Android).config {
-                followRedirects = requiresRedirection
-            }
-        )
 
         private var clientGenerator: () -> HttpClient = {
             HttpClient(Android)
         }
 
-        private fun createClient(requiresRedirection: Boolean = true): HttpInterface {
-            return HttpInterfaceImpl(clientGenerator().config { followRedirects = requiresRedirection })
+        private fun getClient(
+            useCustomClient: Boolean,
+            requiresRedirection: Boolean = true,
+        ): HttpInterfaceImpl {
+            val httpClient = if (useCustomClient) clientGenerator() else HttpClient(Android)
+            return HttpInterfaceImpl(httpClient.config {
+                followRedirects = requiresRedirection
+                install(HttpTimeout) {
+                    socketTimeoutMillis = 13_000
+                }
+            })
         }
 
         /**
@@ -90,9 +95,8 @@ class HttpRequest(
      */
     suspend fun getResponse(needsRedirection: Boolean = true, useCustomClient: Boolean = true): String? =
         withContext(Dispatchers.IO) {
-            (if (useCustomClient) createClient(needsRedirection) else defaultClient(needsRedirection)).getData(
-                getUrl(),
-                getHeader()
+            getClient(useCustomClient, needsRedirection).getData(
+                getUrl(), getHeader()
             )
         }
 
@@ -101,30 +105,24 @@ class HttpRequest(
      *
      * @return bytes count of given [url]
      */
-    suspend fun getSize(useCustomClient: Boolean = true) =
-        (if (useCustomClient) createClient() else defaultClient()).getSize(url, getHeader())
+    suspend fun getSize(useCustomClient: Boolean = true) = getClient(useCustomClient).getSize(url, getHeader())
 
     suspend fun postRequest(postData: Hashtable<String, Any>? = null, useCustomClient: Boolean = true): String =
         withContext(Dispatchers.IO) {
-            (if (useCustomClient) createClient() else defaultClient()).postData(
-                getUrl(),
-                postData,
-                getHeader()
+            getClient(useCustomClient).postData(
+                getUrl(), postData, getHeader()
             )
         }
 
     suspend fun getRawResponse(needsRedirection: Boolean = true, useCustomClient: Boolean = true) =
-        (if (useCustomClient) createClient(needsRedirection) else defaultClient(needsRedirection)).getRawResponse(
-            getUrl(),
-            getHeader()
+        getClient(useCustomClient, needsRedirection).getRawResponse(
+            getUrl(), getHeader()
         )
 
-    suspend fun isAvailable(useCustomClient: Boolean = true): Boolean =
-        withContext(Dispatchers.IO) {
-            (if (useCustomClient) createClient(false) else defaultClient(false)).checkWebPage(
-                getUrl(),
-                getHeader()
-            )
-        }
+    suspend fun isAvailable(useCustomClient: Boolean = true): Boolean = withContext(Dispatchers.IO) {
+        getClient(useCustomClient, false).checkWebPage(
+            getUrl(), getHeader()
+        )
+    }
 
 }

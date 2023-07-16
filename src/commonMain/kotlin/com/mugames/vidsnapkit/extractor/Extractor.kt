@@ -25,6 +25,7 @@ import com.mugames.vidsnapkit.dataholders.ProgressState
 import com.mugames.vidsnapkit.dataholders.Result
 import com.mugames.vidsnapkit.network.HttpRequest
 import com.mugames.vidsnapkit.sanitizeAsHeaderValue
+import io.ktor.client.network.sockets.*
 import io.ktor.client.plugins.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.future.future
@@ -158,6 +159,8 @@ abstract class Extractor(
                 clientRequestError()
             else if (e is ClientRequestException && inputUrl.contains("instagram"))
                 onProgress(Result.Failed(Error.Instagram404Error(cookies != null)))
+            else if (e is SocketTimeoutException)
+                onProgress(Result.Failed(Error.NonFatalError("socket can't connect please try again")))
             else
                 onProgress(Result.Failed(Error.InternalError("Error in SafeAnalyze", e)))
         }
