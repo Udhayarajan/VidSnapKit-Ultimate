@@ -52,42 +52,17 @@ class HttpRequest(
             }
         }
 
-        private var defaultClient: HttpClient? = null
-        private var customClient: HttpClient? = null
-        private var redirection = true
-
-        @Synchronized
         private fun getClient(
             useCustomClient: Boolean,
             requiresRedirection: Boolean = true,
         ): HttpInterfaceImpl {
-            if (defaultClient == null) {
-                defaultClient = HttpClient(Android) {
-                    install(HttpTimeout) {
-                        socketTimeoutMillis = 13_000
-                    }
+            val httpClient = if (useCustomClient) clientGenerator() else HttpClient(Android)
+            return HttpInterfaceImpl(httpClient.config {
+                install(HttpTimeout) {
+                    socketTimeoutMillis = 13_000
                 }
-            }
-            if (customClient == null) {
-                customClient = clientGenerator().config {
-                    install(HttpTimeout) {
-                        socketTimeoutMillis = 13_000
-                    }
-                }
-            }
-            var httpClient = if (useCustomClient) customClient!! else defaultClient!!
-
-            httpClient = if (!requiresRedirection)
-                httpClient.config {
-                    redirection = false
-                    followRedirects = false
-                }
-            else if (!redirection) httpClient.config {
-                redirection = true
-                followRedirects = true
-            } else httpClient
-
-            return HttpInterfaceImpl(httpClient)
+                followRedirects = requiresRedirection
+            })
         }
 
         /**
