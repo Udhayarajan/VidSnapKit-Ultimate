@@ -162,3 +162,7 @@ nexusPublishing {
         }
     }
 }
+
+task("printVersionName") {
+    println(version)
+}
