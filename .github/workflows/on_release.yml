@@ -20,8 +20,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  if: 'github.event.prerelease'
   generate-docs:
+    if: 'github.event.prerelease'
     name: Generate docs for current version and updates docs folder
     runs-on: ubuntu-latest
     steps:
