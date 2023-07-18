@@ -50,4 +50,3 @@ jobs:
           release_name: v${{ env.VERSION_NAME }}
           draft: false
           prerelease: true
-          target_commitish: dev
