@@ -23,7 +23,6 @@ jobs:
   generate-docs:
     name: Generate docs for current version and updates docs folder
     runs-on: ubuntu-latest
-    if: github.event_name == 'release' && github.event.action == 'released'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
