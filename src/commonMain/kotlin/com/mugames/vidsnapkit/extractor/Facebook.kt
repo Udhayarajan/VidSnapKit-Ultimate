@@ -191,7 +191,7 @@ class Facebook internal constructor(url: String) : Extractor(url) {
                                         1
                                     )!!
                                 ),
-                                url = m.group(1)!!
+                                url = decodeHTML(m.group(1)!!)!!
                             )
                         )
                         return
@@ -222,6 +222,7 @@ class Facebook internal constructor(url: String) : Extractor(url) {
                     Regex("(?:true|false),\"name\":\"(.*?)\",\"savable"),
                     Regex("<[Tt]itle id=\"pageTitle\">(.*?) \\| Facebook<\\/title>"),
                     Regex("title\" content=\"(.*?)\""),
+
                     default = "Facebook_Video"
                 )
             }

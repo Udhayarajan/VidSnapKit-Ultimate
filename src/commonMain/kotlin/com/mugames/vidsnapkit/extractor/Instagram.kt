@@ -21,6 +21,7 @@ import com.mugames.vidsnapkit.*
 import com.mugames.vidsnapkit.dataholders.*
 import com.mugames.vidsnapkit.network.HttpRequest
 import io.ktor.http.*
+import kotlinx.coroutines.withTimeoutOrNull
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -44,7 +45,8 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         const val NO_STATUS_AVAILABLE = "No stories Available to Download"
         const val HIGHLIGHTS_API = "https://www.instagram.com/api/v1/feed/reels_media/?reel_ids=highlight%s"
         const val GRAPHQL_URL =
-            "https://www.instagram.com/graphql/query/?query_hash=b3055c01b4b222b8a47dc12b090e4e64&variables={\"shortcode\":\"%s\"}"
+            "https://www.instagram.com/graphql/query/?query_hash=%s&variables={\"shortcode\":\"%s\"}"
+        const val DEFAULT_QUERY_HASH = "b3055c01b4b222b8a47dc12b090e4e64"
 
         private val logger = LoggerFactory.getLogger(Instagram::class.java)
     }
@@ -426,7 +428,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
     }
 
     private fun getFromBrutForcing(page: String): String? {
-        val matcher = Pattern.compile("<script type=\"application\\/ld\\+json\".*?>(.*?)<\\/script>").matcher(page)
+        val matcher = Pattern.compile("<script type=\"application/ld\\+json\".*?>(.*?)</script>").matcher(page)
         if (matcher.find()) {
             val res = matcher.group(1)
             if (res.contains("articleBody")) {
@@ -540,8 +542,8 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         } else null
 
         if (jsonString.isNullOrEmpty()) {
-            logger.info("direct ex as json string isn't matching")
-            directExtraction()
+            logger.info("trying with query hash")
+            tryWithQueryHash(page)
             return
         }
         val jsonObject = JSONObject(jsonString)
@@ -557,6 +559,19 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         } ?: run {
             extractFromItems(jsonObject.getJSONArray("items"))
         }
+    }
+
+    private suspend fun tryWithQueryHash(page: String) {
+        val queryHash = withTimeoutOrNull(2000) {
+            getQueryHashFromAllJSInPage(page)
+        } ?: ""
+        val res = HttpRequest(GRAPHQL_URL.format(queryHash, getShortcode()), headers).getResponse()
+        val shortcodeMedia = res?.toJSONObject()?.getJSONObject("data")?.getNullableJSONObject("shortcode_media") ?: run {
+            logger.info("unable to even get from graphQL so trying direct ex")
+            directExtraction()
+            return
+        }
+        setInfo(shortcodeMedia)
     }
 
     private suspend fun extractFromItems(items: JSONArray) {
