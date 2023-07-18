@@ -21,7 +21,7 @@ concurrency:
 
 jobs:
   generate-docs:
-    if: 'github.event.prerelease'
+    if: '!github.event.prerelease'
     name: Generate docs for current version and updates docs folder
     runs-on: ubuntu-latest
     steps:
