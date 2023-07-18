@@ -44,7 +44,7 @@ jobs:
         uses: actions/create-release@v1
         if: env.create_release == 'true'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT }}
         with:
           tag_name: v${{ env.VERSION_NAME }}
           release_name: v${{ env.VERSION_NAME }}
