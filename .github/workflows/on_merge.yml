@@ -1,0 +1,32 @@
+name: Create Release
+on:
+  pull_request:
+    branches:
+      - dev
+    types: [ closed ]
+
+jobs:
+  build:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Retrieve Version
+        run: |
+          echo "::set-output name=VERSION_NAME::$(${{github.workspace}}/gradlew -q printVersionName)"
+          id: android_version
+      - name: Get version
+        run: |
+          echo "version_name=${{steps.android_version.outputs.VERSION_NAME}}" >> $GITHUB_ENV
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{env.version_name}}
+          release_name: v${{env.version_name}}
+          draft: false
+          prerelease: false
