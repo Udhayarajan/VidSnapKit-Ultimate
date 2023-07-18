@@ -4,7 +4,7 @@ on:
   pull_request:
     branches:
       - dev
-    types: [closed]
+    types: [ closed ]
 
 jobs:
   build:
@@ -18,17 +18,17 @@ jobs:
         id: get_previous_release
         run: |
           previous_release=$(curl -s "https://api.github.com/repos/${{ github.repository }}/releases/latest" | jq -r '.tag_name')
-          echo "::set-output name=PREVIOUS_RELEASE::$previous_release"
+          echo "PREVIOUS_RELEASE=$previous_release" >> $GITHUB_ENV
 
       - name: Retrieve Version
         id: get_version
         run: |
-          echo "::set-output name=VERSION_NAME::$(${{ github.workspace }}/gradlew -q printVersionName)"
+          echo "VERSION_NAME=$(${{ github.workspace }}/gradlew -q printVersionName)" >> $GITHUB_ENV
 
       - name: Check if Version Changed
         id: check_version_change
         run: |
-          if [[ "${{ steps.get_version.outputs.VERSION_NAME }}" != "${{ steps.get_previous_release.outputs.PREVIOUS_RELEASE }}" ]]; then
+          if [[ "v${{ env.VERSION_NAME }}" != "${{ env.PREVIOUS_RELEASE }}" ]]; then
             echo "Version has changed. Creating release..."
             echo "create_release=true" >> $GITHUB_ENV
           else
@@ -43,7 +43,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: v${{ steps.get_version.outputs.VERSION_NAME }}
-          release_name: v${{ steps.get_version.outputs.VERSION_NAME }}
+          tag_name: v${{ env.VERSION_NAME }}
+          release_name: v${{ env.VERSION_NAME }}
           draft: false
           prerelease: true
