@@ -4,6 +4,9 @@ on:
   pull_request:
     branches:
       - dev
+    # It actually triggers the build logic only if the files under src is modified.
+    paths:
+      - 'src/**'
     types: [ closed ]
 
 jobs:
