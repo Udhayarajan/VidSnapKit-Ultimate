@@ -58,7 +58,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         if (cookies.isNullOrEmpty()) return false
         val res =
             HttpRequest("https://www.instagram.com/accounts/login/", headers).getRawResponse(false) ?: return false
-        logger.info("status code=${res.status.value} & http response=${res}")
+        logger.info("status code=${res.status.value} & http response=$res")
         if (res.status == HttpStatusCode.Found) {
             val newLoc = res.headers["location"].toString()
             logger.info("new loc = $newLoc")
@@ -86,7 +86,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
     private fun getShortcode(): String? {
         val matcher = Pattern.compile("(?:reel|reels|p)/(.*?)[/?]").matcher(inputUrl)
         return if (matcher.find()) matcher.group(1) else {
-            logger.error("unable to find shortcode from the url=${inputUrl}")
+            logger.error("unable to find shortcode from the url=$inputUrl")
             null
         }
     }
@@ -97,7 +97,6 @@ class Instagram internal constructor(url: String) : Extractor(url) {
             shortcodeToMediaID(this)
         }
     }
-
 
     private fun isPostUrl(): Boolean {
         if (inputUrl.contains("/p/")) return true
@@ -242,10 +241,12 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                 return
             }
         }
-        extractFromItems(res.toJSONObjectOrNull()?.getNullableJSONArray("items") ?: run {
-            loginRequired()
-            return
-        })
+        extractFromItems(
+            res.toJSONObjectOrNull()?.getNullableJSONArray("items") ?: run {
+                loginRequired()
+                return
+            }
+        )
     }
 
     private suspend fun extractHighlights(highlightsId: String) {
@@ -274,7 +275,6 @@ class Instagram internal constructor(url: String) : Extractor(url) {
             )
         )
     }
-
 
     private suspend fun extractInfoShared(page: String) {
         if (page == "{error:\"Invalid Cookies\"}") {
@@ -308,9 +308,11 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         } else {
             val json = getFromBrutForcing(page)
             if (json != null) {
-                brutForcedExtraction(json.toJSONObjectOrNull() ?: run {
-                    json.toJSONArray().getJSONObject(0)
-                })
+                brutForcedExtraction(
+                    json.toJSONObjectOrNull() ?: run {
+                        json.toJSONArray().getJSONObject(0)
+                    }
+                )
                 return
             } else {
                 logger.info("finally calling direct ex in unsafe, cookies are not validated")
@@ -452,9 +454,11 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         val matcher = Pattern.compile("<link rel=\"preload\" href=\"(.*?)\" as=\"script\"").matcher(page)
         while (matcher.find()) {
             ids.addAll(
-                getQueryHash(HttpRequest(matcher.group(1), headers).getResponse() ?: run {
-                    return null
-                })
+                getQueryHash(
+                    HttpRequest(matcher.group(1), headers).getResponse() ?: run {
+                        return null
+                    }
+                )
             )
         }
         return ids
@@ -555,7 +559,6 @@ class Instagram internal constructor(url: String) : Extractor(url) {
             } ?: run {
                 onProgress(Result.Failed(Error.InternalError("MediaNotFound")))
             }
-
         } ?: run {
             extractFromItems(jsonObject.getJSONArray("items"))
         }
@@ -588,7 +591,6 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                     }
                 )
             }
-
 
             val videoVersion = item.getNullableJSONArray("video_versions")
             videoVersion?.let {
@@ -663,12 +665,10 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         return id.toString()
     }
 
-
     override suspend fun testWebpage(string: String) {
         onProgress = {
             println(it)
         }
         extractInfoShared(string)
     }
-
 }

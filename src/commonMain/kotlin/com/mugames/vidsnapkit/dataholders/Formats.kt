@@ -41,14 +41,13 @@ data class Formats(
     var url: String = "",
     var src: String = "",
 
-
     val videoData: MutableList<VideoResource> = mutableListOf(),
 
     val imageData: MutableList<ImageResource> = mutableListOf(),
 
     val audioData: MutableList<AudioResource> = mutableListOf(),
 
-    //Flag to keep remember what index is selected
+    // Flag to keep remember what index is selected
     var selectedVideoIndex: Int? = null,
     var selectedAudioIndex: Int? = null,
     var selectedThumbnailIndex: Int? = null,
@@ -75,4 +74,3 @@ data class Formats(
      */
     fun getSelectedThumbnailUrl(): ImageResource = imageData[selectedThumbnailIndex ?: 0]
 }
-

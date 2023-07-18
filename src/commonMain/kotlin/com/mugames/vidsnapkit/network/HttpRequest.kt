@@ -57,12 +57,14 @@ class HttpRequest(
             requiresRedirection: Boolean = true,
         ): HttpInterfaceImpl {
             val httpClient = if (useCustomClient) clientGenerator() else HttpClient(Android)
-            return HttpInterfaceImpl(httpClient.config {
-                install(HttpTimeout) {
-                    socketTimeoutMillis = 13_000
+            return HttpInterfaceImpl(
+                httpClient.config {
+                    install(HttpTimeout) {
+                        socketTimeoutMillis = 13_000
+                    }
+                    followRedirects = requiresRedirection
                 }
-                followRedirects = requiresRedirection
-            })
+            )
         }
 
         /**
@@ -128,5 +130,4 @@ class HttpRequest(
             getUrl(), getHeader()
         )
     }
-
 }

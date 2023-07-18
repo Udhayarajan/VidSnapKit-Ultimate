@@ -24,6 +24,6 @@ import com.mugames.vidsnapkit.dataholders.Result
  * Created on 31-07-2022
  */
 
-interface ProgressCallback{
+interface ProgressCallback {
     fun onProgress(result: Result)
 }

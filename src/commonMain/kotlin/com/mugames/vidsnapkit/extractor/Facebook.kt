@@ -54,7 +54,7 @@ class Facebook internal constructor(url: String) : Extractor(url) {
             val containsRestrictedKeyword = restrictedKeywords.any { keyword ->
                 res.bodyAsText().contains(keyword, ignoreCase = true)
             }
-            logger.info("Check cookie containsRestrictedKeyword=${containsRestrictedKeyword} ")
+            logger.info("Check cookie containsRestrictedKeyword=$containsRestrictedKeyword ")
             return !containsRestrictedKeyword
         }
         if (res.status == HttpStatusCode.Found) {
@@ -248,7 +248,6 @@ class Facebook internal constructor(url: String) : Extractor(url) {
         return null
     }
 
-
     private fun grabRelayPrefetchedDataSearchUrl(webpage: String): Any? {
         fun parseAttachment(attachment: JSONObject?, key: String) {
             val media = attachment?.getNullableJSONObject(key)
@@ -284,7 +283,7 @@ class Facebook internal constructor(url: String) : Extractor(url) {
                         ?: story.getJSONArray("attachments")
 
                     for (j in 0 until attachments.length()) {
-                        //attachments.getJSONObject(j).getJSONObject("style_type_renderer").getJSONObject("attachment");
+                        // attachments.getJSONObject(j).getJSONObject("style_type_renderer").getJSONObject("attachment");
                         val attachment = attachments.getNullableJSONObject(j)
                             ?.run {
                                 getNullableJSONObject("style_type_renderer") ?: getNullableJSONObject("styles")
@@ -300,7 +299,6 @@ class Facebook internal constructor(url: String) : Extractor(url) {
                             }
                         }
                         parseAttachment(attachment, "media")
-
                     }
                 }
             }
@@ -323,7 +321,6 @@ class Facebook internal constructor(url: String) : Extractor(url) {
                     ?.getNullableJSONArray("attachments")
                     ?: video.getNullableJSONObject("creation_story")
                         ?.getNullableJSONArray("attachments")
-
 
                 if (attachments != null) {
                     for (j in 0 until attachments.length()) {
@@ -403,7 +400,7 @@ class Facebook internal constructor(url: String) : Extractor(url) {
         localFormats.title = media.getNullableString("name")
             ?: media.getNullableJSONObject("savable_description")
                 ?.getNullableString("text")
-                    ?: "Facebook_Video"
+            ?: "Facebook_Video"
 
         val dashXml = media.getNullableString("dash_manifest")
         dashXml?.let {
@@ -425,7 +422,6 @@ class Facebook internal constructor(url: String) : Extractor(url) {
                     if (suffix == "") "$res(SD)" else "$res(HD)"
                 )
             )
-
         }
     }
 
@@ -529,10 +525,10 @@ class Facebook internal constructor(url: String) : Extractor(url) {
                             url,
                             MimeType.VIDEO_MP4,
                             videoData.get("original_width").toString() + "x" +
-                                    videoData.get("original_height") + "(" +
-                                    s.uppercase() + ")",
+                                videoData.get("original_height") + "(" +
+                                s.uppercase() + ")",
 
-                            )
+                        )
                     )
                 }
                 return SUCCESS
@@ -543,15 +539,13 @@ class Facebook internal constructor(url: String) : Extractor(url) {
 
     override suspend fun testWebpage(string: String) {
         onProgress = {
-
         }
         scratchWebPage(string)
     }
 
-
     companion object {
         const val TAG: String = Statics.TAG.plus(":Facebook")
-        const val SUCCESS = -1 //Null if fails
+        const val SUCCESS = -1 // Null if fails
         val logger = LoggerFactory.getLogger(Facebook::class.java)
         var PAGELET_REGEX =
             "(?:pagelet_group_mall|permalink_video_pagelet|hyperfeed_story_id_[0-9a-f]+)".toRegex()

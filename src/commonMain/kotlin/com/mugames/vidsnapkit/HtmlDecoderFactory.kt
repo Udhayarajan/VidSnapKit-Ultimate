@@ -17,16 +17,15 @@
 
 package com.mugames.vidsnapkit
 
-
 /**
  * @author Udhaya
  * Created on 28-02-2023
  */
 
-interface HtmlDecoder{
+interface HtmlDecoder {
     fun decodeHtml(string: String): String
 }
 
-expect object HtmlDecoderFactory{
+expect object HtmlDecoderFactory {
     fun createDecoderFactory(): HtmlDecoder
 }

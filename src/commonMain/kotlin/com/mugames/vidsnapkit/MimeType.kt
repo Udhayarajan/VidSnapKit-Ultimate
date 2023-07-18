@@ -67,7 +67,7 @@ class MimeType {
          *
          * Constant Value: "application/x-mpegURL"
          */
-        const val APPLICATION_X_MPEG_URL = "application/x-mpegURL";
+        const val APPLICATION_X_MPEG_URL = "application/x-mpegURL"
 
         fun fromCodecs(codec: String, defaultCodec: String = "") = with(codec) {
             when {
