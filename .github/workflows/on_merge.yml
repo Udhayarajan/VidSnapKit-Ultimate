@@ -41,12 +41,11 @@ jobs:
 
       - name: Create Release
         id: create_release
-        uses: actions/create-release@v1
+        uses: softprops/action-gh-release@v1
         if: env.create_release == 'true'
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT }}
         with:
           tag_name: v${{ env.VERSION_NAME }}
-          release_name: v${{ env.VERSION_NAME }}
+          name: v${{ env.VERSION_NAME }}
           draft: false
           prerelease: true
+          token: ${{secrets.PAT}}
