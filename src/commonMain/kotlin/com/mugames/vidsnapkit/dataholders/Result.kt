@@ -96,7 +96,7 @@ sealed class Error(val message: String? = null, val e: Exception? = null) {
      * The current extractor missing some of its extraction logic
      * for the given url
      */
-    object MethodMissingLogic: Error("Missing implementation logic")
+    object MethodMissingLogic : Error("Missing implementation logic")
 }
 
 /**

@@ -25,7 +25,6 @@ actual object HtmlDecoderFactory {
             override fun decodeHtml(string: String): String {
                 return HtmlCompat.fromHtml(string, HtmlCompat.FROM_HTML_MODE_LEGACY).toString()
             }
-
         }
     }
 }

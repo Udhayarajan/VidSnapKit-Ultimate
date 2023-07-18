@@ -36,10 +36,12 @@ class LinkedIn internal constructor(url: String) : Extractor(url) {
         formats.url = inputUrl
         formats.src = "LinkedIn"
         onProgress(Result.Progress(ProgressState.Start))
-        scratchWebpage(HttpRequest(inputUrl, headers).getResponse() ?: run {
-            clientRequestError()
-            return
-        })
+        scratchWebpage(
+            HttpRequest(inputUrl, headers).getResponse() ?: run {
+                clientRequestError()
+                return
+            }
+        )
     }
 
     override suspend fun testWebpage(string: String) {

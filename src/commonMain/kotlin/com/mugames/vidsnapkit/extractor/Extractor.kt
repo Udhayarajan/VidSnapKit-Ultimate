@@ -78,7 +78,6 @@ abstract class Extractor(
     protected var inputUrl: String = url
     protected lateinit var onProgress: (Result) -> Unit
 
-
     protected var headers: Hashtable<String, String> = Hashtable()
 
     /**
@@ -95,9 +94,7 @@ abstract class Extractor(
             field = value
         }
 
-
     protected val videoFormats = mutableListOf<Formats>()
-
 
     /**
      * starting point of all child of [Extractor]
@@ -119,7 +116,6 @@ abstract class Extractor(
         safeAnalyze()
     }
 
-
     private suspend fun safeAnalyze() {
         try {
             if (inputUrl.contains("facebook")) {
@@ -131,11 +127,13 @@ abstract class Extractor(
                         else
                             null
                     }
-                    Instagram(instaURL ?: run {
-                        logger.error("Fail to match the regex url=${inputUrl}")
-                        internalError("unable to match the instagram url")
-                        return
-                    })
+                    Instagram(
+                        instaURL ?: run {
+                            logger.error("Fail to match the regex url=$inputUrl")
+                            internalError("unable to match the instagram url")
+                            return
+                        }
+                    )
                 }
             }
             if (inputUrl.contains("instagram")) {
@@ -165,7 +163,6 @@ abstract class Extractor(
                 onProgress(Result.Failed(Error.InternalError("Error in SafeAnalyze", e)))
         }
     }
-
 
     protected abstract suspend fun analyze(payload: Any? = null)
 
