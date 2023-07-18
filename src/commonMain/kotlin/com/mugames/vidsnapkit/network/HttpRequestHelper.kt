@@ -137,9 +137,10 @@ class HttpInterfaceImpl(
             logger.error("checkWebPage() url=${url} header=${headers.toString()} ClientRequestException:", e)
 
             false
+        } catch (e: SocketTimeoutException) {
+            throw e
         } catch (e: Exception) {
             logger.error("checkWebPage() url=${url} header=${headers.toString()} GenericException:", e)
-
             false
         }
     }
@@ -262,7 +263,7 @@ class HttpInterfaceImpl(
         do {
             var locationUrl = cacheResponse.headers[HttpHeaders.Location] ?: return cacheResponse
 
-            val matcher = Pattern.compile("^(?:https?:\\/\\/)?(?:[^@\\n]+@)?(?:www\\.)?([^:\\/\\n?]+)")
+            val matcher = Pattern.compile("^(?:https?://)?(?:[^@\\n]+@)?(?:www\\.)?([^:/\\n?]+)")
                 .matcher(locationUrl)
             if (!matcher.find())
                 locationUrl = cacheResponse.request.url.protocolWithAuthority + locationUrl
