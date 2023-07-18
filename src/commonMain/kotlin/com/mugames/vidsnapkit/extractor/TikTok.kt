@@ -23,7 +23,6 @@ import com.mugames.vidsnapkit.network.HttpRequest
 import com.mugames.vidsnapkit.toJSONObject
 import java.util.regex.Pattern
 
-
 /**
  * @author Udhaya
  * Created on 07-03-2023
@@ -32,7 +31,6 @@ import java.util.regex.Pattern
 class TikTok internal constructor(url: String) : Extractor(url) {
 
     private val localFormats = Formats()
-
 
     override suspend fun analyze(payload: Any?) {
         localFormats.src = "TikTok"

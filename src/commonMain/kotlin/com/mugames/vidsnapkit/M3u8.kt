@@ -24,7 +24,6 @@ import com.mugames.vidsnapkit.network.HttpRequest
 import org.json.JSONObject
 import java.util.regex.Pattern
 
-
 /**
  * @author Udhaya
  * Created on 07-03-2023
@@ -34,9 +33,7 @@ class M3u8(private val url: String, private val onProgressCallback: ProgressCall
 
     var TAG = Statics.TAG + ":m3u8"
 
-
     var info: JSONObject? = null
-
 
     private val localFormats = Formats()
 
@@ -61,7 +58,6 @@ class M3u8(private val url: String, private val onProgressCallback: ProgressCall
 //        })
     }
 
-
     private suspend fun realExtract(index: Int, url: String, chunkCallback: ChunkCallback) {
         val response = HttpRequest(url).getResponse()
         response?.let {
@@ -74,7 +70,7 @@ class M3u8(private val url: String, private val onProgressCallback: ProgressCall
                 return
             }
             if (it.contains("#EXT-X-TARGETDURATION")) {
-                //No playlist
+                // No playlist
                 extractFromMeta(index, it, url, chunkCallback)
             } else {
                 extractFromPlaylist(it, url)
@@ -84,10 +80,10 @@ class M3u8(private val url: String, private val onProgressCallback: ProgressCall
         }
     }
 
-    //size
+    // size
     var got = 0
 
-    //TODO Fix needed
+    // TODO Fix needed
 //    fun completingProcess() {
 //        try {
 //            extractor.formats.title = info.getString("title")
@@ -142,7 +138,6 @@ class M3u8(private val url: String, private val onProgressCallback: ProgressCall
 //            })
 //        }
     }
-
 
     private fun extractFromMeta(index: Int, meta: String, url: String, chunkCallback: ChunkCallback) {
         val chunksUrl: ArrayList<String> = ArrayList()
@@ -205,19 +200,15 @@ class M3u8(private val url: String, private val onProgressCallback: ProgressCall
         return s == null || s.isEmpty()
     }
 
-
     fun find_url(mainURL: String?, line: String): String {
         return if (Pattern.compile("^https?://").matcher(line).find()) line else Util.joinURL(mainURL, line)!!
     }
-
 
     fun getResolution(query: String): String? {
         return query.substring("RESOLUTION".length + 1)
     }
 
-
     internal interface ChunkCallback {
         fun onChunkExtracted(index: Int, chunkURLS: ArrayList<String>?)
     }
-
 }

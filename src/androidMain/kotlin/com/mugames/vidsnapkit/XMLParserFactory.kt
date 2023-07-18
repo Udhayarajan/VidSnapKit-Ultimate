@@ -26,7 +26,6 @@ actual object XMLParserFactory {
             override fun xmlToJsonObject(xmlString: String): JSONObject {
                 return XML.toJSONObject(xmlString)
             }
-
         }
     }
 }

@@ -17,13 +17,11 @@
 
 package com.mugames.vidsnapkit
 
-
 import io.ktor.utils.io.errors.*
 import org.ccil.cowan.tagsoup.HTMLSchema
 import org.ccil.cowan.tagsoup.Parser
 import org.xml.sax.*
 import java.io.StringReader
-
 
 private val schema = HTMLSchema()
 actual object HtmlDecoderFactory {
@@ -43,7 +41,6 @@ actual object HtmlDecoderFactory {
                 val converter = HtmlToSpannedConverter(string, parser)
                 return converter.convert().toString()
             }
-
         }
     }
 }
