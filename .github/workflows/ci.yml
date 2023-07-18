@@ -1,0 +1,25 @@
+name: Pre Check
+
+on: [ push ]
+
+permissions:
+  contents: read
+
+jobs:
+  lint-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Change wrapper permissions
+        run: chmod +x ./gradlew
+
+      - name: Set up Java
+        uses: actions/setup-java@v2
+        with:
+          java-version: 11
+
+      - name: Run lint checks
+        run: ./gradlew ktlintCheck
