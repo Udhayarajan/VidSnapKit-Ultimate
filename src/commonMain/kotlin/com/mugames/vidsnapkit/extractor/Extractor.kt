@@ -140,8 +140,7 @@ abstract class Extractor(
                 inputUrl = if (cookies == null) {
                     inputUrl.replace("/reels/", "/reel/")
                 } else inputUrl.replace("/reel/", "/reels/")
-                headers["User-Agent"] =
-                    "Mozilla/5.0 (iPhone; CPU iPhone OS 12_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 105.0.0.11.118 (iPhone11,8; iOS 12_3_1; en_US; en-US; scale=2.00; 828x1792; 165586599)"
+                headers["User-Agent"] = getRandomInstagramUserAgent()
             }
             if (HttpRequest(inputUrl, headers).isAvailable())
                 analyze()
@@ -242,4 +241,28 @@ abstract class Extractor(
     }
 
     abstract suspend fun testWebpage(string: String)
+
+    // list of ua supported by both fb & insta
+    private fun getRandomInstagramUserAgent(): String {
+        val userAgents = listOf(
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 " +
+                    "Safari/537.36",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 " +
+                    "Safari/537.36",
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) " +
+                    "Chrome/74.0.3729.169 Safari/537.36",
+            "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 " +
+                    "Safari/537.36",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 " +
+                    "Safari/537.36",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.157 " +
+                    "Safari/537.36",
+            "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.157 " +
+                    "Safari/537.36",
+            "Mozilla/5.0 (iPhone; CPU iPhone OS 12_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) " +
+                    "Mobile/15E148 Instagram 105.0.0.11.118 (iPhone11,8; iOS 12_3_1; en_US; en-US; scale=2.00; " +
+                    "828x1792; 165586599)"
+        )
+        return userAgents.random()
+    }
 }
