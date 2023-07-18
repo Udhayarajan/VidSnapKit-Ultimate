@@ -2,8 +2,8 @@ name: Generate Docs, publish docs and build & publish the code
 
 on:
   release:
-    # We'll run this workflow when a new GitHub release/pre-release is created
-    types: [ released, prereleased ]
+    # We'll run this workflow when a new GitHub pre-release is created
+    types: [ prereleased ]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -23,6 +23,7 @@ jobs:
   generate-docs:
     name: Generate docs for current version and updates docs folder
     runs-on: ubuntu-latest
+    if: github.event_name == 'release' && github.event.action == 'released'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
