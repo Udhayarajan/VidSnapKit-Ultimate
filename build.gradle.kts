@@ -27,7 +27,7 @@ plugins {
 }
 
 group = "io.github.udhayarajan"
-version = "5.6.0"
+version = "5.6.0.0.1"
 //Version Naming incremented if "<NEW_FEATURE_ADDED>.<WORKED_ON_BUG>.<BETA_VERSION_COUNT>"
 //Priority on incrementing Feature > BugFix > Beta
 
@@ -161,4 +161,8 @@ nexusPublishing {
             snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
         }
     }
+}
+
+task("printVersionName") {
+    println(version)
 }

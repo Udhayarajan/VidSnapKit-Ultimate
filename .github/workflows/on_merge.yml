@@ -1,0 +1,49 @@
+name: Create Release
+
+on:
+  pull_request:
+    branches:
+      - dev
+    types: [closed]
+
+jobs:
+  build:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Retrieve Previous Release
+        id: get_previous_release
+        run: |
+          previous_release=$(curl -s "https://api.github.com/repos/${{ github.repository }}/releases/latest" | jq -r '.tag_name')
+          echo "::set-output name=PREVIOUS_RELEASE::$previous_release"
+
+      - name: Retrieve Version
+        id: get_version
+        run: |
+          echo "::set-output name=VERSION_NAME::$(${{ github.workspace }}/gradlew -q printVersionName)"
+
+      - name: Check if Version Changed
+        id: check_version_change
+        run: |
+          if [[ "${{ steps.get_version.outputs.VERSION_NAME }}" != "${{ steps.get_previous_release.outputs.PREVIOUS_RELEASE }}" ]]; then
+            echo "Version has changed. Creating release..."
+            echo "create_release=true" >> $GITHUB_ENV
+          else
+            echo "Version has not changed. Skipping release..."
+            echo "create_release=false" >> $GITHUB_ENV
+          fi
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        if: env.create_release == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.get_version.outputs.VERSION_NAME }}
+          release_name: v${{ steps.get_version.outputs.VERSION_NAME }}
+          draft: false
+          prerelease: true
