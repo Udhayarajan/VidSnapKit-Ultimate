@@ -27,7 +27,6 @@ import org.json.JSONObject
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
-
 /**
  * @author Udhaya
  * Created on 06-03-2023
@@ -44,13 +43,10 @@ class Twitter internal constructor(url: String) : Extractor(url) {
 
     var localFormats = Formats()
 
-
     var auth =
         "Bearer AAAAAAAAAAAAAAAAAAAAAPYXBAAAAAAACLXUNDekMxqa8h%2F40K4moUkGsoc%3DTYfbDKbT3jJPCEVnMYqilB28NHfOPqkca3qaAxGfsyKCs0wRbw"
 
-
     var info: JSONObject? = null
-
 
     override suspend fun analyze(payload: Any?) {
         localFormats.url = inputUrl
@@ -74,7 +70,6 @@ class Twitter internal constructor(url: String) : Extractor(url) {
         else null
     }
 
-
     private suspend fun getToken() {
         val response = HttpRequest(base_url + "guest/activate.json", headers).postRequest()
         headers["x-guest-token"] = response.toJSONObject().getString("guest_token")
@@ -83,11 +78,11 @@ class Twitter internal constructor(url: String) : Extractor(url) {
     }
 
     private suspend fun extractVideo() {
-        val response = HttpRequest("${base_url}statuses/show/${tweetID}.json$query", headers).getResponse()
+        val response = HttpRequest("${base_url}statuses/show/$tweetID.json$query", headers).getResponse()
         response?.let {
             identifyDownloader(it)
         } ?: run {
-            clientRequestError("Fetch failed for ${base_url}statuses/show/${tweetID}.json$query")
+            clientRequestError("Fetch failed for ${base_url}statuses/show/$tweetID.json$query")
         }
     }
 
@@ -168,7 +163,7 @@ class Twitter internal constructor(url: String) : Extractor(url) {
     }
 
     private suspend fun fromVMap(url: String) {
-        val response = HttpRequest(url).getResponse();
+        val response = HttpRequest(url).getResponse()
         response?.let {
             var matcher: Matcher =
                 Pattern.compile("(?<=<tw:videoVariants>)[\\s\\S]*(?=</tw:videoVariants>)")
@@ -197,7 +192,6 @@ class Twitter internal constructor(url: String) : Extractor(url) {
         } ?: run {
             clientRequestError("Url unable to fetch for url $url")
         }
-
     }
 
     private fun fromVideoInfo(media: JSONObject) {
@@ -238,7 +232,6 @@ class Twitter internal constructor(url: String) : Extractor(url) {
     override suspend fun testWebpage(string: String) {
         TODO("Not yet implemented")
     }
-
 
     fun resolution(url: String?): String {
         val pattern: Pattern = Pattern.compile("/(\\d+x\\d+)/")
@@ -301,4 +294,3 @@ class Twitter internal constructor(url: String) : Extractor(url) {
         }
     }
 }
-

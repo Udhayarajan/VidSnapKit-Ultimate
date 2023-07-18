@@ -18,9 +18,9 @@
 package com.mugames.vidsnapkit.extractor
 
 import com.mugames.vidsnapkit.MimeType
+import com.mugames.vidsnapkit.dataholders.*
 import com.mugames.vidsnapkit.getNullableString
 import com.mugames.vidsnapkit.network.HttpRequest
-import com.mugames.vidsnapkit.dataholders.*
 import org.json.JSONObject
 import java.util.regex.Pattern
 
@@ -36,10 +36,12 @@ class ShareChat internal constructor(url: String) : Extractor(url) {
         formats.url = inputUrl
         formats.src = "ShareChat"
         onProgress(Result.Progress(ProgressState.Start))
-        scratchWebPage(HttpRequest(inputUrl).getResponse()?: run {
-            clientRequestError()
-            return
-        })
+        scratchWebPage(
+            HttpRequest(inputUrl).getResponse() ?: run {
+                clientRequestError()
+                return
+            }
+        )
     }
 
     override suspend fun testWebpage(string: String) {
@@ -57,9 +59,9 @@ class ShareChat internal constructor(url: String) : Extractor(url) {
         val responseObject = JSONObject(matcher.group(1)!!)
         formats.title = responseObject.getString("name")
             ?: responseObject.getString("description")
-                    ?: "ShareChat_${
-                responseObject.getJSONObject("author")
-                    .getNullableString("name")
+            ?: "ShareChat_${
+            responseObject.getJSONObject("author")
+                .getNullableString("name")
             }"
         val contentUrl = responseObject.getString("contentUrl")
         try {
@@ -73,7 +75,7 @@ class ShareChat internal constructor(url: String) : Extractor(url) {
                 )
             )
             formats.imageData.add(ImageResource(responseObject.getString("thumbnail")))
-        }catch (e:Exception){
+        } catch (e: Exception) {
             formats.imageData.add(ImageResource(contentUrl))
         }
         videoFormats.add(formats)

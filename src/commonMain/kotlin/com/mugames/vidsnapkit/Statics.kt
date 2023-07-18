@@ -25,7 +25,7 @@ package com.mugames.vidsnapkit
  */
 class Statics {
 
-    companion object{
+    companion object {
         /**
          * [android.util.Log]'s Tag used for logging purpose inside library
          *
@@ -33,5 +33,4 @@ class Statics {
          */
         const val TAG = "VidSnapKit"
     }
-
 }

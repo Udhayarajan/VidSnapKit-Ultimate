@@ -24,12 +24,13 @@ plugins {
     id("com.android.library")
     id("org.jetbrains.dokka") version "1.7.20"
     id("io.github.gradle-nexus.publish-plugin") version "1.2.0"
+    id("org.jlleitschuh.gradle.ktlint") version "10.1.0"
 }
 
 group = "io.github.udhayarajan"
-version = "5.6.0"
-//Version Naming incremented if "<NEW_FEATURE_ADDED>.<WORKED_ON_BUG>.<BETA_VERSION_COUNT>"
-//Priority on incrementing Feature > BugFix > Beta
+version = "5.6.1"
+// Version Naming incremented if "<NEW_FEATURE_ADDED>.<WORKED_ON_BUG>.<BETA_VERSION_COUNT_OR_PRE_RELEASE>"
+// Priority on incrementing Feature > BugFix > Beta
 
 repositories {
     google()
@@ -51,7 +52,6 @@ kotlin {
     }
     android {
         publishLibraryVariants("release", "debug")
-
     }
     sourceSets {
         val ktor_version = "2.3.1"
@@ -90,6 +90,10 @@ kotlin {
             }
         }
     }
+}
+
+ktlint {
+    disabledRules.set(listOf("no-wildcard-imports"))
 }
 
 android {

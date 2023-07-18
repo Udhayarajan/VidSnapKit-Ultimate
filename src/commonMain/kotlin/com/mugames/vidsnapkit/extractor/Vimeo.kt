@@ -29,7 +29,6 @@ import org.json.JSONObject
 import java.net.URI
 import java.util.regex.Pattern
 
-
 /**
  * @author Udhaya
  * Created on 14-01-2023
@@ -55,10 +54,12 @@ class Vimeo internal constructor(url: String) : Extractor(url) {
         val id = getVideoId()
         id?.let {
             val request = HttpRequest(CONFIG_URL.format(it))
-            parseConfigRequest(request.getResponse()?: run {
-                clientRequestError()
-                return
-            })
+            parseConfigRequest(
+                request.getResponse() ?: run {
+                    clientRequestError()
+                    return
+                }
+            )
             videoFormats.add(formats)
             finalize()
         }
@@ -73,10 +74,13 @@ class Vimeo internal constructor(url: String) : Extractor(url) {
         val hls = json.getJSONObject("request").getJSONObject("files").getJSONObject("dash")
         val defaultCdn = hls.getString("default_cdn")
         val cdnUrl = hls.getJSONObject("cdns").getJSONObject(defaultCdn).getString("url")
-        extractFromCdns(HttpRequest(cdnUrl).getResponse()?: run {
-            clientRequestError()
-            return
-        }, cdnUrl)
+        extractFromCdns(
+            HttpRequest(cdnUrl).getResponse() ?: run {
+                clientRequestError()
+                return
+            },
+            cdnUrl
+        )
         val video = json.getJSONObject("video")
         extractMetaData(video)
     }
@@ -112,7 +116,6 @@ class Vimeo internal constructor(url: String) : Extractor(url) {
                 MimeType.fromCodecs(jsonObject.getString("codecs"), jsonObject.getString("mime_type"))
             )
         }
-
 
         fun extractVideoData() {
             for (i in 0 until videoArray.length()) {

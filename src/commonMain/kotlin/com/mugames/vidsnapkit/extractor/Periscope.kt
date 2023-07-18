@@ -29,7 +29,6 @@ import com.mugames.vidsnapkit.toJSONObjectOrNull
 import org.json.JSONObject
 import java.util.regex.Pattern
 
-
 /**
  * @author Udhaya
  * Created on 06-03-2023
@@ -49,9 +48,7 @@ class Periscope internal constructor(url: String) : Extractor(url) {
 
     var manifest: ArrayList<ArrayList<String>>? = ArrayList()
 
-
     var data: JSONObject? = null
-
 
     private fun getID(s: String?): String? {
         val matcher = Pattern.compile("https?://(?:www\\.)?(?:periscope|pscp)\\.tv/[^/]+/([^/?#]+)").matcher(s)
@@ -70,14 +67,16 @@ class Periscope internal constructor(url: String) : Extractor(url) {
                 val broadcast = stream.getJSONObject("broadcast")
                 data = extractData(broadcast)
                 val videUrls = mutableListOf<String>()
-                for (formatId in arrayOf(
-                    "replay",
-                    "rtmp",
-                    "hls",
-                    "https_hls",
-                    "lhls",
-                    "lhlsweb"
-                )) {
+                for (
+                    formatId in arrayOf(
+                        "replay",
+                        "rtmp",
+                        "hls",
+                        "https_hls",
+                        "lhls",
+                        "lhlsweb"
+                    )
+                ) {
                     val videoUrl = stream.getNullableString(formatId + "_url")
                     if (videoUrl.isNullOrEmpty() || videUrls.contains(videoUrl)) continue
                     localFormats.videoData.add(VideoResource(videoUrl, MimeType.VIDEO_MP4))
@@ -94,7 +93,6 @@ class Periscope internal constructor(url: String) : Extractor(url) {
         }
         return localFormats
     }
-
 
     private fun extractData(broadcast: JSONObject): JSONObject? {
         var title = broadcast.getNullableString("status")
@@ -118,5 +116,4 @@ class Periscope internal constructor(url: String) : Extractor(url) {
         )
         return js.toJSONObjectOrNull()
     }
-
 }
