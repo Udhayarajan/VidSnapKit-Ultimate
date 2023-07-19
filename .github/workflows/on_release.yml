@@ -2,8 +2,8 @@ name: Generate Docs, publish docs and build & publish the code
 
 on:
   release:
-    # We'll run this workflow when a new GitHub pre-release is created
-    types: [ published ]
+    types: [ prereleased ]    # We'll run this workflow when a new GitHub pre-release is created
+
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -21,7 +21,6 @@ concurrency:
 
 jobs:
   generate-docs:
-    if: 'github.event.prerelease'
     name: Generate docs for current version and updates docs folder
     runs-on: ubuntu-latest
     steps:
