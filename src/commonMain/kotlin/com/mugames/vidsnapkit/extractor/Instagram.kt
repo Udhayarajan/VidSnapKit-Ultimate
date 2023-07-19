@@ -206,6 +206,8 @@ class Instagram internal constructor(url: String) : Extractor(url) {
             // possibly user url
             val userId = getUserID()
             userId?.let {
+                cookies =
+                    "Mozilla/5.0 (iPhone; CPU iPhone OS 12_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 105.0.0.11.118 (iPhone11,8; iOS 12_3_1; en_US; en-US; scale=2.00; 828x1792; 165586599)"
                 extractStories(it)
             }
         }
@@ -569,11 +571,12 @@ class Instagram internal constructor(url: String) : Extractor(url) {
             getQueryHashFromAllJSInPage(page)
         } ?: ""
         val res = HttpRequest(GRAPHQL_URL.format(queryHash, getShortcode()), headers).getResponse()
-        val shortcodeMedia = res?.toJSONObject()?.getJSONObject("data")?.getNullableJSONObject("shortcode_media") ?: run {
-            logger.info("unable to even get from graphQL so trying direct ex")
-            directExtraction()
-            return
-        }
+        val shortcodeMedia =
+            res?.toJSONObject()?.getJSONObject("data")?.getNullableJSONObject("shortcode_media") ?: run {
+                logger.info("unable to even get from graphQL so trying direct ex")
+                directExtraction()
+                return
+            }
         setInfo(shortcodeMedia)
     }
 
