@@ -20,7 +20,6 @@ package com.mugames.vidsnapkit
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
-import org.slf4j.LoggerFactory
 
 /**
  * @author Udhaya

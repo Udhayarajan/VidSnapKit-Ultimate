@@ -62,16 +62,18 @@ class DailyMotion(url: String) : Extractor(url) {
 
             val thumbnails = json.getJSONObject("posters")
 
-            for (i in listOf(
-                "60",
-                "120",
-                "180",
-                "240",
-                "360",
-                "480",
-                "720",
-                "1080"
-            )) {
+            for (
+                i in listOf(
+                    "60",
+                    "120",
+                    "180",
+                    "240",
+                    "360",
+                    "480",
+                    "720",
+                    "1080"
+                )
+            ) {
                 localFormats.imageData.add(
                     ImageResource(
                         thumbnails.getString(i),

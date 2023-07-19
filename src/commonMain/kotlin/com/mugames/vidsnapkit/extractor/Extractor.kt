@@ -78,7 +78,6 @@ abstract class Extractor(
     protected var inputUrl: String = url
     protected lateinit var onProgress: (Result) -> Unit
 
-
     protected var headers: Hashtable<String, String> = Hashtable()
 
     /**
@@ -95,9 +94,7 @@ abstract class Extractor(
             field = value
         }
 
-
     protected val videoFormats = mutableListOf<Formats>()
-
 
     /**
      * starting point of all child of [Extractor]
@@ -119,7 +116,6 @@ abstract class Extractor(
         safeAnalyze()
     }
 
-
     private suspend fun safeAnalyze() {
         try {
             if (inputUrl.contains("facebook")) {
@@ -131,19 +127,20 @@ abstract class Extractor(
                         else
                             null
                     }
-                    Instagram(instaURL ?: run {
-                        logger.error("Fail to match the regex url=${inputUrl}")
-                        internalError("unable to match the instagram url")
-                        return
-                    })
+                    Instagram(
+                        instaURL ?: run {
+                            logger.error("Fail to match the regex url=$inputUrl")
+                            internalError("unable to match the instagram url")
+                            return
+                        }
+                    )
                 }
             }
             if (inputUrl.contains("instagram")) {
                 inputUrl = if (cookies == null) {
                     inputUrl.replace("/reels/", "/reel/")
                 } else inputUrl.replace("/reel/", "/reels/")
-                headers["User-Agent"] =
-                    "Mozilla/5.0 (iPhone; CPU iPhone OS 12_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 105.0.0.11.118 (iPhone11,8; iOS 12_3_1; en_US; en-US; scale=2.00; 828x1792; 165586599)"
+                headers["User-Agent"] = getRandomInstagramUserAgent()
             }
             if (HttpRequest(inputUrl, headers).isAvailable())
                 analyze()
@@ -165,7 +162,6 @@ abstract class Extractor(
                 onProgress(Result.Failed(Error.InternalError("Error in SafeAnalyze", e)))
         }
     }
-
 
     protected abstract suspend fun analyze(payload: Any? = null)
 
@@ -245,4 +241,28 @@ abstract class Extractor(
     }
 
     abstract suspend fun testWebpage(string: String)
+
+    // list of ua supported by both fb & insta
+    private fun getRandomInstagramUserAgent(): String {
+        val userAgents = listOf(
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 " +
+                "Safari/537.36",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 " +
+                "Safari/537.36",
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) " +
+                "Chrome/74.0.3729.169 Safari/537.36",
+            "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 " +
+                "Safari/537.36",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 " +
+                "Safari/537.36",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.157 " +
+                "Safari/537.36",
+            "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.157 " +
+                "Safari/537.36",
+            "Mozilla/5.0 (iPhone; CPU iPhone OS 12_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) " +
+                "Mobile/15E148 Instagram 105.0.0.11.118 (iPhone11,8; iOS 12_3_1; en_US; en-US; scale=2.00; " +
+                "828x1792; 165586599)"
+        )
+        return userAgents.random()
+    }
 }

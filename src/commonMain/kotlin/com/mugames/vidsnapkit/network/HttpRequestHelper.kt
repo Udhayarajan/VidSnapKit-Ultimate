@@ -84,7 +84,7 @@ class HttpInterfaceImpl(
             data
         } catch (e: Exception) {
             logger.error(
-                "postData() url=${url} header=${headers.toString()} & postData=${postData.toString()} Error:",
+                "postData() url=$url header=$headers & postData=$postData Error:",
                 e
             )
 
@@ -127,19 +127,20 @@ class HttpInterfaceImpl(
 
                         return isPageAvailable
                     }
-                    logger.warn("Unhandled in checkWebPage() status code=${status} for url=${url} with headers=${headers.toString()} & response=${bodyAsText()}")
+                    logger.warn("Unhandled in checkWebPage() status code=$status for url=$url with headers=$headers & response=${bodyAsText()}")
                     false
                 }
 
                 data
             }
         } catch (e: ClientRequestException) {
-            logger.error("checkWebPage() url=${url} header=${headers.toString()} ClientRequestException:", e)
+            logger.error("checkWebPage() url=$url header=$headers ClientRequestException:", e)
 
             false
+        } catch (e: SocketTimeoutException) {
+            throw e
         } catch (e: Exception) {
-            logger.error("checkWebPage() url=${url} header=${headers.toString()} GenericException:", e)
-
+            logger.error("checkWebPage() url=$url header=$headers GenericException:", e)
             false
         }
     }
@@ -169,17 +170,17 @@ class HttpInterfaceImpl(
 
                     "{error:\"Invalid Cookies\"}"
                 } else if (status == HttpStatusCode.TooManyRequests) {
-                    logger.warn("Unhandled in getData() TooManyRequest for url=${url} with headers=${headers.toString()} & response=${bodyAsText()}")
+                    logger.warn("Unhandled in getData() TooManyRequest for url=$url with headers=$headers & response=${bodyAsText()}")
 
                     "429"
                 } else {
-                    logger.warn("Unhandled in getData() status code=${status} for url=${url} with headers=${headers.toString()} &\n response=${bodyAsText()}")
+                    logger.warn("Unhandled in getData() status code=$status for url=$url with headers=$headers &\n response=${bodyAsText()}")
 
                     null
                 }
             }
         } catch (e: ClientRequestException) {
-            logger.error("getData() url=${url} header=${headers.toString()} ClientRequestException:", e)
+            logger.error("getData() url=$url header=$headers ClientRequestException:", e)
 
             null
         } catch (e: SendCountExceedException) {
@@ -187,12 +188,12 @@ class HttpInterfaceImpl(
 
                 "{error:\"Invalid Cookies\"}"
             } else {
-                logger.error("getData() url=${url} header=${headers.toString()} SendCountExceedException:", e)
+                logger.error("getData() url=$url header=$headers SendCountExceedException:", e)
 
                 throw e
             }
         } catch (e: Exception) {
-            logger.error("getData() url=${url} header=${headers.toString()} Generic exception:", e)
+            logger.error("getData() url=$url header=$headers Generic exception:", e)
 
             throw e
         }
@@ -216,7 +217,7 @@ class HttpInterfaceImpl(
         } catch (e: Exception) {
 
             logger.error(
-                "getRawResponse() url=${url} header=${headers.toString()} Generic exception:",
+                "getRawResponse() url=$url header=$headers Generic exception:",
                 e
             )
             null
@@ -262,11 +263,11 @@ class HttpInterfaceImpl(
         do {
             var locationUrl = cacheResponse.headers[HttpHeaders.Location] ?: return cacheResponse
 
-            val matcher = Pattern.compile("^(?:https?:\\/\\/)?(?:[^@\\n]+@)?(?:www\\.)?([^:\\/\\n?]+)")
+            val matcher = Pattern.compile("^(?:https?://)?(?:[^@\\n]+@)?(?:www\\.)?([^:/\\n?]+)")
                 .matcher(locationUrl)
             if (!matcher.find())
                 locationUrl = cacheResponse.request.url.protocolWithAuthority + locationUrl
-            logger.info("redirection ${cacheResponse.request.url}->${locationUrl} [${cacheResponse.status.value}]")
+            logger.info("redirection ${cacheResponse.request.url}->$locationUrl [${cacheResponse.status.value}]")
             val nonRedirectingClient = client.config {
                 followRedirects = false
             }
