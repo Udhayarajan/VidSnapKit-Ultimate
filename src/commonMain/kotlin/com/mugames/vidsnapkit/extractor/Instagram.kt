@@ -569,7 +569,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
     private suspend fun tryWithQueryHash(page: String) {
         val queryHash = withTimeoutOrNull(2000) {
             getQueryHashFromAllJSInPage(page)
-        } ?: ""
+        } ?: DEFAULT_QUERY_HASH
         val res = HttpRequest(GRAPHQL_URL.format(queryHash, getShortcode()), headers).getResponse()
         val shortcodeMedia =
             res?.toJSONObject()?.getJSONObject("data")?.getNullableJSONObject("shortcode_media") ?: run {
