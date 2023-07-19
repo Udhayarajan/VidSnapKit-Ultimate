@@ -1,0 +1,74 @@
+name: Create Release
+
+on:
+  pull_request:
+    branches:
+      - dev
+      - master
+    # It actually triggers the build logic only if the files under src is modified.
+    paths:
+      - 'src/**'
+    types: [ closed ]
+
+jobs:
+  create_prerelease:
+    if: github.head_ref == 'dev' && github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Retrieve Previous Release
+        id: get_previous_release
+        run: |
+          previous_release=$(curl -s "https://api.github.com/repos/${{ github.repository }}/releases" | jq '[.[] ] | first' | jq -r '.tag_name')
+          echo "PREVIOUS_RELEASE=$previous_release" >> $GITHUB_ENV
+
+      - name: Retrieve Version
+        id: get_version
+        run: |
+          echo "VERSION_NAME=$(${{ github.workspace }}/gradlew -q printVersionName)" >> $GITHUB_ENV
+
+      - name: Check if Version Changed
+        id: check_version_change
+        run: |
+          if [[ "v${{ env.VERSION_NAME }}" != "${{ env.PREVIOUS_RELEASE }}" ]]; then
+            echo "Version has changed. Creating release..."
+            echo "create_release=true" >> $GITHUB_ENV
+          else
+            echo "Version has not changed. Skipping release..."
+            echo "create_release=false" >> $GITHUB_ENV
+          fi
+
+      - name: Create PreRelease
+        id: create_pre_release
+        uses: softprops/action-gh-release@v1
+        if: env.create_release == 'true'
+        with:
+          tag_name: v${{ env.VERSION_NAME }}
+          name: v${{ env.VERSION_NAME }}
+          draft: false
+          prerelease: true
+          token: ${{secrets.PAT}}
+          target_commitish: dev
+
+
+  create_release:
+    if: github.head_ref == 'master' && github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Retrieve Previous Release
+        id: get_previous_release
+        run: |
+          previous_release=$(curl -s "https://api.github.com/repos/${{ github.repository }}/releases" | jq '[.[] | select(.prerelease == true)] | first' | jq -r '.id')
+          echo "PREVIOUS_RELEASE_ID=$previous_release" >> $GITHUB_ENV
+
+      - name: Update the pre-release to release
+        uses: irongut/EditRelease@v1.2.0
+        with:
+          token: ${{ secrets.PAT }}
+          id: ${{ env.PREVIOUS_RELEASE_ID }}
+          prerelease: false
