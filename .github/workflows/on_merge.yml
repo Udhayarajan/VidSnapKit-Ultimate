@@ -49,3 +49,4 @@ jobs:
           draft: false
           prerelease: true
           token: ${{secrets.PAT}}
+          target_commitish: dev
