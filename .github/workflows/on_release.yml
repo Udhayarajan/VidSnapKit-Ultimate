@@ -65,11 +65,6 @@ jobs:
       - name: Release build
         run: ./gradlew publishToMavenLocal
 
-
-        # Generates other artifacts (javadocJar)
-      - name: Source jar and dokka
-        run: ./gradlew androidSourcesJar javadocJar
-
         #Runs upload, and then closes & releases the repository
       - name: Publish to MavenCentral
         run: ./gradlew publishAllPublicationsToSonatypeRepository closeAndReleaseSonatypeStagingRepository
