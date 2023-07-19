@@ -316,7 +316,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                 return
             } else {
                 logger.info("finally calling direct ex in unsafe, cookies are not validated")
-                directExtraction()
+                tryWithQueryHash(page)
             }
             return
         }
