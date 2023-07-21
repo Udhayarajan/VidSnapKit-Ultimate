@@ -45,7 +45,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         const val NO_STATUS_AVAILABLE = "No stories Available to Download"
         const val HIGHLIGHTS_API = "https://www.instagram.com/api/v1/feed/reels_media/?reel_ids=highlight%s"
         const val GRAPHQL_URL =
-            "https://www.instagram.com/graphql/query/?query_hash=%s&variables={\"shortcode\":\"%s\"}"
+            "https://www.instagram.com/graphql/query/?query_hash=%s&variables={\"shortcode\":\"%s\"}&__a=1&__d=dis"
         const val DEFAULT_QUERY_HASH = "b3055c01b4b222b8a47dc12b090e4e64"
 
         private val logger = LoggerFactory.getLogger(Instagram::class.java)

@@ -30,6 +30,7 @@ import io.ktor.client.plugins.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.future.future
 import org.slf4j.LoggerFactory
+import java.net.SocketException
 import java.util.*
 import java.util.regex.Pattern
 import javax.net.ssl.SSLHandshakeException
@@ -58,6 +59,22 @@ abstract class Extractor(
         fun findExtractor(
             url: String,
         ): Extractor? {
+            if (url.contains("facebook")) {
+                if (url.contains("instagram.com")) {
+                    logger.info("Insta embedded FB post, redirecting to Instagram")
+                    val instaURL = Pattern.compile("\\?.*?u=(.*?)(?:&|/|)\$").matcher(url).run {
+                        if (find())
+                            Util.decodeHTML(group(1))
+                        else
+                            null
+                    }
+                    return instaURL?.let {
+                        Instagram(
+                            it
+                        )
+                    }
+                }
+            }
             return when {
                 url.contains("facebook|fb\\.".toRegex()) -> Facebook(url)
                 url.contains("instagram") -> Instagram(url)
@@ -118,24 +135,6 @@ abstract class Extractor(
 
     private suspend fun safeAnalyze() {
         try {
-            if (inputUrl.contains("facebook")) {
-                if (inputUrl.contains("instagram.com")) {
-                    logger.info("Insta embedded FB post, redirecting to Instagram")
-                    val instaURL = Pattern.compile("\\?.*?u=(.*?)(?:&|/|)\$").matcher(inputUrl).run {
-                        if (find())
-                            Util.decodeHTML(group(1))
-                        else
-                            null
-                    }
-                    Instagram(
-                        instaURL ?: run {
-                            logger.error("Fail to match the regex url=$inputUrl")
-                            internalError("unable to match the instagram url")
-                            return
-                        }
-                    )
-                }
-            }
             if (inputUrl.contains("instagram")) {
                 inputUrl = if (cookies == null) {
                     inputUrl.replace("/reels/", "/reel/")
@@ -153,11 +152,11 @@ abstract class Extractor(
             } else clientRequestError()
         } catch (e: Exception) {
             if (e is SSLHandshakeException)
-                clientRequestError()
-            else if (e is ClientRequestException && inputUrl.contains("instagram"))
+                internalError("problem with SSL try again")
+            if (e is ClientRequestException && inputUrl.contains("instagram"))
                 onProgress(Result.Failed(Error.Instagram404Error(cookies != null)))
-            else if (e is SocketTimeoutException)
-                onProgress(Result.Failed(Error.NonFatalError("socket can't connect please try again")))
+            else if (e is SocketTimeoutException || e is SocketException)
+                internalError("socket can't connect please try again")
             else
                 onProgress(Result.Failed(Error.InternalError("Error in SafeAnalyze", e)))
         }
@@ -238,6 +237,10 @@ abstract class Extractor(
 
     protected fun internalError(msg: String, e: Exception? = null) {
         onProgress(Result.Failed(Error.InternalError(msg, e)))
+    }
+
+    protected fun missingLogic() {
+        onProgress(Result.Failed(Error.MethodMissingLogic))
     }
 
     abstract suspend fun testWebpage(string: String)

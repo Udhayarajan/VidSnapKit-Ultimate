@@ -25,9 +25,14 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.http.content.*
+import kotlinx.coroutines.TimeoutCancellationException
 import org.slf4j.LoggerFactory
+import java.net.SocketException
 import java.util.*
+import java.util.concurrent.CancellationException
 import java.util.regex.Pattern
+import javax.net.ssl.SSLHandshakeException
+import kotlin.math.min
 
 /**
  * @author Udhaya
@@ -138,6 +143,13 @@ class HttpInterfaceImpl(
 
             false
         } catch (e: SocketTimeoutException) {
+            logger.error("checkWebPage() url=$url header=$headers SocketTimeoutException ${e.message}")
+            throw e
+        } catch (e: SocketException) {
+            logger.error("checkWebPage() url=$url header=$headers SocketException ${e.message}")
+            throw e
+        } catch (e: SSLHandshakeException) {
+            logger.error("checkWebPage() url=$url header=$headers SLLHandShakeException ${e.message}")
             throw e
         } catch (e: Exception) {
             logger.error("checkWebPage() url=$url header=$headers GenericException:", e)
@@ -171,30 +183,43 @@ class HttpInterfaceImpl(
                     "{error:\"Invalid Cookies\"}"
                 } else if (status == HttpStatusCode.TooManyRequests) {
                     logger.warn("Unhandled in getData() TooManyRequest for url=$url with headers=$headers & response=${bodyAsText()}")
-
                     "429"
                 } else {
-                    logger.warn("Unhandled in getData() status code=$status for url=$url with headers=$headers &\n response=${bodyAsText()}")
-
+                    val body = bodyAsText()
+                    logger.warn(
+                        "Unhandled in getData() status code=$status for url=$url with headers=$headers &\n response=${
+                        body.substring(
+                            min(body.length, 2000)
+                        )
+                        }"
+                    )
                     null
                 }
             }
         } catch (e: ClientRequestException) {
             logger.error("getData() url=$url header=$headers ClientRequestException:", e)
-
             null
+        } catch (e: SocketTimeoutException) {
+            logger.error("getData() url=$url header=$headers SocketTimeoutException ${e.message}")
+            throw e
+        } catch (e: SocketException) {
+            logger.error("getData() url=$url header=$headers SocketException ${e.message}")
+            throw e
+        } catch (e: SSLHandshakeException) {
+            logger.error("getData() url=$url header=$headers SLLHandShakeException ${e.message}")
+            throw e
         } catch (e: SendCountExceedException) {
             if (url.contains("instagram") && headers?.containsKey("Cookie") == true) {
-
                 "{error:\"Invalid Cookies\"}"
             } else {
                 logger.error("getData() url=$url header=$headers SendCountExceedException:", e)
-
                 throw e
             }
         } catch (e: Exception) {
-            logger.error("getData() url=$url header=$headers Generic exception:", e)
-
+            if (e is TimeoutCancellationException || e is CancellationException)
+                logger.error("getData() url=$url header=$headers Cancellation exception: ${e.message}")
+            else
+                logger.error("getData() url=$url header=$headers Generic exception:", e)
             throw e
         }
     }
