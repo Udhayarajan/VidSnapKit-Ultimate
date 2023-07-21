@@ -30,6 +30,7 @@ import io.ktor.client.plugins.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.future.future
 import org.slf4j.LoggerFactory
+import java.net.SocketException
 import java.util.*
 import java.util.regex.Pattern
 import javax.net.ssl.SSLHandshakeException
@@ -58,6 +59,22 @@ abstract class Extractor(
         fun findExtractor(
             url: String,
         ): Extractor? {
+            if (url.contains("facebook")) {
+                if (url.contains("instagram.com")) {
+                    logger.info("Insta embedded FB post, redirecting to Instagram")
+                    val instaURL = Pattern.compile("\\?.*?u=(.*?)(?:&|/|)\$").matcher(url).run {
+                        if (find())
+                            Util.decodeHTML(group(1))
+                        else
+                            null
+                    }
+                    return instaURL?.let {
+                        Instagram(
+                            it
+                        )
+                    }
+                }
+            }
             return when {
                 url.contains("facebook|fb\\.".toRegex()) -> Facebook(url)
                 url.contains("instagram") -> Instagram(url)
@@ -118,24 +135,6 @@ abstract class Extractor(
 
     private suspend fun safeAnalyze() {
         try {
-            if (inputUrl.contains("facebook")) {
-                if (inputUrl.contains("instagram.com")) {
-                    logger.info("Insta embedded FB post, redirecting to Instagram")
-                    val instaURL = Pattern.compile("\\?.*?u=(.*?)(?:&|/|)\$").matcher(inputUrl).run {
-                        if (find())
-                            Util.decodeHTML(group(1))
-                        else
-                            null
-                    }
-                    Instagram(
-                        instaURL ?: run {
-                            logger.error("Fail to match the regex url=$inputUrl")
-                            internalError("unable to match the instagram url")
-                            return
-                        }
-                    )
-                }
-            }
             if (inputUrl.contains("instagram")) {
                 inputUrl = if (cookies == null) {
                     inputUrl.replace("/reels/", "/reel/")
@@ -153,11 +152,11 @@ abstract class Extractor(
             } else clientRequestError()
         } catch (e: Exception) {
             if (e is SSLHandshakeException)
-                clientRequestError()
-            else if (e is ClientRequestException && inputUrl.contains("instagram"))
+                internalError("problem with SSL try again")
+            if (e is ClientRequestException && inputUrl.contains("instagram"))
                 onProgress(Result.Failed(Error.Instagram404Error(cookies != null)))
-            else if (e is SocketTimeoutException)
-                onProgress(Result.Failed(Error.NonFatalError("socket can't connect please try again")))
+            else if (e is SocketTimeoutException || e is SocketException)
+                internalError("socket can't connect please try again")
             else
                 onProgress(Result.Failed(Error.InternalError("Error in SafeAnalyze", e)))
         }
@@ -240,28 +239,32 @@ abstract class Extractor(
         onProgress(Result.Failed(Error.InternalError(msg, e)))
     }
 
+    protected fun missingLogic() {
+        onProgress(Result.Failed(Error.MethodMissingLogic))
+    }
+
     abstract suspend fun testWebpage(string: String)
 
     // list of ua supported by both fb & insta
     private fun getRandomInstagramUserAgent(): String {
         val userAgents = listOf(
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 " +
-                "Safari/537.36",
+                    "Safari/537.36",
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 " +
-                "Safari/537.36",
+                    "Safari/537.36",
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) " +
-                "Chrome/74.0.3729.169 Safari/537.36",
+                    "Chrome/74.0.3729.169 Safari/537.36",
             "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 " +
-                "Safari/537.36",
+                    "Safari/537.36",
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 " +
-                "Safari/537.36",
+                    "Safari/537.36",
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.157 " +
-                "Safari/537.36",
+                    "Safari/537.36",
             "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.157 " +
-                "Safari/537.36",
+                    "Safari/537.36",
             "Mozilla/5.0 (iPhone; CPU iPhone OS 12_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) " +
-                "Mobile/15E148 Instagram 105.0.0.11.118 (iPhone11,8; iOS 12_3_1; en_US; en-US; scale=2.00; " +
-                "828x1792; 165586599)"
+                    "Mobile/15E148 Instagram 105.0.0.11.118 (iPhone11,8; iOS 12_3_1; en_US; en-US; scale=2.00; " +
+                    "828x1792; 165586599)"
         )
         return userAgents.random()
     }

@@ -46,6 +46,8 @@ class Facebook internal constructor(url: String) : Extractor(url) {
         Chrome/69.0.3497.122 Safari/537.36
     """.trimIndent().replace("\n", "")
 
+    private var isBucket = false
+
     private suspend fun isCookieValid(): Boolean {
         if (cookies.isNullOrEmpty()) return false
         val res = HttpRequest("https://www.facebook.com/", headers).getRawResponse(false) ?: return false
@@ -226,7 +228,9 @@ class Facebook internal constructor(url: String) : Extractor(url) {
                     default = "Facebook_Video"
                 )
             }
-            videoFormats.add(localFormats)
+            if (videoFormats.isEmpty()) {
+                videoFormats.add(localFormats)
+            }
             finalize()
         } ?: apply {
             onProgress(Result.Failed(Error.NonFatalError("This video can't be Downloaded")))
@@ -249,13 +253,16 @@ class Facebook internal constructor(url: String) : Extractor(url) {
     }
 
     private fun grabRelayPrefetchedDataSearchUrl(webpage: String): Any? {
-        fun parseAttachment(attachment: JSONObject?, key: String) {
+        fun parseAttachment(attachment: JSONObject?, key: String): Formats? {
             val media = attachment?.getNullableJSONObject(key)
             media?.let {
                 if (it.getString("__typename") == "Video") {
-                    parseGraphqlVideo(it)
+                    return parseGraphqlVideo(it)
+                } else if (it.getString("__typename") == "Photo") {
+                    return parseGraphqlImage(it)
                 }
             }
+            return null
         }
 
         val data =
@@ -264,6 +271,11 @@ class Facebook internal constructor(url: String) : Extractor(url) {
             var nodes = it.getNullableJSONArray("nodes")
             var node = it.getNullableJSONObject("node")
 
+            val bucket = data.getNullableJSONObject("bucket")
+            if (bucket != null) {
+                nodes = bucket.getJSONObject("unified_stories").getJSONArray("edges")
+                isBucket = true
+            }
             if (nodes == null && node != null) {
                 nodes = JSONArray().apply {
                     put(data)
@@ -274,9 +286,9 @@ class Facebook internal constructor(url: String) : Extractor(url) {
                 for (i in 0 until nodesIt.length()) {
                     node = nodesIt.getNullableJSONObject(i)?.getNullableJSONObject("node")
 
-                    val story = node!!.getJSONObject("comet_sections")
-                        .getJSONObject("content")
-                        .getJSONObject("story")
+                    val story = node!!.getNullableJSONObject("comet_sections")
+                        ?.getJSONObject("content")
+                        ?.getJSONObject("story") ?: node!!
 
                     val attachments = story.getNullableJSONObject("attached_story")
                         ?.getNullableJSONArray("attachments")
@@ -288,17 +300,21 @@ class Facebook internal constructor(url: String) : Extractor(url) {
                             ?.run {
                                 getNullableJSONObject("style_type_renderer") ?: getNullableJSONObject("styles")
                             }
-                            ?.getNullableJSONObject("attachment")
+                            ?.getNullableJSONObject("attachment") ?: attachments.getJSONObject(j)
 
                         val ns = attachment?.getNullableJSONObject("all_subattachments")
                             ?.getNullableJSONArray("nodes")
 
                         ns?.let { nsIt ->
                             for (l in 0 until nsIt.length()) {
-                                parseAttachment(nsIt.getJSONObject(l), "media")
+                                parseAttachment(nsIt.getJSONObject(l), "media")?.let {
+                                    videoFormats.add(it)
+                                }
                             }
                         }
-                        parseAttachment(attachment, "media")
+                        parseAttachment(attachment, "media")?.let {
+                            videoFormats.add(it)
+                        }
                     }
                 }
             }
@@ -310,7 +326,9 @@ class Facebook internal constructor(url: String) : Extractor(url) {
             if (edges != null) {
                 for (j in 0 until edges.length()) {
                     val edge = edges.getJSONObject(j)
-                    parseAttachment(edge, "node")
+                    parseAttachment(edge, "node")?.let {
+                        videoFormats.add(it)
+                    }
                 }
             }
 
@@ -324,15 +342,17 @@ class Facebook internal constructor(url: String) : Extractor(url) {
 
                 if (attachments != null) {
                     for (j in 0 until attachments.length()) {
-                        parseAttachment(attachments.getJSONObject(j), "media")
+                        parseAttachment(attachments.getJSONObject(j), "media")?.let {
+                            videoFormats.add(it)
+                        }
                     }
                 } else {
-                    extractFromCreationStory(video)
+                    videoFormats.add(extractFromCreationStory(video))
                     return SUCCESS
                 }
-                if (localFormats.videoData.isEmpty()) parseGraphqlVideo(video)
+                if (videoFormats.isEmpty()) videoFormats.add(parseGraphqlVideo(video))
             }
-            if (localFormats.videoData.isNotEmpty()) return SUCCESS
+            return SUCCESS
         }
         return null
     }
@@ -385,26 +405,37 @@ class Facebook internal constructor(url: String) : Extractor(url) {
         return searchFromRequireArray(jsonString?.toJSONObjectOrNull()?.getJSONArray("require"))
     }
 
-    private fun parseGraphqlVideo(media: JSONObject, hasCreationStory: Boolean = true) {
+    private fun parseGraphqlVideo(media: JSONObject, hasCreationStory: Boolean = true): Formats {
         if (media.getNullableJSONObject("creation_story") != null && hasCreationStory) {
-            extractFromCreationStory(media)
-            return
+            return extractFromCreationStory(media)
         }
+        val scopedFormats = localFormats.copy(
+            title = "",
+            videoData = mutableListOf(),
+            audioData = mutableListOf(),
+            imageData = mutableListOf()
+        )
+
         val thumbnailUrl = media.getNullableJSONObject("thumbnailImage")?.getString("uri")
             ?: media.getNullableJSONObject("preferred_thumbnail")
                 ?.getJSONObject("image")
                 ?.getString("uri") ?: ""
         val thumbnailRes = Util.getResolutionFromUrl(thumbnailUrl)
         if (thumbnailUrl != "")
-            localFormats.imageData.add(ImageResource(resolution = thumbnailRes, url = thumbnailUrl))
-        localFormats.title = media.getNullableString("name")
+            scopedFormats.imageData.add(ImageResource(resolution = thumbnailRes, url = thumbnailUrl))
+        scopedFormats.title = media.getNullableString("name")
             ?: media.getNullableJSONObject("savable_description")
                 ?.getNullableString("text")
-            ?: "Facebook_Video"
+                    ?: media.getNullableJSONObject("title")?.getString("text")?.ifEmpty {
+                "Facebook_Video"
+            }
+                    ?: "Facebook_Video"
 
         val dashXml = media.getNullableString("dash_manifest")
         dashXml?.let {
-            extractFromDash(it)
+            val dashFormats = extractFromDash(it)
+            scopedFormats.videoData.addAll(dashFormats.videoData)
+            scopedFormats.imageData.addAll(dashFormats.imageData)
         }
 
         fun getWidth() = media.getNullable("width") ?: media["original_width"].toString()
@@ -415,7 +446,7 @@ class Facebook internal constructor(url: String) : Extractor(url) {
         for (suffix in arrayOf("", "_quality_hd")) {
             val playableUrl = media.getNullableString("playable_url$suffix")
             if (playableUrl == null || playableUrl == "null") continue
-            localFormats.videoData.add(
+            scopedFormats.videoData.add(
                 VideoResource(
                     playableUrl,
                     MimeType.VIDEO_MP4,
@@ -423,17 +454,52 @@ class Facebook internal constructor(url: String) : Extractor(url) {
                 )
             )
         }
+        return scopedFormats
     }
 
-    private fun extractFromCreationStory(media: JSONObject) {
+    private fun parseGraphqlImage(media: JSONObject): Formats? {
+        val scopedFormats = localFormats.copy(
+            title = "",
+            videoData = mutableListOf(),
+            audioData = mutableListOf(),
+            imageData = mutableListOf()
+        )
+
+        val image = media.getJSONObject("image")
+        scopedFormats.imageData.add(
+            ImageResource(
+                image.getString("uri"),
+                resolution = "${image.get("width")}x${image.get("height")}"
+            )
+        )
+
+        val blurredImage = media.getJSONObject("blurred_image")
+        scopedFormats.imageData.add(
+            ImageResource(
+                blurredImage.getString("uri"),
+                resolution = Util.getResolutionFromUrl(blurredImage.getString("uri"))
+            )
+        )
+
+        val previewImage = media.getJSONObject("previewImage")
+        scopedFormats.imageData.add(
+            ImageResource(
+                previewImage.getString("uri"),
+                resolution = Util.getResolutionFromUrl(previewImage.getString("uri"))
+            )
+        )
+        return scopedFormats
+    }
+
+    private fun extractFromCreationStory(media: JSONObject): Formats {
         val playbackVideo =
             media.getNullableJSONObject("creation_story")?.getNullableJSONObject("short_form_video_context")
                 ?.getNullableJSONObject("playback_video")
-        if (playbackVideo != null) parseGraphqlVideo(playbackVideo)
+        return if (playbackVideo != null) parseGraphqlVideo(playbackVideo)
         else parseGraphqlVideo(media, false)
     }
 
-    private fun extractFromDash(xml: String) {
+    private fun extractFromDash(xml: String): Formats {
         fun getRepresentationArray(adaptionSet: JSONArray, index: Int) = with(adaptionSet.getJSONObject(index)) {
             "Representation".let { key ->
                 getNullableJSONArray(key) ?: run {
@@ -444,59 +510,73 @@ class Facebook internal constructor(url: String) : Extractor(url) {
             }
         }
 
+        val scopedFormats = localFormats.copy(
+            title = "",
+            videoData = mutableListOf(),
+            audioData = mutableListOf(),
+            imageData = mutableListOf()
+        )
+
         var xmlDecoded = xml.replace("x3C".toRegex(), "<")
         xmlDecoded = xmlDecoded.replace("\\\\\u003C".toRegex(), "<")
         var videos = JSONArray()
         var audios = JSONArray()
-        XMLParserFactory.createParserFactory().xmlToJsonObject(xmlDecoded).getJSONObject("MPD")
-            .getJSONObject("Period").run {
-                "AdaptationSet".let { adaptationSet ->
-                    getNullableJSONArray(adaptationSet)?.let {
-                        videos = getRepresentationArray(it, 0)
-                        audios = getRepresentationArray(it, 1)
-                    } ?: run {
-                        videos = getJSONObject(adaptationSet).getNullableJSONArray("Representation") ?: run {
-                            val arr = JSONArray()
-                            arr.put(getJSONObject(adaptationSet).getJSONObject("Representation"))
+        try {
+            XMLParserFactory.createParserFactory().xmlToJsonObject(xmlDecoded).getJSONObject("MPD")
+                .getJSONObject("Period").run {
+                    "AdaptationSet".let { adaptationSet ->
+                        getNullableJSONArray(adaptationSet)?.let {
+                            videos = getRepresentationArray(it, 0)
+                            audios = getRepresentationArray(it, 1)
+                        } ?: run {
+                            videos = getJSONObject(adaptationSet).getNullableJSONArray("Representation") ?: run {
+                                val arr = JSONArray()
+                                arr.put(getJSONObject(adaptationSet).getJSONObject("Representation"))
+                            }
                         }
                     }
                 }
-            }
 
-        fun safeGet(jsonObject: JSONObject, key: String) =
-            jsonObject.getNullable("_$key") ?: jsonObject.getNullable(key) ?: "--NA--"
 
-        fun addVideos() {
-            for (i in 0 until videos.length()) {
-                val video = videos.getJSONObject(i)
-                val videoUrl = video.getString("BaseURL")
-                val res: String = try {
-                    "${safeGet(video, "FBQualityLabel")}(${safeGet(video, "FBQualityClass").uppercase()})"
-                } catch (e: JSONException) {
-                    "${safeGet(video, "width")}x${safeGet(video, "height")}"
-                }
-                val videoMime = safeGet(video, "mimeType")
-                localFormats.videoData.add(
-                    VideoResource(
-                        videoUrl,
-                        videoMime,
-                        res,
-                        hasAudio = false
+            fun safeGet(jsonObject: JSONObject, key: String) =
+                jsonObject.getNullable("_$key") ?: jsonObject.getNullable(key) ?: "--NA--"
+
+            fun addVideos() {
+                for (i in 0 until videos.length()) {
+                    val video = videos.getJSONObject(i)
+                    val videoUrl = video.getString("BaseURL")
+                    val res: String = try {
+                        "${safeGet(video, "FBQualityLabel")}(${safeGet(video, "FBQualityClass").uppercase()})"
+                    } catch (e: JSONException) {
+                        "${safeGet(video, "width")}x${safeGet(video, "height")}"
+                    }
+                    val videoMime = safeGet(video, "mimeType")
+                    scopedFormats.videoData.add(
+                        VideoResource(
+                            videoUrl,
+                            videoMime,
+                            res,
+                            hasAudio = false
+                        )
                     )
-                )
+                }
             }
-        }
 
-        fun addAudios() {
-            for (i in 0 until audios.length()) {
-                val audio = audios.getJSONObject(i)
-                val audioUrl = safeGet(audio, "BaseURL")
-                val audioMime = safeGet(audio, "mimeType")
-                localFormats.audioData.add(AudioResource(audioUrl, audioMime))
+            fun addAudios() {
+                for (i in 0 until audios.length()) {
+                    val audio = audios.getJSONObject(i)
+                    val audioUrl = safeGet(audio, "BaseURL")
+                    val audioMime = safeGet(audio, "mimeType")
+                    scopedFormats.audioData.add(AudioResource(audioUrl, audioMime))
+                }
             }
+            addAudios()
+            addVideos()
+        } catch (e: JSONException) {
+            logger.error(e.message)
+            logger.info(xmlDecoded)
         }
-        addAudios()
-        addVideos()
+        return scopedFormats
     }
 
     private fun grabFromJSModsInstance(jsData: JSONObject): Any? {
@@ -525,10 +605,10 @@ class Facebook internal constructor(url: String) : Extractor(url) {
                             url,
                             MimeType.VIDEO_MP4,
                             videoData.get("original_width").toString() + "x" +
-                                videoData.get("original_height") + "(" +
-                                s.uppercase() + ")",
+                                    videoData.get("original_height") + "(" +
+                                    s.uppercase() + ")",
 
-                        )
+                            )
                     )
                 }
                 return SUCCESS
@@ -546,6 +626,7 @@ class Facebook internal constructor(url: String) : Extractor(url) {
     companion object {
         const val TAG: String = Statics.TAG.plus(":Facebook")
         const val SUCCESS = -1 // Null if fails
+        const val FAILS = 1 // so don't send back the response
         val logger = LoggerFactory.getLogger(Facebook::class.java)
         var PAGELET_REGEX =
             "(?:pagelet_group_mall|permalink_video_pagelet|hyperfeed_story_id_[0-9a-f]+)".toRegex()
