@@ -426,10 +426,10 @@ class Facebook internal constructor(url: String) : Extractor(url) {
         scopedFormats.title = media.getNullableString("name")
             ?: media.getNullableJSONObject("savable_description")
                 ?.getNullableString("text")
-                    ?: media.getNullableJSONObject("title")?.getString("text")?.ifEmpty {
+            ?: media.getNullableJSONObject("title")?.getString("text")?.ifEmpty {
                 "Facebook_Video"
             }
-                    ?: "Facebook_Video"
+            ?: "Facebook_Video"
 
         val dashXml = media.getNullableString("dash_manifest")
         dashXml?.let {
@@ -537,7 +537,6 @@ class Facebook internal constructor(url: String) : Extractor(url) {
                     }
                 }
 
-
             fun safeGet(jsonObject: JSONObject, key: String) =
                 jsonObject.getNullable("_$key") ?: jsonObject.getNullable(key) ?: "--NA--"
 
@@ -605,10 +604,10 @@ class Facebook internal constructor(url: String) : Extractor(url) {
                             url,
                             MimeType.VIDEO_MP4,
                             videoData.get("original_width").toString() + "x" +
-                                    videoData.get("original_height") + "(" +
-                                    s.uppercase() + ")",
+                                videoData.get("original_height") + "(" +
+                                s.uppercase() + ")",
 
-                            )
+                        )
                     )
                 }
                 return SUCCESS
