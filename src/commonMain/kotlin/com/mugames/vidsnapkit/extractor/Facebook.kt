@@ -378,6 +378,10 @@ class Facebook internal constructor(url: String) : Extractor(url) {
         return searchFromRequireArray(jsonString?.toJSONObjectOrNull()?.getJSONArray("require"))
     }
 
+    private fun getVideoFromVideoGridRenderer(media: JSONObject): Formats {
+        return parseGraphqlVideo(media.getJSONObject("video_grid_renderer").getJSONObject("video"), false)
+    }
+
     private fun parseGraphqlVideo(media: JSONObject, hasCreationStory: Boolean = true): Formats {
         if (media.getNullableJSONObject("creation_story") != null && hasCreationStory) {
             return extractFromCreationStory(media)
@@ -385,6 +389,9 @@ class Facebook internal constructor(url: String) : Extractor(url) {
         val scopedFormats = localFormats.copy(
             title = "", videoData = mutableListOf(), audioData = mutableListOf(), imageData = mutableListOf()
         )
+        if (media.getNullableJSONObject("video_grid_renderer") != null) {
+            return getVideoFromVideoGridRenderer(media)
+        }
 
         val thumbnailUrl = media.getNullableJSONObject("thumbnailImage")?.getString("uri")
             ?: media.getNullableJSONObject("preferred_thumbnail")?.getJSONObject("image")?.getString("uri") ?: ""
