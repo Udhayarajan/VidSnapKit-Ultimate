@@ -21,7 +21,6 @@ import com.mugames.vidsnapkit.*
 import com.mugames.vidsnapkit.dataholders.Formats
 import com.mugames.vidsnapkit.dataholders.ImageResource
 import com.mugames.vidsnapkit.dataholders.VideoResource
-import com.mugames.vidsnapkit.network.HttpRequest
 import org.json.JSONException
 import org.json.JSONObject
 import java.util.regex.Matcher
@@ -71,14 +70,14 @@ class Twitter internal constructor(url: String) : Extractor(url) {
     }
 
     private suspend fun getToken() {
-        val response = HttpRequest(base_url + "guest/activate.json", headers).postRequest()
+        val response = httpRequestService.postRequest(base_url + "guest/activate.json", headers = headers)
         headers["x-guest-token"] = response.toJSONObject().getString("guest_token")
         if (inputUrl.contains("status")) extractVideo()
         if (inputUrl.contains("broadcasts")) extractBroadcasts()
     }
 
     private suspend fun extractVideo() {
-        val response = HttpRequest("${base_url}statuses/show/$tweetID.json$query", headers).getResponse()
+        val response = httpRequestService.getResponse("${base_url}statuses/show/$tweetID.json$query", headers)
         response?.let {
             identifyDownloader(it)
         } ?: run {
@@ -163,7 +162,7 @@ class Twitter internal constructor(url: String) : Extractor(url) {
     }
 
     private suspend fun fromVMap(url: String) {
-        val response = HttpRequest(url).getResponse()
+        val response = httpRequestService.getResponse(url)
         response?.let {
             var matcher: Matcher =
                 Pattern.compile("(?<=<tw:videoVariants>)[\\s\\S]*(?=</tw:videoVariants>)")
@@ -240,7 +239,7 @@ class Twitter internal constructor(url: String) : Extractor(url) {
     }
 
     private suspend fun extractBroadcasts() {
-        val response = HttpRequest("${base_url}broadcasts/show.json?ids=$tweetID").getResponse()
+        val response = httpRequestService.getResponse("${base_url}broadcasts/show.json?ids=$tweetID")
         response?.let {
             parseBroadcastResponse(response)
         } ?: run {
@@ -252,7 +251,7 @@ class Twitter internal constructor(url: String) : Extractor(url) {
         val broadcasts: JSONObject = response.toJSONObject().getJSONObject("broadcasts").getJSONObject(tweetID)
         info = extractInfo(broadcasts)
         val mediaKey: String = broadcasts.getString("media_key")
-        val res = HttpRequest("${base_url}live_video_stream/status/$mediaKey", headers).getResponse()
+        val res = httpRequestService.getResponse("${base_url}live_video_stream/status/$mediaKey", headers)
         res?.let {
             val matcher: Matcher = Pattern.compile("\\{[\\s\\S]+\\}").matcher(res)
             matcher.find()

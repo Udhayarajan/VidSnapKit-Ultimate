@@ -17,6 +17,8 @@
 
 package com.mugames.vidsnapkit.dataholders
 
+import io.ktor.http.*
+
 /**
  * @author Udhaya
  * Created on 21-01-2022
@@ -32,6 +34,8 @@ package com.mugames.vidsnapkit.dataholders
  * @param videoData List of available video qualities
  * @param audioData List of available audio qualities
  *
+ * @param cookies Map of cookies currently used by TikTok downloader. Use this to download video
+ *
  * @param selectedVideoIndex Index of selected video and `null` if nothing is selected
  * @param selectedAudioIndex Index of selected audio and `null` if nothing is selected
  * @param selectedThumbnailIndex Resolution of image(key) that was selected
@@ -46,6 +50,8 @@ data class Formats(
     val imageData: MutableList<ImageResource> = mutableListOf(),
 
     val audioData: MutableList<AudioResource> = mutableListOf(),
+
+    val cookies: MutableList<Cookie> = mutableListOf(),
 
     // Flag to keep remember what index is selected
     var selectedVideoIndex: Int? = null,

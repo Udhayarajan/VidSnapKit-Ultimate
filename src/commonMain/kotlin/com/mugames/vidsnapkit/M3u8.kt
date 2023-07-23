@@ -20,7 +20,7 @@ package com.mugames.vidsnapkit
 import com.mugames.vidsnapkit.dataholders.Error
 import com.mugames.vidsnapkit.dataholders.Formats
 import com.mugames.vidsnapkit.dataholders.Result
-import com.mugames.vidsnapkit.network.HttpRequest
+import com.mugames.vidsnapkit.network.HttpRequestService
 import org.json.JSONObject
 import java.util.regex.Pattern
 
@@ -34,6 +34,8 @@ class M3u8(private val url: String, private val onProgressCallback: ProgressCall
     var TAG = Statics.TAG + ":m3u8"
 
     var info: JSONObject? = null
+
+    val httpRequestService = HttpRequestService.create()
 
     private val localFormats = Formats()
 
@@ -59,7 +61,7 @@ class M3u8(private val url: String, private val onProgressCallback: ProgressCall
     }
 
     private suspend fun realExtract(index: Int, url: String, chunkCallback: ChunkCallback) {
-        val response = HttpRequest(url).getResponse()
+        val response = httpRequestService.getResponse(url)
         response?.let {
             if (it.contains("#EXT-X-FAXS-CM:")) {
                 nonFatalError("Adobe Flash access can't downloaded")

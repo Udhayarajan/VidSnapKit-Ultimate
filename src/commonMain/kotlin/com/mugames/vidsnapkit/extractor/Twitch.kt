@@ -21,7 +21,6 @@ import com.mugames.vidsnapkit.MimeType
 import com.mugames.vidsnapkit.dataholders.Formats
 import com.mugames.vidsnapkit.dataholders.ImageResource
 import com.mugames.vidsnapkit.dataholders.VideoResource
-import com.mugames.vidsnapkit.network.HttpRequest
 import com.mugames.vidsnapkit.toJSONObject
 import java.util.regex.Pattern
 
@@ -64,7 +63,7 @@ class Twitch internal constructor(url: String) : Extractor(url) {
             "{\"query\":\"{clip(slug:\\\"%s\\\"){broadcaster{displayName}createdAt curator{displayName id}durationSeconds id tiny:thumbnailURL(width:86,height:45)small:thumbnailURL(width:260,height:147)medium:thumbnailURL(width:480,height:272)title videoQualities{frameRate quality sourceURL}viewCount}}\"}",
             id
         )
-        val response = HttpRequest("https://gql.twitch.tv/gql", headers).postRequest()
+        val response = httpRequestService.postRequest("https://gql.twitch.tv/gql", headers = headers)
         val clip = response.toJSONObject().getJSONObject("data").getJSONObject("clip")
         localFormats.imageData.add(ImageResource(clip.getString("medium"), "medium"))
         val videoQualities = clip.getJSONArray("videoQualities")

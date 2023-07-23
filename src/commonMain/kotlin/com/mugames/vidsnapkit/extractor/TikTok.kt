@@ -18,9 +18,12 @@
 package com.mugames.vidsnapkit.extractor
 
 import com.mugames.vidsnapkit.MimeType
-import com.mugames.vidsnapkit.dataholders.*
-import com.mugames.vidsnapkit.network.HttpRequest
+import com.mugames.vidsnapkit.dataholders.Formats
+import com.mugames.vidsnapkit.dataholders.ImageResource
+import com.mugames.vidsnapkit.dataholders.VideoResource
 import com.mugames.vidsnapkit.toJSONObject
+import java.io.File
+import java.util.*
 import java.util.regex.Pattern
 
 /**
@@ -35,9 +38,14 @@ class TikTok internal constructor(url: String) : Extractor(url) {
     override suspend fun analyze(payload: Any?) {
         localFormats.src = "TikTok"
         localFormats.url = inputUrl
-        val response = HttpRequest(inputUrl).getResponse()
+        headers["Referer"] = "https://www.tiktok.com/"
+        headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
+        val response = httpRequestService.getResponse(inputUrl, headers)
         response?.let {
             extractFromWebPage(response)
+        } ?: run {
+            missingLogic()
+            return
         }
     }
 
@@ -64,18 +72,36 @@ class TikTok internal constructor(url: String) : Extractor(url) {
                         video.getString("cover")
                     )
                 )
-                formats.videoData.add(
-                    VideoResource(
-                        video.getString("playAddr"),
-                        MimeType.fromCodecs(video.getString("format")),
-                        quality = video.getString("definition")
-                    )
-                )
+                val videos = video.getJSONArray("bitrateInfo")
+                for (j in 0 until videos.length()) {
+                    val bitrate = videos.getJSONObject(j)
+                    val urls = bitrate.getJSONObject("PlayAddr").getJSONArray("UrlList")
+                    for (k in 0 until urls.length()) {
+                        val url = urls.getString(k)
+                        formats.videoData.add(
+                            VideoResource(
+                                url,
+                                MimeType.fromCodecs(bitrate.getString("CodecType")),
+                                quality = bitrate.getString("GearName")
+                            )
+                        )
+                    }
+                }
+
+                // TODO: needed to find flexible appropriate method and does extracting music is necessary
+//                val music = videoId.getNullableJSONObject("music")
+//                music?.let {
+//                    if(formats.title.isEmpty()) formats.title = it.getString("title")
+//
+//                }
                 videoFormats.add(formats)
             }
             finalize()
-        } else
-            onProgress(Result.Failed(Error.MethodMissingLogic))
+        } else {
+            val uuid = "tt." + UUID.randomUUID().toString() + ".html"
+            File(uuid).writeText(webpage)
+            missingLogic()
+        }
     }
 
     override suspend fun testWebpage(string: String) {
