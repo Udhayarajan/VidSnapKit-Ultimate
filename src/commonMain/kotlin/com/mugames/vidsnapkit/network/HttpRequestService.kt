@@ -32,7 +32,7 @@ interface HttpRequestService {
     suspend fun getResponse(
         url: String,
         headers:
-        Hashtable<String, String>? = null,
+            Hashtable<String, String>? = null,
     ): String?
 
     /**

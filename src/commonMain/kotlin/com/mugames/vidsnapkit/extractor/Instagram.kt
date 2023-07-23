@@ -178,10 +178,10 @@ class Instagram internal constructor(url: String) : Extractor(url) {
     private suspend fun extractMusicAssetInfo(assetInfo: JSONObject) {
         formats.title =
             assetInfo.getNullableString("title")?.ifEmpty { null } ?: assetInfo.getNullableString("subtitle")
-                ?.ifEmpty { null } ?: "Reels_audio ${assetInfo.getNullableString("display_artist")}"
+            ?.ifEmpty { null } ?: "Reels_audio ${assetInfo.getNullableString("display_artist")}"
         val imageUrl = assetInfo.run {
             getNullableString("cover_artwork_uri")?.ifEmpty { null } ?: getNullableString("cover_artwork_thumbnail_uri")
-            ?: getJSONObject("music_composition_info").getString("placeholder_profile_pic_url")
+                ?: getJSONObject("music_composition_info").getString("placeholder_profile_pic_url")
         }
         formats.imageData.add(ImageResource(imageUrl, Util.getResolutionFromUrl(imageUrl)))
 

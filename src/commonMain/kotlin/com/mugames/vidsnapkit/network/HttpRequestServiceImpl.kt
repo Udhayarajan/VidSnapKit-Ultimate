@@ -78,9 +78,9 @@ class HttpRequestServiceImpl(private val client: HttpClient) : HttpRequestServic
                     val body = bodyAsText()
                     logger.warn(
                         "Unhandled in getData() status code=$status for url=$url with headers=$headers &\n response=${
-                            body.substring(
-                                min(body.length, 2000)
-                            )
+                        body.substring(
+                            min(body.length, 2000)
+                        )
                         }"
                     )
                     null
