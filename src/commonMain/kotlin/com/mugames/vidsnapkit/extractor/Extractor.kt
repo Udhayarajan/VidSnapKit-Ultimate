@@ -100,7 +100,11 @@ abstract class Extractor(
     protected var headers: Hashtable<String, String> = Hashtable()
     private val store = AcceptAllCookiesStorage()
 
-    protected var httpRequestService = HttpRequestService.create(storage = store)
+    protected var httpRequestService = run {
+        val str = if (inputUrl.contains(Regex("/reels/audio/|tiktok"))) store else null
+        HttpRequestService.create(storage = str)
+    }
+
 
     /**
      * If media is private just pass valid cookies to
@@ -127,7 +131,8 @@ abstract class Extractor(
      */
     fun setCustomClient(httpClient: HttpClient) {
         httpRequestService.close()
-        httpRequestService = HttpRequestService.create(httpClient, store)
+        val str = if (inputUrl.contains(Regex("/reels/audio/|tiktok"))) store else null
+        httpRequestService = HttpRequestService.create(httpClient, str)
     }
 
     /**
@@ -245,7 +250,7 @@ abstract class Extractor(
         return sizes.awaitAll()
     }
 
-    protected fun clientRequestError(msg: String = "The request video page missing. If you find it as false kindly contact us") {
+    protected fun clientRequestError(msg: String = "error making request") {
         onProgress(Result.Failed(Error.NonFatalError(msg)))
     }
 
@@ -267,22 +272,22 @@ abstract class Extractor(
     private fun getRandomInstagramUserAgent(): String {
         val userAgents = listOf(
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 " +
-                "Safari/537.36",
+                    "Safari/537.36",
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 " +
-                "Safari/537.36",
+                    "Safari/537.36",
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) " +
-                "Chrome/74.0.3729.169 Safari/537.36",
+                    "Chrome/74.0.3729.169 Safari/537.36",
             "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 " +
-                "Safari/537.36",
+                    "Safari/537.36",
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 " +
-                "Safari/537.36",
+                    "Safari/537.36",
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.157 " +
-                "Safari/537.36",
+                    "Safari/537.36",
             "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.157 " +
-                "Safari/537.36",
+                    "Safari/537.36",
             "Mozilla/5.0 (iPhone; CPU iPhone OS 12_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) " +
-                "Mobile/15E148 Instagram 105.0.0.11.118 (iPhone11,8; iOS 12_3_1; en_US; en-US; scale=2.00; " +
-                "828x1792; 165586599)"
+                    "Mobile/15E148 Instagram 105.0.0.11.118 (iPhone11,8; iOS 12_3_1; en_US; en-US; scale=2.00; " +
+                    "828x1792; 165586599)"
         )
         return userAgents.random()
     }

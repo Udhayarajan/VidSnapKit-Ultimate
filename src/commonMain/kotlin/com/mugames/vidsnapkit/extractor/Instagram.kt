@@ -178,10 +178,10 @@ class Instagram internal constructor(url: String) : Extractor(url) {
     private suspend fun extractMusicAssetInfo(assetInfo: JSONObject) {
         formats.title =
             assetInfo.getNullableString("title")?.ifEmpty { null } ?: assetInfo.getNullableString("subtitle")
-            ?.ifEmpty { null } ?: "Reels_audio ${assetInfo.getNullableString("display_artist")}"
+                ?.ifEmpty { null } ?: "Reels_audio ${assetInfo.getNullableString("display_artist")}"
         val imageUrl = assetInfo.run {
             getNullableString("cover_artwork_uri")?.ifEmpty { null } ?: getNullableString("cover_artwork_thumbnail_uri")
-                ?: getJSONObject("music_composition_info").getString("placeholder_profile_pic_url")
+            ?: getJSONObject("music_composition_info").getString("placeholder_profile_pic_url")
         }
         formats.imageData.add(ImageResource(imageUrl, Util.getResolutionFromUrl(imageUrl)))
 
@@ -283,8 +283,8 @@ class Instagram internal constructor(url: String) : Extractor(url) {
             tempHeader.remove("User-Agent")
             tempHeader["X-Ig-App-Id"] = appId
             val res = httpRequestService.postRequest(AUDIO_API, tempHeader, audioPayload)
-            val metadata = res.toJSONObject().getJSONObject("metadata")
-            metadata.run {
+            val metadata = res?.toJSONObject()?.getJSONObject("metadata")
+            metadata?.run {
                 getNullableJSONObject("original_sound_info")?.let { extractFromOriginalAudioInfo(it) }
                     ?: getNullableJSONObject("music_info")
                         ?.getJSONObject("music_asset_info")
@@ -293,6 +293,9 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                         missingLogic()
                         return
                     }
+            } ?: run {
+                clientRequestError()
+                return
             }
         } else {
             // possibly user url

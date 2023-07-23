@@ -32,7 +32,7 @@ interface HttpRequestService {
     suspend fun getResponse(
         url: String,
         headers:
-            Hashtable<String, String>? = null,
+        Hashtable<String, String>? = null,
     ): String?
 
     /**
@@ -60,7 +60,7 @@ interface HttpRequestService {
         url: String,
         headers: Hashtable<String, String>? = null,
         postData: Hashtable<String, Any>? = null,
-    ): String
+    ): String?
 
     suspend fun postRawResponse(
         url: String,
@@ -85,11 +85,9 @@ interface HttpRequestService {
                 client.config {
                     install(HttpTimeout) {
                         socketTimeoutMillis = 13_000
-                        requestTimeoutMillis = 13_000
-                        connectTimeoutMillis = 13_000
                     }
-                    install(HttpCookies) {
-                        if (storage != null) {
+                    if (storage != null) {
+                        install(HttpCookies) {
                             this.storage = storage
                         }
                     }

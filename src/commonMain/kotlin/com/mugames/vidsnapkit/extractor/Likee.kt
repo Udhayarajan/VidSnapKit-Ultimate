@@ -46,8 +46,11 @@ class Likee internal constructor(url: String) : Extractor(url) {
         }
         val response = httpRequestService.postRequest(GET_VIDEO_INFO, hashMapOf("postIds" to postId).toHashtable())
         val responseData =
-            response.toJSONObject()
-                .getJSONObject("data")
+            response?.toJSONObject()
+                ?.getJSONObject("data") ?: run {
+                clientRequestError()
+                return
+            }
         responseData.getJSONArray("videoList")?.let {
             extractVideoList(it)
         } ?: run {

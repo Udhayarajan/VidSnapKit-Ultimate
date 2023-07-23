@@ -63,7 +63,10 @@ class Twitch internal constructor(url: String) : Extractor(url) {
             "{\"query\":\"{clip(slug:\\\"%s\\\"){broadcaster{displayName}createdAt curator{displayName id}durationSeconds id tiny:thumbnailURL(width:86,height:45)small:thumbnailURL(width:260,height:147)medium:thumbnailURL(width:480,height:272)title videoQualities{frameRate quality sourceURL}viewCount}}\"}",
             id
         )
-        val response = httpRequestService.postRequest("https://gql.twitch.tv/gql", headers = headers)
+        val response = httpRequestService.postRequest("https://gql.twitch.tv/gql", headers = headers) ?: run {
+            clientRequestError()
+            return localFormats
+        }
         val clip = response.toJSONObject().getJSONObject("data").getJSONObject("clip")
         localFormats.imageData.add(ImageResource(clip.getString("medium"), "medium"))
         val videoQualities = clip.getJSONArray("videoQualities")

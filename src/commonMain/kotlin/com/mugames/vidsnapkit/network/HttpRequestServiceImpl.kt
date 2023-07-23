@@ -53,66 +53,69 @@ class HttpRequestServiceImpl(private val client: HttpClient) : HttpRequestServic
     override suspend fun getResponse(
         url: String,
         headers: Hashtable<String, String>?,
-    ): String? = try {
-        client.get {
-            url(url)
-            headers?.let {
-                if (it.isNotEmpty()) {
-                    headers {
-                        for ((key, value) in it) append(key, value)
+    ): String? {
+        return try {
+            client.get {
+                url(url)
+                headers?.let {
+                    if (it.isNotEmpty()) {
+                        headers {
+                            for ((key, value) in it) append(key, value)
+                        }
                     }
                 }
-            }
-        }.run {
-            if (status == HttpStatusCode.OK) {
-                bodyAsText()
-            } else if (status in redirectionStatusCode) {
-                getLastPossibleRedirectedResponse(this, headers).bodyAsText()
-            } else if (url.contains("instagram") && status == HttpStatusCode.InternalServerError) {
-                "{error:\"Invalid Cookies\"}"
-            } else if (status == HttpStatusCode.TooManyRequests) {
-                logger.warn("Unhandled in getData() TooManyRequest for url=$url with headers=$headers & response=${bodyAsText()}")
-                "429"
-            } else {
-                val body = bodyAsText()
-                logger.warn(
-                    "Unhandled in getData() status code=$status for url=$url with headers=$headers &\n response=${
-                    body.substring(
-                        min(body.length, 2000)
+            }.run {
+                if (status == HttpStatusCode.OK) {
+                    bodyAsText()
+                } else if (status in redirectionStatusCode) {
+                    getLastPossibleRedirectedResponse(this, headers).bodyAsText()
+                } else if (url.contains("instagram") && status == HttpStatusCode.InternalServerError) {
+                    "{error:\"Invalid Cookies\"}"
+                } else if (status == HttpStatusCode.TooManyRequests) {
+                    logger.warn("Unhandled in getData() TooManyRequest for url=$url with headers=$headers & response=${bodyAsText()}")
+                    "429"
+                } else {
+                    val body = bodyAsText()
+                    logger.warn(
+                        "Unhandled in getData() status code=$status for url=$url with headers=$headers &\n response=${
+                            body.substring(
+                                min(body.length, 2000)
+                            )
+                        }"
                     )
-                    }"
-                )
-                null
+                    null
+                }
             }
-        }
-    } catch (e: ClientRequestException) {
-        logger.error("getData() url=$url header=$headers ClientRequestException:", e)
-        null
-    } catch (e: SSLPeerUnverifiedException) {
-        logger.error("getData() url=$url header=$headers SSLPeerUnverifiedException ${e.message}")
-        throw ProxyException(e)
-    } catch (e: SocketTimeoutException) {
-        logger.error("getData() url=$url header=$headers SocketTimeoutException ${e.message}")
-        throw ProxyException(e)
-    } catch (e: SocketException) {
-        logger.error("getData() url=$url header=$headers SocketException ${e.message}")
-        throw ProxyException(e)
-    } catch (e: SSLHandshakeException) {
-        logger.error("getData() url=$url header=$headers SLLHandShakeException ${e.message}")
-        throw ProxyException(e)
-    } catch (e: SendCountExceedException) {
-        if (url.contains("instagram") && headers?.containsKey("Cookie") == true) {
-            "{error:\"Invalid Cookies\"}"
-        } else {
-            logger.error("getData() url=$url header=$headers SendCountExceedException:", e)
+        } catch (e: ClientRequestException) {
+            logger.error("getData() url=$url header=$headers ClientRequestException:", e)
+            null
+        } catch (e: SSLPeerUnverifiedException) {
+            logger.error("getData() url=$url header=$headers SSLPeerUnverifiedException ${e.message}")
+            throw ProxyException(e)
+        } catch (e: SocketTimeoutException) {
+            logger.error("getData() url=$url header=$headers SocketTimeoutException ${e.message}")
+            throw ProxyException(e)
+        } catch (e: SocketException) {
+            logger.error("getData() url=$url header=$headers SocketException ${e.message}")
+            throw ProxyException(e)
+        } catch (e: SSLHandshakeException) {
+            logger.error("getData() url=$url header=$headers SLLHandShakeException ${e.message}")
+            throw ProxyException(e)
+        } catch (e: SendCountExceedException) {
+            if (url.contains("instagram") && headers?.containsKey("Cookie") == true) {
+                "{error:\"Invalid Cookies\"}"
+            } else {
+                logger.error("getData() url=$url header=$headers SendCountExceedException:", e)
+                throw e
+            }
+        } catch (e: Exception) {
+            if (e is TimeoutCancellationException || e is CancellationException) {
+                logger.error("getData() url=$url header=$headers Cancellation exception: ${e.message}")
+                return null
+            } else logger.error("getData() url=$url header=$headers Generic exception:", e)
             throw e
         }
-    } catch (e: Exception) {
-        if (e is TimeoutCancellationException || e is CancellationException) logger.error("getData() url=$url header=$headers Cancellation exception: ${e.message}")
-        else logger.error("getData() url=$url header=$headers Generic exception:", e)
-        throw e
     }
-
     override suspend fun getRawResponse(
         url: String,
         headers: Hashtable<String, String>?,
@@ -196,33 +199,35 @@ class HttpRequestServiceImpl(private val client: HttpClient) : HttpRequestServic
         url: String,
         headers: Hashtable<String, String>?,
         postData: Hashtable<String, Any>?,
-    ) = try {
-        client.post {
-            url(url)
-            headers?.let {
-                if (it.isNotEmpty()) headers {
-                    for ((key, value) in it) append(key, value)
+    ): String? {
+        return try {
+            client.post {
+                url(url)
+                headers?.let {
+                    if (it.isNotEmpty()) headers {
+                        for ((key, value) in it) append(key, value)
+                    }
                 }
-            }
-            postData?.let {
-                setBody(TextContent(it.toJsonString(), ContentType.Application.Json))
-            }
-        }.bodyAsText()
-    } catch (e: SocketTimeoutException) {
-        logger.error("postRequest() url=$url header=$headers SocketTimeoutException ${e.message}")
-        throw ProxyException(e)
-    } catch (e: SocketException) {
-        logger.error("postRequest() url=$url header=$headers SocketException ${e.message}")
-        throw ProxyException(e)
-    } catch (e: SSLHandshakeException) {
-        logger.error("postRequest() url=$url header=$headers SSLPeerUnverifiedException ${e.message}")
-        throw ProxyException(e)
-    } catch (e: SSLPeerUnverifiedException) {
-        logger.error("postRequest() url=$url header=$headers SSLPeerUnverifiedException ${e.message}")
-        throw ProxyException(e)
-    } catch (e: Exception) {
-        logger.error("postRequest() url=$url header=$headers & postRequest=$postData Error:", e)
-        throw e
+                postData?.let {
+                    setBody(TextContent(it.toJsonString(), ContentType.Application.Json))
+                }
+            }.bodyAsText()
+        } catch (e: SocketTimeoutException) {
+            logger.error("postRequest() url=$url header=$headers SocketTimeoutException ${e.message}")
+            throw ProxyException(e)
+        } catch (e: SocketException) {
+            logger.error("postRequest() url=$url header=$headers SocketException ${e.message}")
+            throw ProxyException(e)
+        } catch (e: SSLHandshakeException) {
+            logger.error("postRequest() url=$url header=$headers SSLPeerUnverifiedException ${e.message}")
+            throw ProxyException(e)
+        } catch (e: SSLPeerUnverifiedException) {
+            logger.error("postRequest() url=$url header=$headers SSLPeerUnverifiedException ${e.message}")
+            throw ProxyException(e)
+        } catch (e: Exception) {
+            logger.error("postRequest() url=$url header=$headers & postRequest=$postData Error:", e)
+            return null
+        }
     }
 
     override suspend fun postRawResponse(

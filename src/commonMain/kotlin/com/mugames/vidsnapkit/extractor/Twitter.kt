@@ -70,7 +70,10 @@ class Twitter internal constructor(url: String) : Extractor(url) {
     }
 
     private suspend fun getToken() {
-        val response = httpRequestService.postRequest(base_url + "guest/activate.json", headers = headers)
+        val response = httpRequestService.postRequest(base_url + "guest/activate.json", headers = headers) ?: run {
+            clientRequestError("post request fails")
+            return
+        }
         headers["x-guest-token"] = response.toJSONObject().getString("guest_token")
         if (inputUrl.contains("status")) extractVideo()
         if (inputUrl.contains("broadcasts")) extractBroadcasts()
