@@ -283,8 +283,8 @@ class Instagram internal constructor(url: String) : Extractor(url) {
             tempHeader.remove("User-Agent")
             tempHeader["X-Ig-App-Id"] = appId
             val res = httpRequestService.postRequest(AUDIO_API, tempHeader, audioPayload)
-            val metadata = res.toJSONObject().getJSONObject("metadata")
-            metadata.run {
+            val metadata = res?.toJSONObject()?.getJSONObject("metadata")
+            metadata?.run {
                 getNullableJSONObject("original_sound_info")?.let { extractFromOriginalAudioInfo(it) }
                     ?: getNullableJSONObject("music_info")
                         ?.getJSONObject("music_asset_info")
@@ -293,6 +293,9 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                         missingLogic()
                         return
                     }
+            } ?: run {
+                clientRequestError()
+                return
             }
         } else {
             // possibly user url

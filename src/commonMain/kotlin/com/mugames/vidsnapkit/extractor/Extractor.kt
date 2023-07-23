@@ -100,7 +100,10 @@ abstract class Extractor(
     protected var headers: Hashtable<String, String> = Hashtable()
     private val store = AcceptAllCookiesStorage()
 
-    protected var httpRequestService = HttpRequestService.create(storage = store)
+    protected var httpRequestService = run {
+        val str = if (inputUrl.contains(Regex("/reels/audio/|tiktok"))) store else null
+        HttpRequestService.create(storage = str)
+    }
 
     /**
      * If media is private just pass valid cookies to
@@ -127,7 +130,8 @@ abstract class Extractor(
      */
     fun setCustomClient(httpClient: HttpClient) {
         httpRequestService.close()
-        httpRequestService = HttpRequestService.create(httpClient, store)
+        val str = if (inputUrl.contains(Regex("/reels/audio/|tiktok"))) store else null
+        httpRequestService = HttpRequestService.create(httpClient, str)
     }
 
     /**
@@ -245,7 +249,7 @@ abstract class Extractor(
         return sizes.awaitAll()
     }
 
-    protected fun clientRequestError(msg: String = "The request video page missing. If you find it as false kindly contact us") {
+    protected fun clientRequestError(msg: String = "error making request") {
         onProgress(Result.Failed(Error.NonFatalError(msg)))
     }
 

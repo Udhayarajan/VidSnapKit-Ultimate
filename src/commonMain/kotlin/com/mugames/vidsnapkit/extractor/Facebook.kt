@@ -226,7 +226,7 @@ class Facebook internal constructor(url: String) : Extractor(url) {
         } ?: apply {
             val uuid = "fb." + UUID.randomUUID().toString() + ".html"
             File(uuid).writeText(webPage)
-            onProgress(Result.Failed(Error.NonFatalError("This video can't be Downloaded, refer=$uuid")))
+            onProgress(Result.Failed(Error.NonFatalError("Sorry! we can't see the page, refer=$uuid")))
         }
     }
 
