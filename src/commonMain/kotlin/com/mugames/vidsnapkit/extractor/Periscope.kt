@@ -23,7 +23,6 @@ import com.mugames.vidsnapkit.dataholders.Formats
 import com.mugames.vidsnapkit.dataholders.Result
 import com.mugames.vidsnapkit.dataholders.VideoResource
 import com.mugames.vidsnapkit.getNullableString
-import com.mugames.vidsnapkit.network.HttpRequest
 import com.mugames.vidsnapkit.toJSONObject
 import com.mugames.vidsnapkit.toJSONObjectOrNull
 import org.json.JSONObject
@@ -61,21 +60,21 @@ class Periscope internal constructor(url: String) : Extractor(url) {
         val id = getID(inputUrl)
         id?.let {
             val response =
-                HttpRequest("https://api.periscope.tv/api/v2/accessVideoPublic?broadcast_id=$it").getResponse()
+                httpRequestService.getResponse("https://api.periscope.tv/api/v2/accessVideoPublic?broadcast_id=$it")
             response?.let {
                 val stream = response.toJSONObject()
                 val broadcast = stream.getJSONObject("broadcast")
                 data = extractData(broadcast)
                 val videUrls = mutableListOf<String>()
                 for (
-                    formatId in arrayOf(
-                        "replay",
-                        "rtmp",
-                        "hls",
-                        "https_hls",
-                        "lhls",
-                        "lhlsweb"
-                    )
+                formatId in arrayOf(
+                    "replay",
+                    "rtmp",
+                    "hls",
+                    "https_hls",
+                    "lhls",
+                    "lhlsweb"
+                )
                 ) {
                     val videoUrl = stream.getNullableString(formatId + "_url")
                     if (videoUrl.isNullOrEmpty() || videUrls.contains(videoUrl)) continue

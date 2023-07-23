@@ -23,17 +23,19 @@ import com.mugames.vidsnapkit.dataholders.Error
 import com.mugames.vidsnapkit.dataholders.Formats
 import com.mugames.vidsnapkit.dataholders.ProgressState
 import com.mugames.vidsnapkit.dataholders.Result
-import com.mugames.vidsnapkit.network.HttpRequest
+import com.mugames.vidsnapkit.network.HttpRequestService
+import com.mugames.vidsnapkit.network.ProxyException
 import com.mugames.vidsnapkit.sanitizeAsHeaderValue
-import io.ktor.client.network.sockets.*
+import io.ktor.client.*
 import io.ktor.client.plugins.*
+import io.ktor.client.plugins.cookies.*
+import io.ktor.http.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.future.future
 import org.slf4j.LoggerFactory
-import java.net.SocketException
 import java.util.*
 import java.util.regex.Pattern
-import javax.net.ssl.SSLHandshakeException
+import kotlin.collections.set
 
 /**
  * @author Udhaya
@@ -96,6 +98,9 @@ abstract class Extractor(
     protected lateinit var onProgress: (Result) -> Unit
 
     protected var headers: Hashtable<String, String> = Hashtable()
+    private val store = AcceptAllCookiesStorage()
+
+    protected var httpRequestService = HttpRequestService.create(storage = store)
 
     /**
      * If media is private just pass valid cookies to
@@ -112,6 +117,18 @@ abstract class Extractor(
         }
 
     protected val videoFormats = mutableListOf<Formats>()
+
+    /**
+     * If you have any custom client to work on you can use it.
+     * @param httpClient custom client with your config
+     * anyhow timeouts are forced
+     * @see HttpRequestService.create
+     * For more about timeouts, [refer](https://ktor.io/docs/timeout.html#configure_plugin)
+     */
+    fun setCustomClient(httpClient: HttpClient) {
+        httpRequestService.close()
+        httpRequestService = HttpRequestService.create(httpClient, store)
+    }
 
     /**
      * starting point of all child of [Extractor]
@@ -136,29 +153,27 @@ abstract class Extractor(
     private suspend fun safeAnalyze() {
         try {
             if (inputUrl.contains("instagram")) {
-                inputUrl = if (cookies == null) {
+                inputUrl = if (cookies == null && inputUrl.contains("/audio/")) {
                     inputUrl.replace("/reels/", "/reel/")
                 } else inputUrl.replace("/reel/", "/reels/")
                 headers["User-Agent"] = getRandomInstagramUserAgent()
             }
-            if (HttpRequest(inputUrl, headers).isAvailable())
+            if (httpRequestService.checkPageAvailability(inputUrl, headers))
                 analyze()
             else if (inputUrl.contains("instagram") && cookies != null) {
-                logger.info("Forcing instagram")
                 analyze(hashMapOf("forced" to true))
             } else if ((inputUrl.contains("facebook") || inputUrl.contains("fb")) && cookies != null) {
-                logger.info("Forcing FB")
                 analyze(hashMapOf("forced" to true))
             } else clientRequestError()
-        } catch (e: Exception) {
-            if (e is SSLHandshakeException)
-                internalError("problem with SSL try again")
-            if (e is ClientRequestException && inputUrl.contains("instagram"))
+        } catch (e: ClientRequestException) {
+            if (inputUrl.contains("instagram"))
                 onProgress(Result.Failed(Error.Instagram404Error(cookies != null)))
-            else if (e is SocketTimeoutException || e is SocketException)
-                internalError("socket can't connect please try again")
             else
-                onProgress(Result.Failed(Error.InternalError("Error in SafeAnalyze", e)))
+                internalError("unhandled client request exception in safe analyse", e)
+        } catch (e: ProxyException) {
+            internalError("ssl/socket exception please try again", e)
+        } catch (e: Exception) {
+            internalError("unknown & unhandled error in safe analyse", e)
         }
     }
 
@@ -193,6 +208,9 @@ abstract class Extractor(
                 format.imageData.addAll(formats.imageData.filter { it.size > 0 }.toList())
                 filteredFormats.add(format)
             }
+            filteredFormats.forEach {
+                it.cookies.addAll(store.get(Url(inputUrl)))
+            }
             onProgress(Result.Success(filteredFormats))
         }
     }
@@ -201,7 +219,7 @@ abstract class Extractor(
         val sizes = mutableListOf<Deferred<Long>>()
         coroutineScope {
             for (videoData in format.videoData) {
-                sizes.add(async { HttpRequest(videoData.url, headers).getSize() })
+                sizes.add(async { httpRequestService.getSize(videoData.url, headers) })
             }
         }
         return sizes.awaitAll()
@@ -211,7 +229,7 @@ abstract class Extractor(
         val sizes = mutableListOf<Deferred<Long>>()
         coroutineScope {
             for (audioData in format.audioData) {
-                sizes.add(async { HttpRequest(audioData.url, headers).getSize() })
+                sizes.add(async { httpRequestService.getSize(audioData.url, headers) })
             }
         }
         return sizes.awaitAll()
@@ -221,7 +239,7 @@ abstract class Extractor(
         val sizes = mutableListOf<Deferred<Long>>()
         coroutineScope {
             for (imageData in format.imageData) {
-                sizes.add(async { HttpRequest(imageData.url, headers).getSize() })
+                sizes.add(async { httpRequestService.getSize(imageData.url, headers) })
             }
         }
         return sizes.awaitAll()
@@ -249,22 +267,22 @@ abstract class Extractor(
     private fun getRandomInstagramUserAgent(): String {
         val userAgents = listOf(
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 " +
-                "Safari/537.36",
+                    "Safari/537.36",
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 " +
-                "Safari/537.36",
+                    "Safari/537.36",
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) " +
-                "Chrome/74.0.3729.169 Safari/537.36",
+                    "Chrome/74.0.3729.169 Safari/537.36",
             "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 " +
-                "Safari/537.36",
+                    "Safari/537.36",
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 " +
-                "Safari/537.36",
+                    "Safari/537.36",
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.157 " +
-                "Safari/537.36",
+                    "Safari/537.36",
             "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.157 " +
-                "Safari/537.36",
+                    "Safari/537.36",
             "Mozilla/5.0 (iPhone; CPU iPhone OS 12_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) " +
-                "Mobile/15E148 Instagram 105.0.0.11.118 (iPhone11,8; iOS 12_3_1; en_US; en-US; scale=2.00; " +
-                "828x1792; 165586599)"
+                    "Mobile/15E148 Instagram 105.0.0.11.118 (iPhone11,8; iOS 12_3_1; en_US; en-US; scale=2.00; " +
+                    "828x1792; 165586599)"
         )
         return userAgents.random()
     }

@@ -20,7 +20,6 @@ package com.mugames.vidsnapkit.extractor
 import com.mugames.vidsnapkit.MimeType
 import com.mugames.vidsnapkit.dataholders.*
 import com.mugames.vidsnapkit.getNullableString
-import com.mugames.vidsnapkit.network.HttpRequest
 import org.json.JSONObject
 import java.util.regex.Pattern
 
@@ -37,7 +36,7 @@ class ShareChat internal constructor(url: String) : Extractor(url) {
         formats.src = "ShareChat"
         onProgress(Result.Progress(ProgressState.Start))
         scratchWebPage(
-            HttpRequest(inputUrl).getResponse() ?: run {
+            httpRequestService.getResponse(inputUrl) ?: run {
                 clientRequestError()
                 return
             }
@@ -59,9 +58,9 @@ class ShareChat internal constructor(url: String) : Extractor(url) {
         val responseObject = JSONObject(matcher.group(1)!!)
         formats.title = responseObject.getString("name")
             ?: responseObject.getString("description")
-            ?: "ShareChat_${
-            responseObject.getJSONObject("author")
-                .getNullableString("name")
+                    ?: "ShareChat_${
+                responseObject.getJSONObject("author")
+                    .getNullableString("name")
             }"
         val contentUrl = responseObject.getString("contentUrl")
         try {

@@ -23,7 +23,6 @@ import com.mugames.vidsnapkit.dataholders.AudioResource
 import com.mugames.vidsnapkit.dataholders.Formats
 import com.mugames.vidsnapkit.dataholders.ImageResource
 import com.mugames.vidsnapkit.dataholders.VideoResource
-import com.mugames.vidsnapkit.network.HttpRequest
 import com.mugames.vidsnapkit.toJSONObject
 import org.json.JSONObject
 import java.net.URI
@@ -53,9 +52,8 @@ class Vimeo internal constructor(url: String) : Extractor(url) {
         formats.url = inputUrl
         val id = getVideoId()
         id?.let {
-            val request = HttpRequest(CONFIG_URL.format(it))
             parseConfigRequest(
-                request.getResponse() ?: run {
+                httpRequestService.getResponse(CONFIG_URL.format(it)) ?: run {
                     clientRequestError()
                     return
                 }
@@ -75,7 +73,7 @@ class Vimeo internal constructor(url: String) : Extractor(url) {
         val defaultCdn = hls.getString("default_cdn")
         val cdnUrl = hls.getJSONObject("cdns").getJSONObject(defaultCdn).getString("url")
         extractFromCdns(
-            HttpRequest(cdnUrl).getResponse() ?: run {
+            httpRequestService.getResponse(cdnUrl) ?: run {
                 clientRequestError()
                 return
             },

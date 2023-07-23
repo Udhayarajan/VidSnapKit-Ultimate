@@ -19,7 +19,6 @@ package com.mugames.vidsnapkit.extractor
 
 import com.mugames.vidsnapkit.*
 import com.mugames.vidsnapkit.dataholders.*
-import com.mugames.vidsnapkit.network.HttpRequest
 import java.util.regex.Pattern
 
 /**
@@ -47,7 +46,7 @@ class DailyMotion(url: String) : Extractor(url) {
         val id = getVideoId()
         id?.let {
             onProgress(Result.Progress(ProgressState.Start))
-            val json = HttpRequest(METADATA_API.format(id)).getResponse()?.toJSONObject() ?: run {
+            val json = httpRequestService.getResponse(METADATA_API.format(id))?.toJSONObject() ?: run {
                 clientRequestError()
                 return
             }
@@ -62,22 +61,12 @@ class DailyMotion(url: String) : Extractor(url) {
 
             val thumbnails = json.getJSONObject("posters")
 
-            for (
-                i in listOf(
-                    "60",
-                    "120",
-                    "180",
-                    "240",
-                    "360",
-                    "480",
-                    "720",
-                    "1080"
-                )
-            ) {
+            for (i in listOf(
+                "60", "120", "180", "240", "360", "480", "720", "1080"
+            )) {
                 localFormats.imageData.add(
                     ImageResource(
-                        thumbnails.getString(i),
-                        resolution = i
+                        thumbnails.getString(i), resolution = i
                     )
                 )
             }
@@ -87,19 +76,16 @@ class DailyMotion(url: String) : Extractor(url) {
             for (i in 0 until (autoQuality?.length() ?: 0)) {
                 val type = autoQuality!!.getJSONObject(i).getString("type")
                 if (type == MimeType.APPLICATION_X_MPEG_URL) {
-                    extractFromM3U8(
-                        HttpRequest(
+                    extractFromM3U8(httpRequestService.getResponse(
                             autoQuality.getJSONObject(i).getString("url")
-                        ).getResponse() ?: run {
-                            clientRequestError()
-                            return
-                        }
-                    )
+                        ) ?: run {
+                        clientRequestError()
+                        return
+                    })
                 } else {
                     localFormats.videoData.add(
                         VideoResource(
-                            autoQuality.getJSONObject(i).getString("url"),
-                            type
+                            autoQuality.getJSONObject(i).getString("url"), type
                         )
                     )
                 }
@@ -116,8 +102,7 @@ class DailyMotion(url: String) : Extractor(url) {
     private suspend fun extractFromM3U8(response: String) {
         fun valueForKey(key: String, line: String): String? {
             val matcher = Pattern.compile("$key=(?:\"(.*?)\"|(.*?),)").matcher(line)
-            return if (matcher.find())
-                matcher.tryGroup(1) ?: matcher.tryGroup(2) else null
+            return if (matcher.find()) matcher.tryGroup(1) ?: matcher.tryGroup(2) else null
         }
 
         onProgress(Result.Progress(ProgressState.Middle))
@@ -126,9 +111,7 @@ class DailyMotion(url: String) : Extractor(url) {
                 valueForKey("PROGRESSIVE-URI", line)?.let {
                     localFormats.videoData.add(
                         VideoResource(
-                            it,
-                            MimeType.VIDEO_MP4,
-                            valueForKey("RESOLUTION", line) ?: "--"
+                            it, MimeType.VIDEO_MP4, valueForKey("RESOLUTION", line) ?: "--"
                         )
                     )
                 }
