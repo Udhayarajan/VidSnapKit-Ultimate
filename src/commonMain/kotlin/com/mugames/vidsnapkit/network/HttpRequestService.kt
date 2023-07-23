@@ -32,7 +32,7 @@ interface HttpRequestService {
     suspend fun getResponse(
         url: String,
         headers:
-        Hashtable<String, String>? = null,
+            Hashtable<String, String>? = null,
     ): String?
 
     /**
@@ -81,17 +81,19 @@ interface HttpRequestService {
             client: HttpClient = HttpClient(Android),
             storage: CookiesStorage? = null,
         ): HttpRequestService =
-            HttpRequestServiceImpl(client.config {
-                install(HttpTimeout) {
-                    socketTimeoutMillis = 13_000
-                    requestTimeoutMillis = 13_000
-                    connectTimeoutMillis = 13_000
-                }
-                install(HttpCookies) {
-                    if (storage != null) {
-                        this.storage = storage
+            HttpRequestServiceImpl(
+                client.config {
+                    install(HttpTimeout) {
+                        socketTimeoutMillis = 13_000
+                        requestTimeoutMillis = 13_000
+                        connectTimeoutMillis = 13_000
+                    }
+                    install(HttpCookies) {
+                        if (storage != null) {
+                            this.storage = storage
+                        }
                     }
                 }
-            })
+            )
     }
 }

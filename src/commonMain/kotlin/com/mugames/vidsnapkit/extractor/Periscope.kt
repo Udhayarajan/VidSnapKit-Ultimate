@@ -67,14 +67,14 @@ class Periscope internal constructor(url: String) : Extractor(url) {
                 data = extractData(broadcast)
                 val videUrls = mutableListOf<String>()
                 for (
-                formatId in arrayOf(
-                    "replay",
-                    "rtmp",
-                    "hls",
-                    "https_hls",
-                    "lhls",
-                    "lhlsweb"
-                )
+                    formatId in arrayOf(
+                        "replay",
+                        "rtmp",
+                        "hls",
+                        "https_hls",
+                        "lhls",
+                        "lhlsweb"
+                    )
                 ) {
                     val videoUrl = stream.getNullableString(formatId + "_url")
                     if (videoUrl.isNullOrEmpty() || videUrls.contains(videoUrl)) continue

@@ -58,9 +58,9 @@ class ShareChat internal constructor(url: String) : Extractor(url) {
         val responseObject = JSONObject(matcher.group(1)!!)
         formats.title = responseObject.getString("name")
             ?: responseObject.getString("description")
-                    ?: "ShareChat_${
-                responseObject.getJSONObject("author")
-                    .getNullableString("name")
+            ?: "ShareChat_${
+            responseObject.getJSONObject("author")
+                .getNullableString("name")
             }"
         val contentUrl = responseObject.getString("contentUrl")
         try {

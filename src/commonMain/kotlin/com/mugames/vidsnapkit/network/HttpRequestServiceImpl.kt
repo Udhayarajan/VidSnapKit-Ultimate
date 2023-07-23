@@ -35,7 +35,6 @@ import javax.net.ssl.SSLHandshakeException
 import javax.net.ssl.SSLPeerUnverifiedException
 import kotlin.math.min
 
-
 /**
  * @author Udhaya
  * @Created 22-07-2023
@@ -78,9 +77,9 @@ class HttpRequestServiceImpl(private val client: HttpClient) : HttpRequestServic
                 val body = bodyAsText()
                 logger.warn(
                     "Unhandled in getData() status code=$status for url=$url with headers=$headers &\n response=${
-                        body.substring(
-                            min(body.length, 2000)
-                        )
+                    body.substring(
+                        min(body.length, 2000)
+                    )
                     }"
                 )
                 null
@@ -272,7 +271,6 @@ class HttpRequestServiceImpl(private val client: HttpClient) : HttpRequestServic
         null
     }
 
-
     // Instagram Server crashes with 500 if we sent wrong cookies
     // So it is tackled by hardcoding and making it as true to prevent NonFatal Error
     override suspend fun checkPageAvailability(
@@ -375,4 +373,3 @@ class HttpRequestServiceImpl(private val client: HttpClient) : HttpRequestServic
         client.close()
     }
 }
-

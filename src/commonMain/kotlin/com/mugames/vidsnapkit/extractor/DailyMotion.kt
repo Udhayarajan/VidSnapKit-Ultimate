@@ -61,9 +61,11 @@ class DailyMotion(url: String) : Extractor(url) {
 
             val thumbnails = json.getJSONObject("posters")
 
-            for (i in listOf(
-                "60", "120", "180", "240", "360", "480", "720", "1080"
-            )) {
+            for (
+                i in listOf(
+                    "60", "120", "180", "240", "360", "480", "720", "1080"
+                )
+            ) {
                 localFormats.imageData.add(
                     ImageResource(
                         thumbnails.getString(i), resolution = i
@@ -76,12 +78,14 @@ class DailyMotion(url: String) : Extractor(url) {
             for (i in 0 until (autoQuality?.length() ?: 0)) {
                 val type = autoQuality!!.getJSONObject(i).getString("type")
                 if (type == MimeType.APPLICATION_X_MPEG_URL) {
-                    extractFromM3U8(httpRequestService.getResponse(
+                    extractFromM3U8(
+                        httpRequestService.getResponse(
                             autoQuality.getJSONObject(i).getString("url")
                         ) ?: run {
-                        clientRequestError()
-                        return
-                    })
+                            clientRequestError()
+                            return
+                        }
+                    )
                 } else {
                     localFormats.videoData.add(
                         VideoResource(

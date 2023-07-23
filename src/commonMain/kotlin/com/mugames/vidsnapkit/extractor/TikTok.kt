@@ -18,7 +18,6 @@
 package com.mugames.vidsnapkit.extractor
 
 import com.mugames.vidsnapkit.MimeType
-import com.mugames.vidsnapkit.Util
 import com.mugames.vidsnapkit.dataholders.Formats
 import com.mugames.vidsnapkit.dataholders.ImageResource
 import com.mugames.vidsnapkit.dataholders.VideoResource
@@ -41,7 +40,7 @@ class TikTok internal constructor(url: String) : Extractor(url) {
         localFormats.url = inputUrl
         headers["Referer"] = "https://www.tiktok.com/"
         headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
-        val response = httpRequestService.getResponse(inputUrl,headers)
+        val response = httpRequestService.getResponse(inputUrl, headers)
         response?.let {
             extractFromWebPage(response)
         } ?: run {
