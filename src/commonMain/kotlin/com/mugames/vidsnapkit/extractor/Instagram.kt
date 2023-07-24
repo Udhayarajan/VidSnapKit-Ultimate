@@ -19,6 +19,7 @@ package com.mugames.vidsnapkit.extractor
 
 import com.mugames.vidsnapkit.*
 import com.mugames.vidsnapkit.dataholders.*
+import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.coroutines.withTimeoutOrNull
 import org.json.JSONArray
@@ -136,6 +137,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
     }
 
     private fun isHighlightsPost(): Boolean {
+        if (inputUrl.contains("/s/")) return true
         return inputUrl.contains("stories/highlights/".toRegex())
     }
 
@@ -195,10 +197,10 @@ class Instagram internal constructor(url: String) : Extractor(url) {
     private suspend fun extractMusicAssetInfo(assetInfo: JSONObject) {
         formats.title =
             assetInfo.getNullableString("title")?.ifEmpty { null } ?: assetInfo.getNullableString("subtitle")
-            ?.ifEmpty { null } ?: "Reels_audio ${assetInfo.getNullableString("display_artist")}"
+                ?.ifEmpty { null } ?: "Reels_audio ${assetInfo.getNullableString("display_artist")}"
         val imageUrl = assetInfo.run {
             getNullableString("cover_artwork_uri")?.ifEmpty { null } ?: getNullableString("cover_artwork_thumbnail_uri")
-                ?: getJSONObject("music_composition_info").getString("placeholder_profile_pic_url")
+            ?: getJSONObject("music_composition_info").getString("placeholder_profile_pic_url")
         }
         formats.imageData.add(ImageResource(imageUrl, Util.getResolutionFromUrl(imageUrl)))
 
@@ -254,6 +256,10 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         } else if (isHighlightsPost()) {
             headers["User-Agent"] =
                 "Mozilla/5.0 (iPhone; CPU iPhone OS 12_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 105.0.0.11.118 (iPhone11,8; iOS 12_3_1; en_US; en-US; scale=2.00; 828x1792; 165586599)"
+            if (!isCookieValid()) {
+                loginRequired()
+                return
+            }
             val highlightsId = getHighlightsId()
             highlightsId?.let {
                 extractHighlights(it)
@@ -305,6 +311,10 @@ class Instagram internal constructor(url: String) : Extractor(url) {
             // possibly user url
             headers["User-Agent"] =
                 "Mozilla/5.0 (iPhone; CPU iPhone OS 12_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 105.0.0.11.118 (iPhone11,8; iOS 12_3_1; en_US; en-US; scale=2.00; 828x1792; 165586599)"
+            if (!isCookieValid()) {
+                loginRequired()
+                return
+            }
             val userId = getUserID()
             userId?.let {
                 extractStories(it)
@@ -678,7 +688,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         val appID = getAppID(page)
         headers["X-Ig-App-Id"] = appID
         val res = httpRequestService.getResponse(GRAPHQL_URL.format(queryHash, getShortcode()), headers)
-        logger.info("graphQL response = $res")
+        logger.info("graphQL response = ${res.toString().substring(0, 80)}")
         val shortcodeMedia =
             res?.toJSONObject()?.getJSONObject("data")?.getNullableJSONObject("shortcode_media") ?: run {
                 logger.info("unable to even get from graphQL so trying direct ex")
