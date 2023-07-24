@@ -52,7 +52,8 @@ class ShareChat internal constructor(url: String) : Extractor(url) {
             Pattern.compile("""<script data-rh="true" type="application\/ld\+json">(\{"@context":"http:\/\/schema\.org","@type":"(?:Image|Video)Object".*?\})<\/script>""")
                 .matcher(response)
         if (!matcher.find()) {
-            onProgress(Result.Failed(Error.InternalError("Unable detect the contentUrl for $inputUrl")))
+            internalError("Unable detect the contentUrl for $inputUrl")
+            return
         }
         onProgress(Result.Progress(ProgressState.Middle))
         val responseObject = JSONObject(matcher.group(1)!!)

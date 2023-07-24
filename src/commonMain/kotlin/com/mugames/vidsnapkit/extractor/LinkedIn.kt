@@ -106,10 +106,10 @@ class LinkedIn internal constructor(url: String) : Extractor(url) {
             }
         }
         if (page.contains("Please enter your email address", true)) {
-            onProgress(Result.Failed(Error.LoginRequired))
+            loginRequired()
             return
         }
-        onProgress(Result.Failed(Error.MethodMissingLogic))
+        missingLogic()
     }
 
     private suspend fun extractFromIncluded(included: JSONArray) {

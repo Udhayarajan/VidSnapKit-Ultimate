@@ -95,7 +95,7 @@ class DailyMotion(url: String) : Extractor(url) {
                 }
             }
         } ?: run {
-            onProgress(Result.Failed(Error.InvalidUrl))
+            failed(Error.InvalidUrl)
         }
     }
 

@@ -35,11 +35,16 @@ class M3u8(private val url: String, private val onProgressCallback: ProgressCall
 
     var info: JSONObject? = null
 
-    val httpRequestService = HttpRequestService.create()
+    val httpRequestService by lazy {
+        HttpRequestService.create()
+    }
 
-    private val localFormats = Formats()
+    private val localFormats by lazy {
+        Formats()
+    }
 
     private fun nonFatalError(msg: String) {
+        httpRequestService.close()
         onProgressCallback.onProgress(Result.Failed(Error.NonFatalError(msg)))
     }
 
