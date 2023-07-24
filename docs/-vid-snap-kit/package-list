@@ -203,6 +203,7 @@ $dokka.location:com.mugames.vidsnapkit.extractor/Extractor.Companion/findExtract
 $dokka.location:com.mugames.vidsnapkit.extractor/Extractor///PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-extractor/index.html
 $dokka.location:com.mugames.vidsnapkit.extractor/Extractor/Extractor/#kotlin.String/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-extractor/-extractor.html
 $dokka.location:com.mugames.vidsnapkit.extractor/Extractor/cookies/#/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-extractor/cookies.html
+$dokka.location:com.mugames.vidsnapkit.extractor/Extractor/failed/#com.mugames.vidsnapkit.dataholders.Error/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-extractor/failed.html
 $dokka.location:com.mugames.vidsnapkit.extractor/Extractor/setCustomClient/#io.ktor.client.HttpClient/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-extractor/set-custom-client.html
 $dokka.location:com.mugames.vidsnapkit.extractor/Extractor/start/#com.mugames.vidsnapkit.ProgressCallback/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-extractor/start.html
 $dokka.location:com.mugames.vidsnapkit.extractor/Extractor/start/#kotlin.Function1[com.mugames.vidsnapkit.dataholders.Result,kotlin.Unit]/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-extractor/start.html
@@ -218,6 +219,7 @@ $dokka.location:com.mugames.vidsnapkit.extractor/Facebook///PointingToDeclaratio
 $dokka.location:com.mugames.vidsnapkit.extractor/Facebook/testWebpage/#kotlin.String/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-facebook/test-webpage.html
 $dokka.location:com.mugames.vidsnapkit.extractor/Instagram.Companion///PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-instagram/-companion/index.html
 $dokka.location:com.mugames.vidsnapkit.extractor/Instagram.Companion/AUDIO_API/#/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-instagram/-companion/-a-u-d-i-o_-a-p-i.html
+$dokka.location:com.mugames.vidsnapkit.extractor/Instagram.Companion/DEFAULT_APP_ID/#/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-instagram/-companion/-d-e-f-a-u-l-t_-a-p-p_-i-d.html
 $dokka.location:com.mugames.vidsnapkit.extractor/Instagram.Companion/DEFAULT_QUERY_HASH/#/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-instagram/-companion/-d-e-f-a-u-l-t_-q-u-e-r-y_-h-a-s-h.html
 $dokka.location:com.mugames.vidsnapkit.extractor/Instagram.Companion/GRAPHQL_URL/#/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-instagram/-companion/-g-r-a-p-h-q-l_-u-r-l.html
 $dokka.location:com.mugames.vidsnapkit.extractor/Instagram.Companion/HIGHLIGHTS_API/#/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit.extractor/-instagram/-companion/-h-i-g-h-l-i-g-h-t-s_-a-p-i.html
