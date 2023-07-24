@@ -102,6 +102,8 @@ abstract class Extractor(
         AcceptAllCookiesStorage()
     }
 
+    private var closeClient = true
+
     protected var httpRequestService = run {
         val str = if (inputUrl.contains(Regex("/reels/audio/|tiktok"))) store else null
         HttpRequestService.create(storage = str)
@@ -130,8 +132,10 @@ abstract class Extractor(
      * @see HttpRequestService.create
      * For more about timeouts, [refer](https://ktor.io/docs/timeout.html#configure_plugin)
      */
-    fun setCustomClient(httpClient: HttpClient) {
-        httpRequestService.close()
+    fun setCustomClient(httpClient: HttpClient, autoCloseClient: Boolean = true) {
+        if (closeClient)
+            httpRequestService.close()
+        closeClient = autoCloseClient
         val str = if (inputUrl.contains(Regex("/reels/audio/|tiktok"))) store else null
         httpRequestService = HttpRequestService.create(httpClient, str)
     }
@@ -217,7 +221,8 @@ abstract class Extractor(
             filteredFormats.forEach {
                 it.cookies.addAll(store.get(Url(inputUrl)))
             }
-            httpRequestService.close()
+            if (closeClient)
+                httpRequestService.close()
             onProgress(Result.Success(filteredFormats))
         }
     }
@@ -253,27 +258,32 @@ abstract class Extractor(
     }
 
     protected fun clientRequestError(msg: String = "error making request") {
-        httpRequestService.close()
+        if (closeClient)
+            httpRequestService.close()
         onProgress(Result.Failed(Error.NonFatalError(msg)))
     }
 
-    public fun failed(error: Error) {
-        httpRequestService.close()
+    fun failed(error: Error) {
+        if (closeClient)
+            httpRequestService.close()
         onProgress(Result.Failed(error))
     }
 
     protected fun loginRequired() {
-        httpRequestService.close()
+        if (closeClient)
+            httpRequestService.close()
         onProgress(Result.Failed(Error.LoginRequired))
     }
 
     protected fun internalError(msg: String, e: Exception? = null) {
-        httpRequestService.close()
+        if (closeClient)
+            httpRequestService.close()
         onProgress(Result.Failed(Error.InternalError(msg, e)))
     }
 
     protected fun missingLogic() {
-        httpRequestService.close()
+        if (closeClient)
+            httpRequestService.close()
         onProgress(Result.Failed(Error.MethodMissingLogic))
     }
 

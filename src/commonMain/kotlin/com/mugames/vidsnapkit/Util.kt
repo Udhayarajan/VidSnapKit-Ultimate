@@ -39,8 +39,10 @@ class Util {
          */
         fun decodeHTML(text: String?): String? {
             if (text == null) return null
+            var data = text.replace("%(?![0-9a-fA-F]{2})".toRegex(), "%25")
+            data = data.replace("\\+".toRegex(), "%2B")
             val decoder = HtmlDecoderFactory.createDecoderFactory()
-            val decoded = decoder.decodeHtml(text)
+            val decoded = decoder.decodeHtml(data)
 //            decoded = HtmlCompat.fromHtml(text, HtmlCompat.FROM_HTML_MODE_LEGACY).toString()
             try {
                 return URLDecoder.decode(decoded, "UTF-8")

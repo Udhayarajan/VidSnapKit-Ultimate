@@ -449,12 +449,14 @@ class Facebook internal constructor(url: String) : Extractor(url) {
             )
         )
 
-        val blurredImage = media.getJSONObject("blurred_image")
-        scopedFormats.imageData.add(
+        val blurredImage = media.getNullableJSONObject("blurred_image")
+        blurredImage?.getString("uri")?.let {
             ImageResource(
-                blurredImage.getString("uri"), resolution = Util.getResolutionFromUrl(blurredImage.getString("uri"))
+                it, resolution = Util.getResolutionFromUrl(blurredImage.getString("uri"))
             )
-        )
+        }?.let {
+            scopedFormats.imageData.add(it)
+        }
 
         val previewImage = media.getJSONObject("previewImage")
         scopedFormats.imageData.add(
