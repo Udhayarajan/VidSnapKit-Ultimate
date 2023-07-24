@@ -46,6 +46,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         const val GRAPHQL_URL =
             "https://www.instagram.com/graphql/query/?query_hash=%s&variables={\"shortcode\":\"%s\"}&__a=1&__d=dis"
         const val DEFAULT_QUERY_HASH = "b3055c01b4b222b8a47dc12b090e4e64"
+        const val DEFAULT_APP_ID = "936619743392459"
         const val AUDIO_API = "https://www.instagram.com/api/v1/clips/music/"
         private val logger = LoggerFactory.getLogger(Instagram::class.java)
     }
@@ -92,6 +93,22 @@ class Instagram internal constructor(url: String) : Extractor(url) {
             logger.error("unable to find shortcode from the url=$inputUrl")
             null
         }
+    }
+
+    private fun getAppID(page: String?): String {
+        if (page == null)
+            return DEFAULT_APP_ID
+        val appIdRegex = listOf(
+            "\"app_id\":\"(\\d.*?)\"".toRegex(),
+            "\"appId\":\"(\\d.*?)\"".toRegex(),
+            "\"APP_ID\":\"(\\d.*?)\"".toRegex(),
+            "\"X-IG-App-ID\":\"(.*?)\"".toRegex()
+        )
+        for (regex in appIdRegex) {
+            val matcher = regex.find(page)
+            return matcher?.groups?.get(1)?.value ?: DEFAULT_APP_ID
+        }
+        return DEFAULT_APP_ID
     }
 
     private fun getMediaId(page: String? = null): String? {
@@ -162,12 +179,12 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                 return null
             }
             if (!isAccessible(response, it)) {
-                onProgress(Result.Failed(Error.InvalidCookies))
+                loginRequired()
                 return null
             }
             return response.getJSONObject("graphql")?.getJSONObject("user")?.getString("id")
         } ?: run {
-            onProgress(Result.Failed(Error.InvalidUrl))
+            failed(Error.InvalidUrl)
         }
         return null
     } ?: run {
@@ -254,24 +271,12 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                 loginRequired()
                 return
             }
-            var appId = "936619743392459"
 
-            withTimeoutOrNull(2000) {
-                httpRequestService.getResponse(inputUrl, headers)?.let {
-                    val appIdRegex = listOf(
-                        "\"app_id\":\"(\\d.*?)\"".toRegex(),
-                        "\"appId\":\"(\\d.*?)\"".toRegex(),
-                        "\"APP_ID\":\"(\\d.*?)\"".toRegex(),
-                        "\"X-IG-App-ID\":\"(.*?)\"".toRegex()
-                    )
-                    for (regex in appIdRegex) {
-                        val matcher = regex.find(it)
-                        matcher?.groups?.get(1)?.let {
-                            appId = it.value
-                        }
-                    }
-                }
-            }
+            val appID = withTimeoutOrNull(1500) {
+                getAppID(httpRequestService.getResponse(inputUrl, headers))
+            } ?: DEFAULT_APP_ID
+
+            headers["X-Ig-App-Id"] = appID
 
             val tempHeader = headers.clone() as Hashtable<String, String>
             pre.headers.getAll("set-cookie")?.forEach {
@@ -281,7 +286,6 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                 }
             }
             tempHeader.remove("User-Agent")
-            tempHeader["X-Ig-App-Id"] = appId
             val res = httpRequestService.postRequest(AUDIO_API, tempHeader, audioPayload)
             val metadata = res?.toJSONObject()?.getJSONObject("metadata")
             metadata?.run {
@@ -328,29 +332,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
             return
         }
         if (res == "429" && isCookieValid()) {
-            val mediaID = shortcodeToMediaID(getShortcode())
-            mediaID?.let {
-                val items =
-                    httpRequestService
-                        .getResponse(
-                            POST_API.format(shortcodeToMediaID(getShortcode())),
-                            headers
-                        )?.let {
-                            it.toJSONObjectOrNull()?.getNullableJSONArray("items") ?: run {
-                                loginRequired()
-                                return
-                            }
-                        } ?: run {
-                        loginRequired()
-                        return
-                    }
-                extractFromItems(items)
-                return
-            } ?: run {
-                logger.error("unable to find mediaID for url $inputUrl")
-                loginRequired()
-                return
-            }
+            shortcodeExtraction()
         }
         extractFromItems(
             res.toJSONObjectOrNull()?.getNullableJSONArray("items") ?: run {
@@ -358,6 +340,33 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                 return
             }
         )
+    }
+
+    // Works only with valid cookies
+    private suspend fun shortcodeExtraction() {
+        val mediaID = shortcodeToMediaID(getShortcode())
+        mediaID?.let {
+            val items =
+                httpRequestService
+                    .getResponse(
+                        POST_API.format(shortcodeToMediaID(getShortcode())),
+                        headers
+                    )?.let {
+                        it.toJSONObjectOrNull()?.getNullableJSONArray("items") ?: run {
+                            loginRequired()
+                            return
+                        }
+                    } ?: run {
+                    loginRequired()
+                    return
+                }
+            extractFromItems(items)
+            return
+        } ?: run {
+            logger.error("unable to find mediaID for url $inputUrl")
+            loginRequired()
+            return
+        }
     }
 
     private suspend fun extractHighlights(highlightsId: String, isStory: Boolean = false) {
@@ -455,15 +464,15 @@ class Instagram internal constructor(url: String) : Extractor(url) {
             if (isObjectPresentInEntryData("LoginAndSignupPage")) {
                 loginRequired()
             } else if (isObjectPresentInEntryData("HttpErrorPage")) {
-                onProgress(Result.Failed(Error.Instagram404Error(cookies != null)))
+                failed(Error.Instagram404Error(cookies != null))
             } else {
                 val user0 = jsonObject.getJSONObject("entry_data").getNullableJSONArray("ProfilePage")?.getJSONObject(0)
                     ?: run {
                         newApiRequest()
                         return
                     }
-                if (!isAccessible(user0)) onProgress(Result.Failed(Error.InvalidCookies))
-                else onProgress(Result.Failed(Error.InternalError("can't find problem")))
+                if (!isAccessible(user0)) loginRequired()
+                else internalError("can't find problem")
             }
         }
     }
@@ -655,7 +664,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
             media?.let { mediaIt ->
                 setInfo(mediaIt)
             } ?: run {
-                onProgress(Result.Failed(Error.InternalError("MediaNotFound")))
+                internalError("MediaNotFound")
             }
         } ?: run {
             extractFromItems(jsonObject.getJSONArray("items"))
@@ -666,6 +675,8 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         val queryHash = withTimeoutOrNull(2000) {
             getQueryHashFromAllJSInPage(page)
         } ?: DEFAULT_QUERY_HASH
+        val appID = getAppID(page)
+        headers["X-Ig-App-Id"] = appID
         val res = httpRequestService.getResponse(GRAPHQL_URL.format(queryHash, getShortcode()), headers)
         logger.info("graphQL response = $res")
         val shortcodeMedia =
@@ -742,7 +753,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
             }
         }
         if (!isPostUrl() && videoFormats.isEmpty()) {
-            onProgress(Result.Failed(Error.NonFatalError(NO_VIDEO_STATUS_AVAILABLE)))
+            clientRequestError(NO_VIDEO_STATUS_AVAILABLE)
         } else finalize()
     }
 

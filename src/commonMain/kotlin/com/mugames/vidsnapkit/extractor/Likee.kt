@@ -54,7 +54,7 @@ class Likee internal constructor(url: String) : Extractor(url) {
         responseData.getJSONArray("videoList")?.let {
             extractVideoList(it)
         } ?: run {
-            onProgress(Result.Failed(Error.MethodMissingLogic))
+            missingLogic()
         }
     }
 

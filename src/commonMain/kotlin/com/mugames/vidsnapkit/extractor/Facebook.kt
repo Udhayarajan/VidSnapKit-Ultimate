@@ -105,7 +105,7 @@ class Facebook internal constructor(url: String) : Extractor(url) {
             extractInfo()
         } catch (e: JSONException) {
             e.printStackTrace()
-            onProgress(Result.Failed(Error.InternalError("Something went wrong", e)))
+            internalError("Something went wrong", e)
         } catch (e: Exception) {
             logger.warn("$TAG+ analyze: ", e)
             throw e
@@ -168,7 +168,7 @@ class Facebook internal constructor(url: String) : Extractor(url) {
                 return
             }
             if (webPage.contains("You must log in to continue")) {
-                onProgress(Result.Failed(Error.LoginRequired))
+                loginRequired()
                 return
             }
         }
@@ -226,7 +226,7 @@ class Facebook internal constructor(url: String) : Extractor(url) {
         } ?: apply {
             val uuid = "fb." + UUID.randomUUID().toString() + ".html"
             File(uuid).writeText(webPage)
-            onProgress(Result.Failed(Error.NonFatalError("Sorry! we can't see the page, refer=$uuid")))
+            clientRequestError("Sorry! we can't see the page, refer=$uuid")
         }
     }
 
@@ -387,7 +387,9 @@ class Facebook internal constructor(url: String) : Extractor(url) {
             return extractFromCreationStory(media)
         }
         val scopedFormats = localFormats.copy(
-            title = "", videoData = mutableListOf(), audioData = mutableListOf(), imageData = mutableListOf()
+            videoData = mutableListOf(),
+            audioData = mutableListOf(),
+            imageData = mutableListOf()
         )
         if (media.getNullableJSONObject("video_grid_renderer") != null) {
             return getVideoFromVideoGridRenderer(media)
@@ -402,10 +404,14 @@ class Facebook internal constructor(url: String) : Extractor(url) {
                 url = thumbnailUrl
             )
         )
-        scopedFormats.title = media.getNullableString("name") ?: media.getNullableJSONObject("savable_description")
-            ?.getNullableString("text") ?: media.getNullableJSONObject("title")?.getString("text")?.ifEmpty {
-            "Facebook_Video"
-        } ?: "Facebook_Video"
+        val title = media.getNullableString("name") ?: media.getNullableJSONObject("savable_description")
+            ?.getNullableString("text") ?: media.getNullableJSONObject("title")?.getString("text")
+        title?.let {
+            if (scopedFormats.title.isEmpty() || it != scopedFormats.title)
+                scopedFormats.title = title
+        } ?: run {
+            if (scopedFormats.title.isEmpty()) scopedFormats.title = "Facebook_Video"
+        }
 
         val dashXml = media.getNullableString("dash_manifest")
         dashXml?.let {
@@ -463,6 +469,9 @@ class Facebook internal constructor(url: String) : Extractor(url) {
         val playbackVideo =
             media.getNullableJSONObject("creation_story")?.getNullableJSONObject("short_form_video_context")
                 ?.getNullableJSONObject("playback_video")
+        localFormats.title = media.getNullableJSONObject("creation_story")
+            ?.getNullableJSONObject("message")
+            ?.getNullableString("text") ?: ""
         return if (playbackVideo != null) parseGraphqlVideo(playbackVideo)
         else parseGraphqlVideo(media, false)
     }

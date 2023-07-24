@@ -98,7 +98,9 @@ abstract class Extractor(
     protected lateinit var onProgress: (Result) -> Unit
 
     protected var headers: Hashtable<String, String> = Hashtable()
-    private val store = AcceptAllCookiesStorage()
+    private val store by lazy {
+        AcceptAllCookiesStorage()
+    }
 
     protected var httpRequestService = run {
         val str = if (inputUrl.contains(Regex("/reels/audio/|tiktok"))) store else null
@@ -215,6 +217,7 @@ abstract class Extractor(
             filteredFormats.forEach {
                 it.cookies.addAll(store.get(Url(inputUrl)))
             }
+            httpRequestService.close()
             onProgress(Result.Success(filteredFormats))
         }
     }
@@ -250,18 +253,27 @@ abstract class Extractor(
     }
 
     protected fun clientRequestError(msg: String = "error making request") {
+        httpRequestService.close()
         onProgress(Result.Failed(Error.NonFatalError(msg)))
     }
 
+    public fun failed(error: Error) {
+        httpRequestService.close()
+        onProgress(Result.Failed(error))
+    }
+
     protected fun loginRequired() {
+        httpRequestService.close()
         onProgress(Result.Failed(Error.LoginRequired))
     }
 
     protected fun internalError(msg: String, e: Exception? = null) {
+        httpRequestService.close()
         onProgress(Result.Failed(Error.InternalError(msg, e)))
     }
 
     protected fun missingLogic() {
+        httpRequestService.close()
         onProgress(Result.Failed(Error.MethodMissingLogic))
     }
 
