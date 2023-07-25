@@ -59,8 +59,8 @@ class Instagram internal constructor(url: String) : Extractor(url) {
     private suspend fun isCookieValid(): Boolean {
         if (cookies.isNullOrEmpty()) return false
         val res = httpRequestService.getRawResponse(
-                "https://www.instagram.com/accounts/login/", headers, false
-            ) ?: return false
+            "https://www.instagram.com/accounts/login/", headers, false
+        ) ?: return false
         logger.info("status code=${res.status.value} & http response=$res")
         if (res.status == HttpStatusCode.Found) {
             val newLoc = res.headers["location"].toString()
@@ -193,10 +193,10 @@ class Instagram internal constructor(url: String) : Extractor(url) {
     private suspend fun extractMusicAssetInfo(assetInfo: JSONObject) {
         formats.title =
             assetInfo.getNullableString("title")?.ifEmpty { null } ?: assetInfo.getNullableString("subtitle")
-                ?.ifEmpty { null } ?: "Reels_audio ${assetInfo.getNullableString("display_artist")}"
+            ?.ifEmpty { null } ?: "Reels_audio ${assetInfo.getNullableString("display_artist")}"
         val imageUrl = assetInfo.run {
             getNullableString("cover_artwork_uri")?.ifEmpty { null } ?: getNullableString("cover_artwork_thumbnail_uri")
-            ?: getJSONObject("music_composition_info").getString("placeholder_profile_pic_url")
+                ?: getJSONObject("music_composition_info").getString("placeholder_profile_pic_url")
         }
         formats.imageData.add(ImageResource(imageUrl, Util.getResolutionFromUrl(imageUrl)))
 
@@ -293,9 +293,9 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                 getNullableJSONObject("original_sound_info")?.let { extractFromOriginalAudioInfo(it) }
                     ?: getNullableJSONObject("music_info")?.getJSONObject("music_asset_info")
                         ?.also { extractMusicAssetInfo(it) } ?: run {
-                        missingLogic()
-                        return
-                    }
+                    missingLogic()
+                    return
+                }
             } ?: run {
                 clientRequestError()
                 return
@@ -337,10 +337,12 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         if (res == "429" && isCookieValid()) {
             shortcodeExtraction()
         }
-        extractFromItems(res.toJSONObjectOrNull()?.getNullableJSONArray("items") ?: run {
-            loginRequired()
-            return
-        })
+        extractFromItems(
+            res.toJSONObjectOrNull()?.getNullableJSONArray("items") ?: run {
+                loginRequired()
+                return
+            }
+        )
     }
 
     // Works only with valid cookies
@@ -348,13 +350,13 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         val mediaID = shortcodeToMediaID(getShortcode())
         mediaID?.let {
             val items = httpRequestService.getResponse(
-                    POST_API.format(shortcodeToMediaID(getShortcode())), headers
-                )?.let {
-                    it.toJSONObjectOrNull()?.getNullableJSONArray("items") ?: run {
-                        loginRequired()
-                        return
-                    }
-                } ?: run {
+                POST_API.format(shortcodeToMediaID(getShortcode())), headers
+            )?.let {
+                it.toJSONObjectOrNull()?.getNullableJSONArray("items") ?: run {
+                    loginRequired()
+                    return
+                }
+            } ?: run {
                 loginRequired()
                 return
             }
@@ -426,9 +428,11 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         } else {
             val json = getFromBrutForcing(page)
             if (json != null) {
-                brutForcedExtraction(json.toJSONObjectOrNull() ?: run {
-                    json.toJSONArray().getJSONObject(0)
-                })
+                brutForcedExtraction(
+                    json.toJSONObjectOrNull() ?: run {
+                        json.toJSONArray().getJSONObject(0)
+                    }
+                )
                 return
             } else {
                 logger.info("finally calling direct ex in unsafe, cookies are not validated")
@@ -561,9 +565,13 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         val ids = mutableListOf<String>()
         val matcher = Pattern.compile("<link rel=\"preload\" href=\"(.*?)\" as=\"script\"").matcher(page)
         while (matcher.find()) {
-            ids.addAll(getQueryHash(httpRequestService.getResponse(matcher.group(1), headers) ?: run {
-                return null
-            }))
+            ids.addAll(
+                getQueryHash(
+                    httpRequestService.getResponse(matcher.group(1), headers) ?: run {
+                        return null
+                    }
+                )
+            )
         }
         return ids
     }
@@ -590,7 +598,8 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                         media.getString(
                             "thumbnail_src"
                         )
-                    ), url = media.getString("thumbnail_src")
+                    ),
+                    url = media.getString("thumbnail_src")
                 )
             )
             videoFormats.add(formats)
@@ -681,9 +690,11 @@ class Instagram internal constructor(url: String) : Extractor(url) {
             if (formats.title.isEmpty()) {
                 onProgress(Result.Progress(ProgressState.Middle))
                 val caption = item.getNullableJSONObject("caption")
-                formats.title = Util.filterName(caption?.getNullableString("text") ?: run {
-                    item.getNullableString("caption") ?: "Instagram_Reels"
-                })
+                formats.title = Util.filterName(
+                    caption?.getNullableString("text") ?: run {
+                        item.getNullableString("caption") ?: "Instagram_Reels"
+                    }
+                )
             }
 
             val videoVersion = item.getNullableJSONArray("video_versions")
@@ -693,7 +704,8 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                     val video = it.getJSONObject(j)
                     format.videoData.add(
                         VideoResource(
-                            video.getString("url"), MimeType.VIDEO_MP4, try {
+                            video.getString("url"), MimeType.VIDEO_MP4,
+                            try {
                                 video.getString("width")
                             } catch (e: JSONException) {
                                 video.getInt("width").toString()
