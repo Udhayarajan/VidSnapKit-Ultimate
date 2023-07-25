@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory
 import java.math.BigInteger
 import java.util.*
 import java.util.regex.Pattern
+import kotlin.math.min
 
 /**
  * @author Udhaya
@@ -57,12 +58,9 @@ class Instagram internal constructor(url: String) : Extractor(url) {
 
     private suspend fun isCookieValid(): Boolean {
         if (cookies.isNullOrEmpty()) return false
-        val res = httpRequestService
-            .getRawResponse(
-                "https://www.instagram.com/accounts/login/",
-                headers,
-                false
-            ) ?: return false
+        val res = httpRequestService.getRawResponse(
+            "https://www.instagram.com/accounts/login/", headers, false
+        ) ?: return false
         logger.info("status code=${res.status.value} & http response=$res")
         if (res.status == HttpStatusCode.Found) {
             val newLoc = res.headers["location"].toString()
@@ -97,8 +95,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
     }
 
     private fun getAppID(page: String?): String {
-        if (page == null)
-            return DEFAULT_APP_ID
+        if (page == null) return DEFAULT_APP_ID
         val appIdRegex = listOf(
             "\"app_id\":\"(\\d.*?)\"".toRegex(),
             "\"appId\":\"(\\d.*?)\"".toRegex(),
@@ -126,8 +123,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
 
     private fun getAudioID(): String {
         val matcher = Pattern.compile("/reels?/audio/([0-9].*?)/").matcher(inputUrl)
-        if (matcher.find())
-            return matcher.group(1)
+        if (matcher.find()) return matcher.group(1)
         throw Exception("unable to get audio ID")
     }
 
@@ -205,8 +201,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         formats.imageData.add(ImageResource(imageUrl, Util.getResolutionFromUrl(imageUrl)))
 
         assetInfo.run {
-            getNullableString("progressive_download_url")
-                ?: getString("fast_start_progressive_download_url")
+            getNullableString("progressive_download_url") ?: getString("fast_start_progressive_download_url")
         }.let {
             formats.audioData.add(AudioResource(it, MimeType.AUDIO_MP4))
         }
@@ -296,13 +291,11 @@ class Instagram internal constructor(url: String) : Extractor(url) {
             val metadata = res?.toJSONObject()?.getJSONObject("metadata")
             metadata?.run {
                 getNullableJSONObject("original_sound_info")?.let { extractFromOriginalAudioInfo(it) }
-                    ?: getNullableJSONObject("music_info")
-                        ?.getJSONObject("music_asset_info")
-                        ?.also { extractMusicAssetInfo(it) }
-                    ?: run {
-                        missingLogic()
-                        return
-                    }
+                    ?: getNullableJSONObject("music_info")?.getJSONObject("music_asset_info")
+                        ?.also { extractMusicAssetInfo(it) } ?: run {
+                    missingLogic()
+                    return
+                }
             } ?: run {
                 clientRequestError()
                 return
@@ -356,20 +349,17 @@ class Instagram internal constructor(url: String) : Extractor(url) {
     private suspend fun shortcodeExtraction() {
         val mediaID = shortcodeToMediaID(getShortcode())
         mediaID?.let {
-            val items =
-                httpRequestService
-                    .getResponse(
-                        POST_API.format(shortcodeToMediaID(getShortcode())),
-                        headers
-                    )?.let {
-                        it.toJSONObjectOrNull()?.getNullableJSONArray("items") ?: run {
-                            loginRequired()
-                            return
-                        }
-                    } ?: run {
+            val items = httpRequestService.getResponse(
+                POST_API.format(shortcodeToMediaID(getShortcode())), headers
+            )?.let {
+                it.toJSONObjectOrNull()?.getNullableJSONArray("items") ?: run {
                     loginRequired()
                     return
                 }
+            } ?: run {
+                loginRequired()
+                return
+            }
             extractFromItems(items)
             return
         } ?: run {
@@ -381,8 +371,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
 
     private suspend fun extractHighlights(highlightsId: String, isStory: Boolean = false) {
         val highlights = httpRequestService.getResponse(
-            HIGHLIGHTS_API.format(if (!isStory) "highlight%3A$highlightsId" else highlightsId),
-            headers
+            HIGHLIGHTS_API.format(if (!isStory) "highlight%3A$highlightsId" else highlightsId), headers
         )?.toJSONObjectOrNull()
         highlights?.let {
             if (it.getNullable("login_required") == "true") {
@@ -423,11 +412,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                 if (mediaId == null) throw JSONException("mediaId is null purposely thrown wrong error")
                 val url = POST_API.format(mediaId)
                 extractFromItems(
-                    httpRequestService
-                        .getResponse(url, headers)
-                        .toString()
-                        .toJSONObject()
-                        .getJSONArray("items")
+                    httpRequestService.getResponse(url, headers).toString().toJSONObject().getJSONArray("items")
                 )
             } catch (e: JSONException) {
                 loginRequired()
@@ -688,7 +673,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         val appID = getAppID(page)
         headers["X-Ig-App-Id"] = appID
         val res = httpRequestService.getResponse(GRAPHQL_URL.format(queryHash, getShortcode()), headers)
-        logger.info("graphQL response = ${res.toString().substring(0, 80)}")
+        logger.info("graphQL response = ${res.toString().substring(0, min(res.toString().length, 50))}")
         val shortcodeMedia =
             res?.toJSONObject()?.getJSONObject("data")?.getNullableJSONObject("shortcode_media") ?: run {
                 logger.info("unable to even get from graphQL so trying direct ex")
