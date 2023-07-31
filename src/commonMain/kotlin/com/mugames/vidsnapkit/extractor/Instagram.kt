@@ -129,7 +129,6 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         throw Exception("unable to get audio ID")
     }
 
-
     private fun getOwnerID(page: String): String {
         val regexes =
             listOf("instapp:owner_user_id\" content=\"(\\d*?)\"".toRegex(), "owner_id\":\"(\\d*?)\"".toRegex())
@@ -207,10 +206,10 @@ class Instagram internal constructor(url: String) : Extractor(url) {
     private suspend fun extractMusicAssetInfo(assetInfo: JSONObject) {
         formats.title =
             assetInfo.getNullableString("title")?.ifEmpty { null } ?: assetInfo.getNullableString("subtitle")
-                ?.ifEmpty { null } ?: "Reels_audio ${assetInfo.getNullableString("display_artist")}"
+            ?.ifEmpty { null } ?: "Reels_audio ${assetInfo.getNullableString("display_artist")}"
         val imageUrl = assetInfo.run {
             getNullableString("cover_artwork_uri")?.ifEmpty { null } ?: getNullableString("cover_artwork_thumbnail_uri")
-            ?: getJSONObject("music_composition_info").getString("placeholder_profile_pic_url")
+                ?: getJSONObject("music_composition_info").getString("placeholder_profile_pic_url")
         }
         formats.imageData.add(ImageResource(imageUrl, Util.getResolutionFromUrl(imageUrl)))
 
@@ -309,9 +308,9 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                 getNullableJSONObject("original_sound_info")?.let { extractFromOriginalAudioInfo(it) }
                     ?: getNullableJSONObject("music_info")?.getJSONObject("music_asset_info")
                         ?.also { extractMusicAssetInfo(it) } ?: run {
-                        missingLogic()
-                        return
-                    }
+                    missingLogic()
+                    return
+                }
             } ?: run {
                 clientRequestError()
                 return
@@ -387,7 +386,6 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         }
         tryWithQueryHash(page, false)
     }
-
 
     // Works only with valid cookies
     private suspend fun shortcodeExtraction() {

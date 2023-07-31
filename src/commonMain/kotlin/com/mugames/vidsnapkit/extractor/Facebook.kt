@@ -587,7 +587,7 @@ class Facebook internal constructor(url: String) : Extractor(url) {
                             videoData.get("original_width")
                                 .toString() + "x" + videoData.get("original_height") + "(" + s.uppercase() + ")",
 
-                            )
+                        )
                     )
                 }
                 return SUCCESS

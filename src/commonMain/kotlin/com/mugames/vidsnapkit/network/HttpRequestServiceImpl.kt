@@ -76,10 +76,10 @@ class HttpRequestServiceImpl(private val client: HttpClient) : HttpRequestServic
                     val body = bodyAsText()
                     logger.warn(
                         "Unhandled in getData() status code=$status for url=$url with headers=$headers &\n response=${
-                            body.substring(
-                                0,
-                                min(body.length, 500)
-                            )
+                        body.substring(
+                            0,
+                            min(body.length, 500)
+                        )
                         }"
                     )
                     null
@@ -172,7 +172,6 @@ class HttpRequestServiceImpl(private val client: HttpClient) : HttpRequestServic
         else logger.error("headRawResponse() url=$url header=$headers Generic exception:\n", e)
         null
     }
-
 
     override suspend fun getSize(url: String, headers: Hashtable<String, String>?) = try {
         client.head {
