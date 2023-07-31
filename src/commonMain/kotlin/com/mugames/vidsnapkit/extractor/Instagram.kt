@@ -21,7 +21,7 @@ import com.mugames.vidsnapkit.*
 import com.mugames.vidsnapkit.dataholders.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.coroutines.*
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -50,6 +50,8 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         const val DEFAULT_QUERY_HASH = "b3055c01b4b222b8a47dc12b090e4e64"
         const val DEFAULT_APP_ID = "936619743392459"
         const val AUDIO_API = "https://www.instagram.com/api/v1/clips/music/"
+        const val MEDIA_CONTENT_LOGGED_OUT =
+            "https://www.instagram.com/api/v1/web/get_ruling_for_media_content_logged_out/?media_id=%s&owner_id=%s"
         private val logger = LoggerFactory.getLogger(Instagram::class.java)
     }
 
@@ -58,7 +60,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
 
     private suspend fun isCookieValid(): Boolean {
         if (cookies.isNullOrEmpty()) return false
-        val res = httpRequestService.getRawResponse(
+        val res = httpRequestService.headRawResponse(
             "https://www.instagram.com/accounts/login/", headers, false
         ) ?: return false
         logger.info("status code=${res.status.value} & http response=$res")
@@ -127,6 +129,17 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         throw Exception("unable to get audio ID")
     }
 
+    private fun getOwnerID(page: String): String {
+        val regexes =
+            listOf("instapp:owner_user_id\" content=\"(\\d*?)\"".toRegex(), "owner_id\":\"(\\d*?)\"".toRegex())
+        for (r in regexes) {
+            val res = r.find(page)?.groups?.get(1)?.value
+            if (res != null)
+                return res
+        }
+        throw Exception("unable to get owner ID")
+    }
+
     private fun isPostUrl(): Boolean {
         if (inputUrl.contains("/p/")) return true
         return inputUrl.contains("(/reel/|/tv/|/reels/)[\\w-]{11}".toRegex())
@@ -139,7 +152,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
 
     private fun getHighlightsId(): String? {
         val matcher =
-            Pattern.compile("(?:https|http)://(?:www\\.|.*?)instagram.com/(?:stories/highlights/|)([A-Za-z0-9_.]+)")
+            Pattern.compile("(?:https|http)://(?:www\\.|.*?)instagram.com/(?:stories/highlights/|s/.*story_media_id=)([A-Za-z0-9_.]+)")
                 .matcher(inputUrl)
         return if (matcher.find()) matcher.group(1)
         else null
@@ -224,7 +237,8 @@ class Instagram internal constructor(url: String) : Extractor(url) {
 
         inputUrl = inputUrl.replace("/reels/", "/reel/")
         if (!inputUrl.endsWith("/")) inputUrl = "$inputUrl/"
-        inputUrl = "${inputUrl.replace("/[^/?]*\$|/*\\?.*\$".toRegex(), "")}/?img_index=1"
+        if (!isHighlightsPost())
+            inputUrl = "${inputUrl.replace("/[^/?]*\$|/*\\?.*\$".toRegex(), "")}/?img_index=1"
 
         if (isPostUrl()) {
             if (!isCookieValid()) {
@@ -261,6 +275,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
             }
         } else if (inputUrl.contains("audio")) {
             inputUrl = inputUrl.replace("/reel/", "/reels/")
+            formats.url = inputUrl
             val audioID = getAudioID()
 
             val audioPayload = Hashtable<String, Any>()
@@ -325,13 +340,13 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         finalize()
     }
 
-    private suspend fun directExtraction() {
+    private suspend fun directExtraction(page: String? = null) {
         inputUrl = inputUrl.replace("/reels/", "/p/")
         inputUrl = inputUrl.replace("/reel/", "/p/")
         inputUrl = inputUrl.replace("https://instagram.com", "https://www.instagram.com")
         logger.info("The new url is $inputUrl&__a=1&__d=dis")
         val res = httpRequestService.getResponse(inputUrl.plus("&__a=1&__d=dis"), headers) ?: run {
-            loginRequired()
+            tryGuestLogin(page)
             return
         }
         if (res == "429" && isCookieValid()) {
@@ -343,6 +358,33 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                 return
             }
         )
+    }
+
+    private suspend fun tryGuestLogin(page: String?) {
+        if (page == null || headers.contains("Cookie")) {
+            loginRequired()
+            return
+        }
+        headers["User-Agent"] =
+            "Mozilla/5.0 (iPhone; CPU iPhone OS 12_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 105.0.0.11.118 (iPhone11,8; iOS 12_3_1; en_US; en-US; scale=2.00; 828x1792; 165586599)"
+        val ownerId = getOwnerID(page)
+        val mediaId = getMediaId(page)
+        val response = httpRequestService.headRawResponse(MEDIA_CONTENT_LOGGED_OUT.format(mediaId, ownerId)) ?: run {
+            clientRequestError()
+            return
+        }
+        val guestCookies = response.headers.getAll("set-cookies") ?: run {
+            logger.info("no cookies")
+            clientRequestError()
+            return
+        }
+        headers["Cookie"] = guestCookies.joinToString { "; " }
+        guestCookies.forEach {
+            if (it.startsWith("csrftoken=")) {
+                headers["X-Csrftoken"] = it.split("=")[1]
+            }
+        }
+        tryWithQueryHash(page, false)
     }
 
     // Works only with valid cookies
@@ -370,6 +412,10 @@ class Instagram internal constructor(url: String) : Extractor(url) {
     }
 
     private suspend fun extractHighlights(highlightsId: String, isStory: Boolean = false) {
+        if (inputUrl.contains("/s/")) {
+            newApiRequest(highlightsId)
+            return
+        }
         val highlights = httpRequestService.getResponse(
             HIGHLIGHTS_API.format(if (!isStory) "highlight%3A$highlightsId" else highlightsId), headers
         )?.toJSONObjectOrNull()
@@ -400,26 +446,24 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         } ?: extractHighlights(userId, true)
     }
 
+    private suspend fun newApiRequest(mediaId: String) {
+        try {
+            val url = POST_API.format(mediaId)
+            extractFromItems(
+                httpRequestService.getResponse(url, headers).toString().toJSONObject().getJSONArray("items")
+            )
+        } catch (e: JSONException) {
+            loginRequired()
+            return
+        }
+    }
+
     private suspend fun extractInfoShared(page: String) {
         if (page == "{error:\"Invalid Cookies\"}") {
             logger.info("direct ex as Invalid cookie arises in extractInfoShared()")
             directExtraction()
             return
         }
-        suspend fun newApiRequest() {
-            val mediaId = getMediaId(page)
-            try {
-                if (mediaId == null) throw JSONException("mediaId is null purposely thrown wrong error")
-                val url = POST_API.format(mediaId)
-                extractFromItems(
-                    httpRequestService.getResponse(url, headers).toString().toJSONObject().getJSONArray("items")
-                )
-            } catch (e: JSONException) {
-                loginRequired()
-                return
-            }
-        }
-
         onProgress(Result.Progress(ProgressState.Start))
         val pattern = Pattern.compile("window\\._sharedData\\s*=\\s*(\\{.+?\\});")
         val matcher = pattern.matcher(page)
@@ -463,7 +507,9 @@ class Instagram internal constructor(url: String) : Extractor(url) {
             } else {
                 val user0 = jsonObject.getJSONObject("entry_data").getNullableJSONArray("ProfilePage")?.getJSONObject(0)
                     ?: run {
-                        newApiRequest()
+                        val mediaId =
+                            getMediaId(page) ?: throw JSONException("mediaId is null purposely thrown wrong error")
+                        newApiRequest(mediaId)
                         return
                     }
                 if (!isAccessible(user0)) loginRequired()
@@ -552,27 +598,33 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         return null
     }
 
-    private suspend fun getQueryHash(js: String): List<String> {
-        val list = mutableListOf<String>()
-        val matcher = Pattern.compile("\\w=\"([a-z0-9]{32})\";").matcher(js)
-        while (matcher.find()) {
-            list.add(matcher.group(1))
-        }
-        return list
+    private fun getQueryHash(js: String): String? {
+        val matcher = Pattern.compile("\\(.*?var \\w=\"([a-z0-9]{32})\";.*?\\)").matcher(js)
+        if (matcher.find() && matcher.group(0).contains("PolarisAPIQuery"))
+            return matcher.group(1)
+        return null
     }
 
-    private suspend fun getQueryHashFromAllJSInPage(page: String): MutableList<String>? {
-        val ids = mutableListOf<String>()
+    private suspend fun getQueryHashFromAllJSInPage(page: String): MutableList<String?> {
+        val ids = mutableListOf<String?>()
         val matcher = Pattern.compile("<link rel=\"preload\" href=\"(.*?)\" as=\"script\"").matcher(page)
-        while (matcher.find()) {
-            ids.addAll(
-                getQueryHash(
-                    httpRequestService.getResponse(matcher.group(1), headers) ?: run {
-                        return null
-                    }
-                )
-            )
+        val deferredList = mutableListOf<Deferred<String?>>()
+
+        withContext(Dispatchers.IO) {
+            while (matcher.find()) {
+                val url = matcher.group(1)
+                val deferredResponse = async { httpRequestService.getResponse(url, headers) }
+                deferredList.add(deferredResponse)
+            }
         }
+        deferredList.awaitAll().forEach { response ->
+            response?.let { r ->
+                getQueryHash(r)?.let {
+                    ids.add(it)
+                }
+            }
+        }
+
         return ids
     }
 
@@ -666,9 +718,9 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         }
     }
 
-    private suspend fun tryWithQueryHash(page: String) {
-        val queryHash = withTimeoutOrNull(2000) {
-            getQueryHashFromAllJSInPage(page)
+    private suspend fun tryWithQueryHash(page: String, directExNeeded: Boolean = true) {
+        val queryHash = withTimeoutOrNull(3000) {
+            getQueryHashFromAllJSInPage(page)[0] ?: DEFAULT_QUERY_HASH
         } ?: DEFAULT_QUERY_HASH
         val appID = getAppID(page)
         headers["X-Ig-App-Id"] = appID
@@ -676,8 +728,11 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         logger.info("graphQL response = ${res.toString().substring(0, min(res.toString().length, 50))}")
         val shortcodeMedia =
             res?.toJSONObject()?.getJSONObject("data")?.getNullableJSONObject("shortcode_media") ?: run {
-                logger.info("unable to even get from graphQL so trying direct ex")
-                directExtraction()
+                if (directExNeeded) {
+                    logger.info("unable to even get from graphQL so trying direct ex")
+                    directExtraction(page)
+                } else
+                    loginRequired()
                 return
             }
         setInfo(shortcodeMedia)

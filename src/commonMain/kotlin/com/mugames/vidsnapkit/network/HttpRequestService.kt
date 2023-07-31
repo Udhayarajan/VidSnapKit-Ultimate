@@ -47,6 +47,17 @@ interface HttpRequestService {
     ): HttpResponse?
 
     /**
+     * Makes Http request
+     *
+     * @return HttpResponse
+     */
+    suspend fun headRawResponse(
+        url: String,
+        headers: Hashtable<String, String>? = null,
+        followRedirect: Boolean = true,
+    ): HttpResponse?
+
+    /**
      * Used to estimate size of given url in bytes
      *
      * @return bytes count of given [url]
@@ -83,9 +94,6 @@ interface HttpRequestService {
         ): HttpRequestService =
             HttpRequestServiceImpl(
                 client.config {
-                    install(HttpTimeout) {
-                        socketTimeoutMillis = 13_000
-                    }
                     if (storage != null) {
                         install(HttpCookies) {
                             this.storage = storage
