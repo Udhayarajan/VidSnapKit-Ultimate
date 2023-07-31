@@ -50,7 +50,7 @@ class Facebook internal constructor(url: String) : Extractor(url) {
 
     private suspend fun isCookieValid(): Boolean {
         if (cookies.isNullOrEmpty()) return false
-        val res = httpRequestService.getRawResponse("https://www.facebook.com/", headers, false) ?: return false
+        val res = httpRequestService.headRawResponse("https://www.facebook.com/", headers, false) ?: return false
         if (res.status == HttpStatusCode.OK) {
             val restrictedKeywords = listOf("Create new account", "log in or sign up", "Forgotten password")
             val containsRestrictedKeyword = restrictedKeywords.any { keyword ->
@@ -107,7 +107,6 @@ class Facebook internal constructor(url: String) : Extractor(url) {
             e.printStackTrace()
             internalError("Something went wrong", e)
         } catch (e: Exception) {
-            logger.warn("$TAG+ analyze: ", e)
             throw e
         }
     }
@@ -434,6 +433,15 @@ class Facebook internal constructor(url: String) : Extractor(url) {
                 )
             )
         }
+        for (quality in arrayOf("hd", "sd")) {
+            val videoUrl = media.getNullableString("browser_native_${quality}_url")
+            if (videoUrl == null || videoUrl == "null") continue
+            scopedFormats.videoData.add(
+                VideoResource(
+                    videoUrl, MimeType.VIDEO_MP4, if (quality == "sd") "$res(SD)" else "$res(HD)"
+                )
+            )
+        }
         return scopedFormats
     }
 
@@ -579,7 +587,7 @@ class Facebook internal constructor(url: String) : Extractor(url) {
                             videoData.get("original_width")
                                 .toString() + "x" + videoData.get("original_height") + "(" + s.uppercase() + ")",
 
-                        )
+                            )
                     )
                 }
                 return SUCCESS

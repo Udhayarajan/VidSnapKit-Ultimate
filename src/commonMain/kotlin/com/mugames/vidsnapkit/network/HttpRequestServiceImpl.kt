@@ -27,12 +27,10 @@ import io.ktor.http.*
 import io.ktor.http.content.*
 import kotlinx.coroutines.TimeoutCancellationException
 import org.slf4j.LoggerFactory
-import java.net.SocketException
+import java.io.IOException
 import java.util.*
 import java.util.concurrent.CancellationException
 import java.util.regex.Pattern
-import javax.net.ssl.SSLHandshakeException
-import javax.net.ssl.SSLPeerUnverifiedException
 import kotlin.math.min
 
 /**
@@ -78,44 +76,37 @@ class HttpRequestServiceImpl(private val client: HttpClient) : HttpRequestServic
                     val body = bodyAsText()
                     logger.warn(
                         "Unhandled in getData() status code=$status for url=$url with headers=$headers &\n response=${
-                        body.substring(
-                            min(body.length, 2000)
-                        )
+                            body.substring(
+                                0,
+                                min(body.length, 500)
+                            )
                         }"
                     )
                     null
                 }
             }
         } catch (e: ClientRequestException) {
-            logger.error("getData() url=$url header=$headers ClientRequestException:", e)
+            logger.error("getData() url=$url header=$headers ClientRequestException:\n", e)
             null
-        } catch (e: SSLPeerUnverifiedException) {
-            logger.error("getData() url=$url header=$headers SSLPeerUnverifiedException ${e.message}")
-            throw ProxyException(e)
-        } catch (e: SocketTimeoutException) {
-            logger.error("getData() url=$url header=$headers SocketTimeoutException ${e.message}")
-            throw ProxyException(e)
-        } catch (e: SocketException) {
-            logger.error("getData() url=$url header=$headers SocketException ${e.message}")
-            throw ProxyException(e)
-        } catch (e: SSLHandshakeException) {
-            logger.error("getData() url=$url header=$headers SLLHandShakeException ${e.message}")
+        } catch (e: IOException) {
+            logger.error("getData() url=$url header=$headers IOException\n ${e.message}")
             throw ProxyException(e)
         } catch (e: SendCountExceedException) {
             if (url.contains("instagram") && headers?.containsKey("Cookie") == true) {
                 "{error:\"Invalid Cookies\"}"
             } else {
-                logger.error("getData() url=$url header=$headers SendCountExceedException:", e)
+                logger.error("getData() url=$url header=$headers SendCountExceedException:\n", e)
                 throw e
             }
         } catch (e: Exception) {
             if (e is TimeoutCancellationException || e is CancellationException) {
-                logger.error("getData() url=$url header=$headers Cancellation exception: ${e.message}")
+                logger.error("getData() url=$url header=$headers Cancellation exception:\n ${e.message}")
                 return null
-            } else logger.error("getData() url=$url header=$headers Generic exception:", e)
+            } else logger.error("getData() url=$url header=$headers Generic exception:\n", e)
             throw e
         }
     }
+
     override suspend fun getRawResponse(
         url: String,
         headers: Hashtable<String, String>?,
@@ -140,27 +131,51 @@ class HttpRequestServiceImpl(private val client: HttpClient) : HttpRequestServic
             this.followRedirects = cache
         }
         response
-    } catch (e: SSLPeerUnverifiedException) {
-        logger.error("getRawResponse() url=$url header=$headers SSLPeerUnverifiedException ${e.message}")
-        throw ProxyException(e)
-    } catch (e: SocketTimeoutException) {
-        logger.error("getRawResponse() url=$url header=$headers SocketTimeoutException ${e.message}")
-        throw ProxyException(e)
-    } catch (e: SocketException) {
-        logger.error("getRawResponse() url=$url header=$headers SocketException ${e.message}")
-        throw ProxyException(e)
-    } catch (e: SSLHandshakeException) {
-        logger.error("getRawResponse() url=$url header=$headers SLLHandShakeException ${e.message}")
+    } catch (e: IOException) {
+        logger.error("getRawResponse() url=$url header=$headers IOException\n ${e.message}")
         throw ProxyException(e)
     } catch (e: Exception) {
-        if (e is TimeoutCancellationException || e is CancellationException) logger.error("getRawResponse() url=$url header=$headers Cancellation exception: ${e.message}")
-        else logger.error("getRawResponse() url=$url header=$headers Generic exception:", e)
+        if (e is CancellationException) logger.error("getRawResponse() url=$url header=$headers Cancellation exception0\n: ${e.message}")
+        else logger.error("getRawResponse() url=$url header=$headers Generic exception:\n", e)
         null
     }
 
+    override suspend fun headRawResponse(
+        url: String,
+        headers: Hashtable<String, String>?,
+        followRedirect: Boolean,
+    ): HttpResponse? = try {
+        var cache = true
+        client.config {
+            cache = this.followRedirects
+            this.followRedirects = followRedirect
+        }
+        val response = client.head {
+            url(url)
+            headers?.let {
+                if (it.isNotEmpty()) {
+                    headers {
+                        for ((key, value) in it) append(key, value)
+                    }
+                }
+            }
+        }
+        client.config {
+            this.followRedirects = cache
+        }
+        response
+    } catch (e: IOException) {
+        logger.error("headRawResponse() url=$url header=$headers IOException\n ${e.message}")
+        throw ProxyException(e)
+    } catch (e: Exception) {
+        if (e is CancellationException) logger.error("getRawResponse() url=$url header=$headers Cancellation exception0\n: ${e.message}")
+        else logger.error("headRawResponse() url=$url header=$headers Generic exception:\n", e)
+        null
+    }
+
+
     override suspend fun getSize(url: String, headers: Hashtable<String, String>?) = try {
-        client.request {
-            method = HttpMethod.Head
+        client.head {
             url(url)
             headers?.let {
                 if (it.isNotEmpty()) headers {
@@ -178,11 +193,7 @@ class HttpRequestServiceImpl(private val client: HttpClient) : HttpRequestServic
         when (e) {
             is HttpRequestTimeoutException,
             is ConnectTimeoutException,
-            is SocketTimeoutException,
-
-            is SSLPeerUnverifiedException,
-            is SocketException,
-            is SSLHandshakeException,
+            is IOException,
             -> {
                 // handle the exception from caller
                 1
@@ -212,20 +223,11 @@ class HttpRequestServiceImpl(private val client: HttpClient) : HttpRequestServic
                     setBody(TextContent(it.toJsonString(), ContentType.Application.Json))
                 }
             }.bodyAsText()
-        } catch (e: SocketTimeoutException) {
-            logger.error("postRequest() url=$url header=$headers SocketTimeoutException ${e.message}")
-            throw ProxyException(e)
-        } catch (e: SocketException) {
-            logger.error("postRequest() url=$url header=$headers SocketException ${e.message}")
-            throw ProxyException(e)
-        } catch (e: SSLHandshakeException) {
-            logger.error("postRequest() url=$url header=$headers SSLPeerUnverifiedException ${e.message}")
-            throw ProxyException(e)
-        } catch (e: SSLPeerUnverifiedException) {
-            logger.error("postRequest() url=$url header=$headers SSLPeerUnverifiedException ${e.message}")
+        } catch (e: IOException) {
+            logger.error("postRequest() url=$url header=$headers IOException\n ${e.message}")
             throw ProxyException(e)
         } catch (e: Exception) {
-            logger.error("postRequest() url=$url header=$headers & postRequest=$postData Error:", e)
+            logger.error("postRequest() url=$url header=$headers & postRequest=$postData\n Error:", e)
             return null
         }
     }
@@ -258,21 +260,12 @@ class HttpRequestServiceImpl(private val client: HttpClient) : HttpRequestServic
             this.followRedirects = cache
         }
         response
-    } catch (e: SSLPeerUnverifiedException) {
-        logger.error("getRawResponse() url=$url header=$headers SSLPeerUnverifiedException ${e.message}")
-        throw ProxyException(e)
-    } catch (e: SocketTimeoutException) {
-        logger.error("getRawResponse() url=$url header=$headers SocketTimeoutException ${e.message}")
-        throw ProxyException(e)
-    } catch (e: SocketException) {
-        logger.error("getRawResponse() url=$url header=$headers SocketException ${e.message}")
-        throw ProxyException(e)
-    } catch (e: SSLHandshakeException) {
-        logger.error("getRawResponse() url=$url header=$headers SLLHandShakeException ${e.message}")
+    } catch (e: IOException) {
+        logger.error("getRawResponse() url=$url header=$headers IOException\n ${e.message}")
         throw ProxyException(e)
     } catch (e: Exception) {
-        if (e is TimeoutCancellationException || e is CancellationException) logger.error("getRawResponse() url=$url header=$headers Cancellation exception: ${e.message}")
-        else logger.error("getRawResponse() url=$url header=$headers Generic exception:", e)
+        if (e is CancellationException) logger.error("getRawResponse() url=$url header=$headers Cancellation exception:\n ${e.message}")
+        else logger.error("getRawResponse() url=$url header=$headers Generic exception:\n", e)
         null
     }
 
@@ -299,7 +292,7 @@ class HttpRequestServiceImpl(private val client: HttpClient) : HttpRequestServic
                 cacheRedirect = followRedirects
                 followRedirects = false
             }
-            client.get {
+            client.head {
                 url(url)
                 method = HttpMethod.Head
                 headers?.let {
@@ -316,24 +309,15 @@ class HttpRequestServiceImpl(private val client: HttpClient) : HttpRequestServic
                         logger.info("page availability = $isPageAvailable")
                         return isPageAvailable
                     }
-                    logger.warn("Unhandled in checkWebPage() status code=$status for url=$url with headers=$headers & response=${bodyAsText()}")
+                    logger.warn("Unhandled in checkWebPage() status code=$status for url=$url with headers=$headers}")
                     false
                 }
             }
         } catch (e: ClientRequestException) {
-            logger.error("checkWebPage() url=$url header=$headers ClientRequestException:", e)
+            logger.error("checkWebPage() url=$url header=$headers ClientRequestException:\n", e)
             false
-        } catch (e: SocketTimeoutException) {
-            logger.error("checkWebPage() url=$url header=$headers SocketTimeoutException ${e.message}")
-            throw ProxyException(e)
-        } catch (e: SocketException) {
-            logger.error("checkWebPage() url=$url header=$headers SocketException ${e.message}")
-            throw ProxyException(e)
-        } catch (e: SSLHandshakeException) {
-            logger.error("checkWebPage() url=$url header=$headers SSLPeerUnverifiedException ${e.message}")
-            throw ProxyException(e)
-        } catch (e: SSLPeerUnverifiedException) {
-            logger.error("checkWebPage() url=$url header=$headers SSLPeerUnverifiedException ${e.message}")
+        } catch (e: IOException) {
+            logger.error("getData() url=$url header=$headers IOException\n ${e.message}")
             throw ProxyException(e)
         } catch (e: Exception) {
             logger.error("checkWebPage() url=$url header=$headers GenericException:", e)
