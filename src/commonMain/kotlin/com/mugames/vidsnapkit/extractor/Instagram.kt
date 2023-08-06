@@ -89,7 +89,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
     }
 
     private fun getShortcode(): String? {
-        val matcher = Pattern.compile("(?:reel|reels|p)/(.*?)[/?]").matcher(inputUrl)
+        val matcher = Pattern.compile("(?:reel|reels|p|tv)/(.*?)[/?]").matcher(inputUrl)
         return if (matcher.find()) matcher.group(1) else {
             logger.error("unable to find shortcode from the url=$inputUrl")
             null
@@ -129,7 +129,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         throw Exception("unable to get audio ID")
     }
 
-    private fun getOwnerID(page: String): String {
+    private fun getOwnerID(page: String): String? {
         val regexes =
             listOf("instapp:owner_user_id\" content=\"(\\d*?)\"".toRegex(), "owner_id\":\"(\\d*?)\"".toRegex())
         for (r in regexes) {
@@ -137,7 +137,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
             if (res != null)
                 return res
         }
-        throw Exception("unable to get owner ID")
+        return null
     }
 
     private fun isPostUrl(): Boolean {
@@ -274,6 +274,9 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                 extractHighlights(it)
             }
         } else if (inputUrl.contains("audio")) {
+            if (!isCookieValid()) {
+                cookies = null
+            }
             inputUrl = inputUrl.replace("/reel/", "/reels/")
             formats.url = inputUrl
             val audioID = getAudioID()
@@ -367,13 +370,16 @@ class Instagram internal constructor(url: String) : Extractor(url) {
         }
         headers["User-Agent"] =
             "Mozilla/5.0 (iPhone; CPU iPhone OS 12_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 105.0.0.11.118 (iPhone11,8; iOS 12_3_1; en_US; en-US; scale=2.00; 828x1792; 165586599)"
-        val ownerId = getOwnerID(page)
+        val ownerId = getOwnerID(page) ?: run {
+            loginRequired()
+            return
+        }
         val mediaId = getMediaId(page)
-        val response = httpRequestService.headRawResponse(MEDIA_CONTENT_LOGGED_OUT.format(mediaId, ownerId)) ?: run {
+        val response = httpRequestService.getRawResponse(MEDIA_CONTENT_LOGGED_OUT.format(mediaId, ownerId), headers) ?: run {
             clientRequestError()
             return
         }
-        val guestCookies = response.headers.getAll("set-cookies") ?: run {
+        val guestCookies = response.headers.getAll("set-cookie") ?: run {
             logger.info("no cookies")
             clientRequestError()
             return
@@ -720,7 +726,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
 
     private suspend fun tryWithQueryHash(page: String, directExNeeded: Boolean = true) {
         val queryHash = withTimeoutOrNull(3000) {
-            getQueryHashFromAllJSInPage(page)[0] ?: DEFAULT_QUERY_HASH
+            getQueryHashFromAllJSInPage(page).getOrNull(0) ?: DEFAULT_QUERY_HASH
         } ?: DEFAULT_QUERY_HASH
         val appID = getAppID(page)
         headers["X-Ig-App-Id"] = appID
