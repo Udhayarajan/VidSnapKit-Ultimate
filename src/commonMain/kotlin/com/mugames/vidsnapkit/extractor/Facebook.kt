@@ -123,6 +123,25 @@ class Facebook internal constructor(url: String) : Extractor(url) {
         scratchWebPage(page)
     }
 
+    private fun getTitle(webPage: String): String {
+        fun extractTitle(vararg regexes: Regex, default: String = ""): String {
+            for (regex in regexes) {
+                val m = Pattern.compile(regex.toString()).matcher(webPage)
+                if (m.find()) {
+                    return decodeHTML(m.group(1)!!).toString()
+                }
+            }
+            return default
+        }
+
+        return extractTitle(
+            Regex("(?:true|false),\"name\":\"(.*?)\",\"savable"),
+            Regex("<[Tt]itle id=\"pageTitle\">(.*?) \\| Facebook<\\/title>"),
+            Regex("title\" content=\"(.*?)\""),
+            default = "Facebook_Video"
+        )
+    }
+
     private suspend fun scratchWebPage(webPage: String) {
         onProgress(Result.Progress(ProgressState.Middle))
         var serverJsData: String? = null
@@ -192,17 +211,6 @@ class Facebook internal constructor(url: String) : Extractor(url) {
                 }
             }
 
-            fun extractTitle(vararg regexes: Regex, default: String = "") {
-                for (regex in regexes) {
-                    m = Pattern.compile(regex.toString()).matcher(webPage)
-                    if (m.find()) {
-                        localFormats.title = decodeHTML(m.group(1)!!).toString()
-                        return
-                    }
-                    localFormats.title = default
-                }
-            }
-
             if (localFormats.imageData.isEmpty()) extractThumbnail(
                 Regex("\"thumbnailImage\":\\{\"uri\":\"(.*?)\"\\}"),
                 Regex("\"thumbnailUrl\":\"(.*?)\""),
@@ -210,13 +218,7 @@ class Facebook internal constructor(url: String) : Extractor(url) {
             )
 
             if (localFormats.title.isEmpty() || localFormats.title == "null") {
-                extractTitle(
-                    Regex("(?:true|false),\"name\":\"(.*?)\",\"savable"),
-                    Regex("<[Tt]itle id=\"pageTitle\">(.*?) \\| Facebook<\\/title>"),
-                    Regex("title\" content=\"(.*?)\""),
-
-                    default = "Facebook_Video"
-                )
+                localFormats.title = getTitle(webPage)
             }
             if (videoFormats.isEmpty()) {
                 videoFormats.add(localFormats)
@@ -245,6 +247,7 @@ class Facebook internal constructor(url: String) : Extractor(url) {
     }
 
     private fun grabRelayPrefetchedDataSearchUrl(webpage: String): Any? {
+        localFormats.title = getTitle(webpage)
         fun parseAttachment(attachment: JSONObject?, key: String): Formats? {
             val media = attachment?.getNullableJSONObject(key)
             media?.let {
@@ -257,7 +260,11 @@ class Facebook internal constructor(url: String) : Extractor(url) {
             return null
         }
 
-        val data = grabRelayPrefetchedData(webpage, arrayOf("\"dash_manifest\"", "\"playable_url\""))
+        val data =
+            grabRelayPrefetchedData(
+                webpage,
+                arrayOf("\"dash_manifest\"", "\"playable_url\"", "\"browser_native_", "\"photo_image\"")
+            )
         data?.let {
             var nodes = it.getNullableJSONArray("nodes")
             var node = it.getNullableJSONObject("node")
@@ -366,8 +373,10 @@ class Facebook internal constructor(url: String) : Extractor(url) {
                 ) return searchFromRequireArray(
                     array.getJSONArray(3).getJSONObject(0).getJSONObject("__bbox").getJSONArray("require")
                 )
-                if (array.getString(0).contains("RelayPrefetchedStreamCache")) return array.getJSONArray(3)
-                    .getJSONObject(1).getJSONObject("__bbox").getJSONObject("result").getJSONObject("data")
+                if (array.getString(0).contains("RelayPrefetchedStreamCache")) {
+                    return array.getJSONArray(3)
+                        .getJSONObject(1).getJSONObject("__bbox").getJSONObject("result").getJSONObject("data")
+                }
                 if (array.getString(0).contains("ScheduledServerJSWithServer")) return searchFromRequireArray(
                     array.getJSONObject(0).getJSONObject("__box").getJSONArray("require")
                 )
@@ -408,8 +417,6 @@ class Facebook internal constructor(url: String) : Extractor(url) {
         title?.let {
             if (scopedFormats.title.isEmpty() || it != scopedFormats.title)
                 scopedFormats.title = title
-        } ?: run {
-            if (scopedFormats.title.isEmpty()) scopedFormats.title = "Facebook_Video"
         }
 
         val dashXml = media.getNullableString("dash_manifest")
@@ -445,33 +452,49 @@ class Facebook internal constructor(url: String) : Extractor(url) {
         return scopedFormats
     }
 
-    private fun parseGraphqlImage(media: JSONObject): Formats? {
+    private fun parseGraphqlImage(media: JSONObject): Formats {
         val scopedFormats = localFormats.copy(
-            title = "", videoData = mutableListOf(), audioData = mutableListOf(), imageData = mutableListOf()
+            videoData = mutableListOf(), audioData = mutableListOf(), imageData = mutableListOf()
         )
 
-        val image = media.getJSONObject("image")
-        scopedFormats.imageData.add(
-            ImageResource(
-                image.getString("uri"), resolution = "${image.get("width")}x${image.get("height")}"
-            )
-        )
-
-        val blurredImage = media.getNullableJSONObject("blurred_image")
-        blurredImage?.getString("uri")?.let {
-            ImageResource(
-                it, resolution = Util.getResolutionFromUrl(blurredImage.getString("uri"))
-            )
-        }?.let {
-            scopedFormats.imageData.add(it)
+        val caption = media.getNullableString("accessibility_caption")
+        if (!caption.isNullOrBlank()) {
+            scopedFormats.title = caption
         }
 
-        val previewImage = media.getJSONObject("previewImage")
-        scopedFormats.imageData.add(
-            ImageResource(
-                previewImage.getString("uri"), resolution = Util.getResolutionFromUrl(previewImage.getString("uri"))
-            )
+        fun addImage(imgObject: JSONObject) {
+            val height = imgObject.getNullable("height")
+            val width = imgObject.getNullable("width")
+            var res = ""
+            if (height != null && width != null) {
+                res = width + "x" + height
+            }
+            val uri = imgObject.getNullableString("uri")
+            uri?.let {
+                scopedFormats.imageData.add(
+                    ImageResource(
+                        it,
+                        resolution = res.ifEmpty { Util.getResolutionFromUrl(imgObject.getString("uri")) }
+                    )
+                )
+            }
+        }
+
+        fun getImages(vararg keywords: String) {
+            for (keyword in keywords) {
+                val imgObj = media.getNullableJSONObject(keyword)
+                imgObj?.let { addImage(it) }
+            }
+        }
+
+        getImages(
+            "image",
+            "blurred_image",
+            "previewImage",
+            "viewer_image",
+            "photo_image"
         )
+
         return scopedFormats
     }
 
@@ -498,7 +521,7 @@ class Facebook internal constructor(url: String) : Extractor(url) {
         }
 
         val scopedFormats = localFormats.copy(
-            title = "", videoData = mutableListOf(), audioData = mutableListOf(), imageData = mutableListOf()
+            videoData = mutableListOf(), audioData = mutableListOf(), imageData = mutableListOf()
         )
 
         var xmlDecoded = xml.replace("x3C".toRegex(), "<")
@@ -587,7 +610,7 @@ class Facebook internal constructor(url: String) : Extractor(url) {
                             videoData.get("original_width")
                                 .toString() + "x" + videoData.get("original_height") + "(" + s.uppercase() + ")",
 
-                        )
+                            )
                     )
                 }
                 return SUCCESS
