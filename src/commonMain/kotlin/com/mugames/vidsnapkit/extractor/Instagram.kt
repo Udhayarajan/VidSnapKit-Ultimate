@@ -134,8 +134,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
             listOf("instapp:owner_user_id\" content=\"(\\d*?)\"".toRegex(), "owner_id\":\"(\\d*?)\"".toRegex())
         for (r in regexes) {
             val res = r.find(page)?.groups?.get(1)?.value
-            if (res != null)
-                return res
+            if (res != null) return res
         }
         return null
     }
@@ -237,8 +236,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
 
         inputUrl = inputUrl.replace("/reels/", "/reel/")
         if (!inputUrl.endsWith("/")) inputUrl = "$inputUrl/"
-        if (!isHighlightsPost())
-            inputUrl = "${inputUrl.replace("/[^/?]*\$|/*\\?.*\$".toRegex(), "")}/?img_index=1"
+        if (!isHighlightsPost()) inputUrl = "${inputUrl.replace("/[^/?]*\$|/*\\?.*\$".toRegex(), "")}/?img_index=1"
 
         if (isPostUrl()) {
             if (!isCookieValid()) {
@@ -260,7 +258,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                     directExtraction()
                 }
 
-                else -> extractInfoShared(res)
+                else -> tryWithQueryHash(res)
             }
         } else if (isHighlightsPost()) {
             headers["User-Agent"] =
@@ -375,10 +373,11 @@ class Instagram internal constructor(url: String) : Extractor(url) {
             return
         }
         val mediaId = getMediaId(page)
-        val response = httpRequestService.getRawResponse(MEDIA_CONTENT_LOGGED_OUT.format(mediaId, ownerId), headers) ?: run {
-            clientRequestError()
-            return
-        }
+        val response =
+            httpRequestService.getRawResponse(MEDIA_CONTENT_LOGGED_OUT.format(mediaId, ownerId), headers) ?: run {
+                clientRequestError()
+                return
+            }
         val guestCookies = response.headers.getAll("set-cookie") ?: run {
             logger.info("no cookies")
             clientRequestError()
@@ -606,8 +605,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
 
     private fun getQueryHash(js: String): String? {
         val matcher = Pattern.compile("\\(.*?var \\w=\"([a-z0-9]{32})\";.*?\\)").matcher(js)
-        if (matcher.find() && matcher.group(0).contains("PolarisAPIQuery"))
-            return matcher.group(1)
+        if (matcher.find() && matcher.group(0).contains("PolarisAPIQuery")) return matcher.group(1)
         return null
     }
 
@@ -643,58 +641,48 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                 ?.getNullableJSONObject(0)?.getJSONObject("node")?.getString("text")
         if (videoName == null || videoName == "null" || videoName.isEmpty()) videoName = "instagram_video"
         formats.title = Util.filterName(videoName)
-        val fileURL: String? = media.getNullableString("video_url")
-        fileURL?.let { url ->
-            formats.videoData.add(
-                VideoResource(
-                    url, MimeType.VIDEO_MP4
-                )
-            )
-            formats.imageData.add(
-                ImageResource(
-                    resolution = Util.getResolutionFromUrl(
-                        media.getString(
-                            "thumbnail_src"
-                        )
-                    ),
-                    url = media.getString("thumbnail_src")
-                )
-            )
-            videoFormats.add(formats)
-        } ?: run {
-            val edges: JSONArray? =
-                media.getNullableJSONObject("edge_sidecar_to_children")?.getNullableJSONArray("edges")
 
-            edges?.let { edgesObj ->
-                for (i in 0 until edgesObj.length()) {
-                    val format = formats.copy(videoData = mutableListOf())
-                    val node = edgesObj.getJSONObject(i).getJSONObject("node")
-                    if (node.getBoolean("is_video")) {
-                        format.imageData.add(
-                            ImageResource(
-                                resolution = Util.getResolutionFromUrl(node.getString("display_url")),
-                                url = node.getString("display_url")
-                            )
-                        )
-                        format.videoData.add(
-                            VideoResource(
-                                node.getString("video_url"), MimeType.VIDEO_MP4
-                            )
-                        )
-                    }
-                    videoFormats.add(format)
-                }
-            } ?: run {
-                onProgress(
-                    Result.Failed(
-                        Error.InternalError(
-                            "Media not found", Exception("$media")
-                        )
-                    )
-                )
+        fun getImageResourceFromDisplayResource(displayResources: JSONArray): MutableList<ImageResource> {
+            val imageList = mutableListOf<ImageResource>()
+            for (j in 0 until displayResources.length()) {
+                val resource = displayResources.getJSONObject(j)
+                val url = resource.getString("src")
+                val res = "${resource.get("config_width")}x${resource.get("config_height")}"
+                imageList.add(ImageResource(url, res))
             }
+            return imageList
         }
 
+        val edges: JSONArray? = media.getNullableJSONObject("edge_sidecar_to_children")?.getNullableJSONArray("edges")
+        edges?.let { edgesObj ->
+            for (i in 0 until edgesObj.length()) {
+                val format = formats.copy(videoData = mutableListOf(), imageData = mutableListOf())
+                val node = edgesObj.getJSONObject(i).getJSONObject("node")
+                if (node.getBoolean("is_video")) {
+                    val imgUrl = node.getString("display_url")
+                    val imgRes = Util.getResolutionFromUrl(imgUrl)
+                    format.imageData.add(ImageResource(resolution = imgRes, url = imgUrl))
+                    format.videoData.add(VideoResource(node.getString("video_url"), MimeType.VIDEO_MP4))
+                } else {
+                    val displayResource = node.getJSONArray("display_resources")
+                    format.imageData.addAll(getImageResourceFromDisplayResource(displayResource))
+                }
+                videoFormats.add(format)
+            }
+        } ?: run {
+            // Non carousel content
+            val videoURL: String? = media.getNullableString("video_url")
+            videoURL?.let { url ->
+                formats.videoData.add(VideoResource(url, MimeType.VIDEO_MP4))
+                val imageUrl = media.getString("thumbnail_src")
+                formats.imageData.add(ImageResource(resolution = Util.getResolutionFromUrl(imageUrl), url = imageUrl))
+            } ?: run {
+                // non video content
+                val displayResource = media.getJSONArray("display_resources")
+                formats.imageData.addAll(getImageResourceFromDisplayResource(displayResource))
+            }
+            videoFormats.add(formats)
+        }
         finalize()
     }
 
@@ -718,6 +706,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                 setInfo(mediaIt)
             } ?: run {
                 internalError("MediaNotFound")
+                return
             }
         } ?: run {
             extractFromItems(jsonObject.getJSONArray("items"))
@@ -737,8 +726,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                 if (directExNeeded) {
                     logger.info("unable to even get from graphQL so trying direct ex")
                     directExtraction(page)
-                } else
-                    loginRequired()
+                } else loginRequired()
                 return
             }
         setInfo(shortcodeMedia)
