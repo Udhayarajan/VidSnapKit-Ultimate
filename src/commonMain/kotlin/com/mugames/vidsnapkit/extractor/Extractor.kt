@@ -23,16 +23,19 @@ import com.mugames.vidsnapkit.dataholders.Error
 import com.mugames.vidsnapkit.dataholders.Formats
 import com.mugames.vidsnapkit.dataholders.ProgressState
 import com.mugames.vidsnapkit.dataholders.Result
-import com.mugames.vidsnapkit.network.HttpRequest
+import com.mugames.vidsnapkit.network.HttpRequestService
+import com.mugames.vidsnapkit.network.ProxyException
 import com.mugames.vidsnapkit.sanitizeAsHeaderValue
-import io.ktor.client.network.sockets.*
+import io.ktor.client.*
 import io.ktor.client.plugins.*
+import io.ktor.client.plugins.cookies.*
+import io.ktor.http.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.future.future
 import org.slf4j.LoggerFactory
 import java.util.*
 import java.util.regex.Pattern
-import javax.net.ssl.SSLHandshakeException
+import kotlin.collections.set
 
 /**
  * @author Udhaya
@@ -58,6 +61,22 @@ abstract class Extractor(
         fun findExtractor(
             url: String,
         ): Extractor? {
+            if (url.contains("facebook")) {
+                if (url.contains("instagram.com")) {
+                    logger.info("Insta embedded FB post, redirecting to Instagram")
+                    val instaURL = Pattern.compile("\\?.*?u=(.*?)(?:&|/|\$)").matcher(url).run {
+                        if (find())
+                            Util.decodeHTML(group(1))
+                        else
+                            null
+                    }
+                    return instaURL?.let {
+                        Instagram(
+                            it
+                        )
+                    }
+                }
+            }
             return when {
                 url.contains("facebook|fb\\.".toRegex()) -> Facebook(url)
                 url.contains("instagram") -> Instagram(url)
@@ -79,6 +98,16 @@ abstract class Extractor(
     protected lateinit var onProgress: (Result) -> Unit
 
     protected var headers: Hashtable<String, String> = Hashtable()
+    private val store by lazy {
+        AcceptAllCookiesStorage()
+    }
+
+    private var closeClient = true
+
+    protected var httpRequestService = run {
+        val str = if (inputUrl.contains(Regex("/reels/audio/|tiktok"))) store else null
+        HttpRequestService.create(storage = str)
+    }
 
     /**
      * If media is private just pass valid cookies to
@@ -95,6 +124,21 @@ abstract class Extractor(
         }
 
     protected val videoFormats = mutableListOf<Formats>()
+
+    /**
+     * If you have any custom client to work on you can use it.
+     * @param httpClient custom client with your config
+     * anyhow timeouts are forced
+     * @see HttpRequestService.create
+     * For more about timeouts, [refer](https://ktor.io/docs/timeout.html#configure_plugin)
+     */
+    fun setCustomClient(httpClient: HttpClient, autoCloseClient: Boolean = true) {
+        if (closeClient)
+            httpRequestService.close()
+        closeClient = autoCloseClient
+        val str = if (inputUrl.contains(Regex("/reels/audio/|tiktok"))) store else null
+        httpRequestService = HttpRequestService.create(httpClient, str)
+    }
 
     /**
      * starting point of all child of [Extractor]
@@ -118,48 +162,28 @@ abstract class Extractor(
 
     private suspend fun safeAnalyze() {
         try {
-            if (inputUrl.contains("facebook")) {
-                if (inputUrl.contains("instagram.com")) {
-                    logger.info("Insta embedded FB post, redirecting to Instagram")
-                    val instaURL = Pattern.compile("\\?.*?u=(.*?)(?:&|/|)\$").matcher(inputUrl).run {
-                        if (find())
-                            Util.decodeHTML(group(1))
-                        else
-                            null
-                    }
-                    Instagram(
-                        instaURL ?: run {
-                            logger.error("Fail to match the regex url=$inputUrl")
-                            internalError("unable to match the instagram url")
-                            return
-                        }
-                    )
-                }
-            }
             if (inputUrl.contains("instagram")) {
-                inputUrl = if (cookies == null) {
+                inputUrl = if (cookies == null && inputUrl.contains("/audio/")) {
                     inputUrl.replace("/reels/", "/reel/")
                 } else inputUrl.replace("/reel/", "/reels/")
                 headers["User-Agent"] = getRandomInstagramUserAgent()
             }
-            if (HttpRequest(inputUrl, headers).isAvailable())
+            if (httpRequestService.checkPageAvailability(inputUrl, headers))
                 analyze()
             else if (inputUrl.contains("instagram") && cookies != null) {
-                logger.info("Forcing instagram")
                 analyze(hashMapOf("forced" to true))
             } else if ((inputUrl.contains("facebook") || inputUrl.contains("fb")) && cookies != null) {
-                logger.info("Forcing FB")
                 analyze(hashMapOf("forced" to true))
             } else clientRequestError()
-        } catch (e: Exception) {
-            if (e is SSLHandshakeException)
-                clientRequestError()
-            else if (e is ClientRequestException && inputUrl.contains("instagram"))
+        } catch (e: ClientRequestException) {
+            if (inputUrl.contains("instagram"))
                 onProgress(Result.Failed(Error.Instagram404Error(cookies != null)))
-            else if (e is SocketTimeoutException)
-                onProgress(Result.Failed(Error.NonFatalError("socket can't connect please try again")))
             else
-                onProgress(Result.Failed(Error.InternalError("Error in SafeAnalyze", e)))
+                internalError("unhandled client request exception in safe analyse", e)
+        } catch (e: ProxyException) {
+            internalError("ssl/socket exception please try again", e)
+        } catch (e: Exception) {
+            internalError("unknown & unhandled error in safe analyse", e)
         }
     }
 
@@ -194,6 +218,11 @@ abstract class Extractor(
                 format.imageData.addAll(formats.imageData.filter { it.size > 0 }.toList())
                 filteredFormats.add(format)
             }
+            filteredFormats.forEach {
+                it.cookies.addAll(store.get(Url(inputUrl)))
+            }
+            if (closeClient)
+                httpRequestService.close()
             onProgress(Result.Success(filteredFormats))
         }
     }
@@ -202,7 +231,7 @@ abstract class Extractor(
         val sizes = mutableListOf<Deferred<Long>>()
         coroutineScope {
             for (videoData in format.videoData) {
-                sizes.add(async { HttpRequest(videoData.url, headers).getSize() })
+                sizes.add(async { httpRequestService.getSize(videoData.url, headers) })
             }
         }
         return sizes.awaitAll()
@@ -212,7 +241,7 @@ abstract class Extractor(
         val sizes = mutableListOf<Deferred<Long>>()
         coroutineScope {
             for (audioData in format.audioData) {
-                sizes.add(async { HttpRequest(audioData.url, headers).getSize() })
+                sizes.add(async { httpRequestService.getSize(audioData.url, headers) })
             }
         }
         return sizes.awaitAll()
@@ -222,22 +251,40 @@ abstract class Extractor(
         val sizes = mutableListOf<Deferred<Long>>()
         coroutineScope {
             for (imageData in format.imageData) {
-                sizes.add(async { HttpRequest(imageData.url, headers).getSize() })
+                sizes.add(async { httpRequestService.getSize(imageData.url, headers) })
             }
         }
         return sizes.awaitAll()
     }
 
-    protected fun clientRequestError(msg: String = "The request video page missing. If you find it as false kindly contact us") {
+    protected fun clientRequestError(msg: String = "error making request") {
+        if (closeClient)
+            httpRequestService.close()
         onProgress(Result.Failed(Error.NonFatalError(msg)))
     }
 
+    fun failed(error: Error) {
+        if (closeClient)
+            httpRequestService.close()
+        onProgress(Result.Failed(error))
+    }
+
     protected fun loginRequired() {
+        if (closeClient)
+            httpRequestService.close()
         onProgress(Result.Failed(Error.LoginRequired))
     }
 
     protected fun internalError(msg: String, e: Exception? = null) {
+        if (closeClient)
+            httpRequestService.close()
         onProgress(Result.Failed(Error.InternalError(msg, e)))
+    }
+
+    protected fun missingLogic() {
+        if (closeClient)
+            httpRequestService.close()
+        onProgress(Result.Failed(Error.MethodMissingLogic))
     }
 
     abstract suspend fun testWebpage(string: String)

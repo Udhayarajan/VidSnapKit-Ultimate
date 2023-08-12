@@ -19,7 +19,6 @@ package com.mugames.vidsnapkit.extractor
 
 import com.mugames.vidsnapkit.Util
 import com.mugames.vidsnapkit.dataholders.*
-import com.mugames.vidsnapkit.network.HttpRequest
 import com.mugames.vidsnapkit.toJSONObject
 import org.json.JSONArray
 import java.util.regex.Pattern
@@ -37,7 +36,7 @@ class LinkedIn internal constructor(url: String) : Extractor(url) {
         formats.src = "LinkedIn"
         onProgress(Result.Progress(ProgressState.Start))
         scratchWebpage(
-            HttpRequest(inputUrl, headers).getResponse() ?: run {
+            httpRequestService.getResponse(inputUrl, headers) ?: run {
                 clientRequestError()
                 return
             }
@@ -107,10 +106,10 @@ class LinkedIn internal constructor(url: String) : Extractor(url) {
             }
         }
         if (page.contains("Please enter your email address", true)) {
-            onProgress(Result.Failed(Error.LoginRequired))
+            loginRequired()
             return
         }
-        onProgress(Result.Failed(Error.MethodMissingLogic))
+        missingLogic()
     }
 
     private suspend fun extractFromIncluded(included: JSONArray) {

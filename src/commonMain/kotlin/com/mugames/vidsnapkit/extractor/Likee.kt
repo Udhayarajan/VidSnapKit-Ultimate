@@ -19,7 +19,6 @@ package com.mugames.vidsnapkit.extractor
 
 import com.mugames.vidsnapkit.MimeType
 import com.mugames.vidsnapkit.dataholders.*
-import com.mugames.vidsnapkit.network.HttpRequest
 import com.mugames.vidsnapkit.toHashtable
 import com.mugames.vidsnapkit.toJSONObject
 import org.json.JSONArray
@@ -45,14 +44,17 @@ class Likee internal constructor(url: String) : Extractor(url) {
             clientRequestError()
             return
         }
-        val response = HttpRequest(GET_VIDEO_INFO).postRequest(hashMapOf("postIds" to postId).toHashtable())
+        val response = httpRequestService.postRequest(GET_VIDEO_INFO, hashMapOf("postIds" to postId).toHashtable())
         val responseData =
-            response.toJSONObject()
-                .getJSONObject("data")
+            response?.toJSONObject()
+                ?.getJSONObject("data") ?: run {
+                clientRequestError()
+                return
+            }
         responseData.getJSONArray("videoList")?.let {
             extractVideoList(it)
         } ?: run {
-            onProgress(Result.Failed(Error.MethodMissingLogic))
+            missingLogic()
         }
     }
 
@@ -86,7 +88,7 @@ class Likee internal constructor(url: String) : Extractor(url) {
 
     private suspend fun getPostId(): String? {
         try {
-            val page = HttpRequest(inputUrl).getResponse()
+            val page = httpRequestService.getResponse(inputUrl)
             Pattern.compile("<meta property=\"og:url\"\\W+content=\".*?postId=(.*?)\"").matcher(page).apply {
                 return if (find()) group(1) else null
             }
