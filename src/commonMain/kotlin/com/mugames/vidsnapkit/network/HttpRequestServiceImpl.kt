@@ -291,7 +291,7 @@ class HttpRequestServiceImpl(private val client: HttpClient) : HttpRequestServic
                 cacheRedirect = followRedirects
                 followRedirects = false
             }
-            client.head {
+            client.get {
                 url(url)
                 method = HttpMethod.Head
                 headers?.let {
