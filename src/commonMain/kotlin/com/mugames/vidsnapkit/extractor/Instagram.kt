@@ -60,7 +60,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
 
     private suspend fun isCookieValid(): Boolean {
         if (cookies.isNullOrEmpty()) return false
-        val res = httpRequestService.headRawResponse(
+        val res = httpRequestService.getRawResponse(
             "https://www.instagram.com/accounts/login/", headers, false
         ) ?: return false
         logger.info("status code=${res.status.value} & http response=$res")
@@ -258,7 +258,7 @@ class Instagram internal constructor(url: String) : Extractor(url) {
                     directExtraction()
                 }
 
-                else -> tryWithQueryHash(res)
+                else -> extractInfoShared(res)
             }
         } else if (isHighlightsPost()) {
             headers["User-Agent"] =
