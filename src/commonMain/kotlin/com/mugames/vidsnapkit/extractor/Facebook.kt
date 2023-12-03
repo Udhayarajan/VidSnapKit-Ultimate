@@ -143,7 +143,6 @@ class Facebook internal constructor(url: String) : Extractor(url) {
     }
 
     private suspend fun scratchWebPage(webPage: String) {
-        onProgress(Result.Progress(ProgressState.Middle))
         var serverJsData: String? = null
         var matcher = Pattern.compile("handleServerJS\\((\\{.+\\})(?:\\);|,\")").matcher(webPage)
         if (matcher.find()) serverJsData = matcher.group(1) else {
@@ -233,7 +232,7 @@ class Facebook internal constructor(url: String) : Extractor(url) {
 
     private fun bruteForceJSON(webPage: String, filter: Array<String>): String? {
         val m =
-            Pattern.compile("<script type=\"application/json\" data-content-len=\"\\d+\" data-sjs>(\\{.+\\})</script>")
+            Pattern.compile("<script\\s+type=\"application/json\"\\s+data-content-len=\"\\d+\"\\s+data-sjs>(\\{.+\\})</script>")
                 .matcher(webPage)
         while (m.find()) {
             val json = m.group(1)
