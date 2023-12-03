@@ -26,7 +26,6 @@ import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import org.slf4j.LoggerFactory
-import java.io.File
 import java.util.*
 import java.util.regex.Matcher
 import java.util.regex.Pattern
@@ -224,9 +223,7 @@ class Facebook internal constructor(url: String) : Extractor(url) {
             }
             finalize()
         } ?: apply {
-            val uuid = "fb." + UUID.randomUUID().toString() + ".html"
-            File(uuid).writeText(webPage)
-            clientRequestError("Sorry! we can't see the page, refer=$uuid")
+            clientRequestError("Sorry! Couldn't find any video data, if you think this is a bug, please report it.")
         }
     }
 
@@ -609,7 +606,7 @@ class Facebook internal constructor(url: String) : Extractor(url) {
                             videoData.get("original_width")
                                 .toString() + "x" + videoData.get("original_height") + "(" + s.uppercase() + ")",
 
-                        )
+                            )
                     )
                 }
                 return SUCCESS
