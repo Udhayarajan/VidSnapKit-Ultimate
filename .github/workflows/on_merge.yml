@@ -8,6 +8,7 @@ on:
     # It actually triggers the build logic only if the files under src is modified.
     paths:
       - 'src/**'
+      - 'build.gradle.kts'
     types: [ closed ]
 
 jobs:
