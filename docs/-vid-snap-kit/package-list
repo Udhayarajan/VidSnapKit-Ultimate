@@ -311,7 +311,6 @@ $dokka.location:com.mugames.vidsnapkit/HtmlDecoderFactory///PointingToDeclaratio
 $dokka.location:com.mugames.vidsnapkit/HtmlDecoderFactory/createDecoderFactory/#/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit/-html-decoder-factory/create-decoder-factory.html
 $dokka.location:com.mugames.vidsnapkit/M3u8///PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit/-m3u8/index.html
 $dokka.location:com.mugames.vidsnapkit/M3u8/M3u8/#kotlin.String#com.mugames.vidsnapkit.ProgressCallback/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit/-m3u8/-m3u8.html
-$dokka.location:com.mugames.vidsnapkit/M3u8/TAG/#/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit/-m3u8/-t-a-g.html
 $dokka.location:com.mugames.vidsnapkit/M3u8/extractM3u8/#kotlin.String#[Error type: Unresolved type for JSONObject]/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit/-m3u8/extract-m3u8.html
 $dokka.location:com.mugames.vidsnapkit/M3u8/find_url/#kotlin.String?#kotlin.String/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit/-m3u8/find_url.html
 $dokka.location:com.mugames.vidsnapkit/M3u8/getResolution/#kotlin.String/PointingToDeclaration/-vid-snap-kit/com.mugames.vidsnapkit/-m3u8/get-resolution.html
