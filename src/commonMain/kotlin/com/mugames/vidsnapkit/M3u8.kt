@@ -31,8 +31,6 @@ import java.util.regex.Pattern
 
 class M3u8(private val url: String, private val onProgressCallback: ProgressCallback) {
 
-    var TAG = Statics.TAG + ":m3u8"
-
     var info: JSONObject? = null
 
     val httpRequestService by lazy {
